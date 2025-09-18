@@ -1,0 +1,3752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secretary Agenda</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        border: 'hsl(var(--border))',
+                        input: 'hsl(var(--input))',
+                        ring: 'hsl(var(--ring))',
+                        background: 'hsl(var(--background))',
+                        foreground: 'hsl(var(--foreground))',
+                        primary: {
+                            DEFAULT: 'hsl(var(--primary))',
+                            foreground: 'hsl(var(--primary-foreground))',
+                        },
+                        secondary: {
+                            DEFAULT: 'hsl(var(--secondary))',
+                            foreground: 'hsl(var(--secondary-foreground))',
+                        },
+                        destructive: {
+                            DEFAULT: 'hsl(var(--destructive))',
+                            foreground: 'hsl(var(--destructive-foreground))',
+                        },
+                        muted: {
+                            DEFAULT: 'hsl(var(--muted))',
+                            foreground: 'hsl(var(--muted-foreground))',
+                        },
+                        accent: {
+                            DEFAULT: 'hsl(var(--accent))',
+                            foreground: 'hsl(var(--accent-foreground))',
+                        },
+                        popover: {
+                            DEFAULT: 'hsl(var(--popover))',
+                            foreground: 'hsl(var(--popover-foreground))',
+                        },
+                        card: {
+                            DEFAULT: 'hsl(var(--card))',
+                            foreground: 'hsl(var(--card-foreground))',
+                        },
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 222.2 84% 4.9%;
+            --card: 0 0% 100%;
+            --card-foreground: 222.2 84% 4.9%;
+            --popover: 0 0% 100%;
+            --popover-foreground: 222.2 84% 4.9%;
+            --primary: 222.2 47.4% 11.2%;
+            --primary-foreground: 210 40% 98%;
+            --secondary: 210 40% 96%;
+            --secondary-foreground: 222.2 47.4% 11.2%;
+            --muted: 210 40% 96%;
+            --muted-foreground: 215.4 16.3% 46.9%;
+            --accent: 210 40% 96%;
+            --accent-foreground: 222.2 47.4% 11.2%;
+            --destructive: 0 84.2% 60.2%;
+            --destructive-foreground: 210 40% 98%;
+            --border: 214.3 31.8% 91.4%;
+            --input: 214.3 31.8% 91.4%;
+            --ring: 215 20.2% 65.1%;
+            --radius: 0.5rem;
+        }
+
+        .card {
+            background-color: hsl(var(--card));
+            color: hsl(var(--card-foreground));
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            border-radius: calc(var(--radius) - 2px);
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .badge-secondary {
+            background-color: hsl(var(--secondary));
+            color: hsl(var(--secondary-foreground));
+        }
+
+        .badge-outline {
+            border: 1px solid hsl(var(--border));
+            background-color: transparent;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-outline {
+            border: 1px solid hsl(var(--border));
+            background-color: transparent;
+            color: hsl(var(--foreground));
+        }
+
+        .btn-outline:hover {
+            background-color: hsl(var(--accent));
+        }
+
+        .calendar {
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            padding: 1rem;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.25rem;
+        }
+
+        .calendar-day {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 2rem;
+            width: 2rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .calendar-day:hover {
+            background-color: hsl(var(--accent));
+        }
+
+        .calendar-day.selected {
+            background-color: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+
+        .appointment-card {
+            border-left: 4px solid hsl(var(--primary));
+            margin-bottom: 0.75rem;
+        }
+
+        .time-slot {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .time-label {
+            width: 5rem;
+            flex-shrink: 0;
+            padding-top: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .slot-content {
+            flex: 1;
+        }
+
+        .available-slot {
+            height: 3rem;
+            border: 2px dashed hsl(var(--border));
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            color: hsl(var(--muted-foreground));
+        }
+
+        /* Icon styles */
+        .icon {
+            width: 1rem;
+            height: 1rem;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .icon-sm {
+            width: 0.75rem;
+            height: 0.75rem;
+        }
+
+        .icon-lg {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+
+        /* Navigation Menu Styles */
+        .nav-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background-color: white;
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .nav-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 4rem;
+        }
+
+        .nav-logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            color: #6b7280;
+            text-decoration: none;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: #2563eb;
+        }
+
+        .nav-link.active {
+            color: #111827;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .user-avatar {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background-color: #3b82f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            margin: 0;
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin: 0;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            padding: 0.5rem;
+            color: #6b7280;
+            cursor: pointer;
+        }
+
+        .mobile-menu {
+            display: none;
+            background-color: white;
+            border-top: 1px solid #e5e7eb;
+            padding: 1rem;
+        }
+
+        .mobile-menu.active {
+            display: block;
+        }
+
+        .mobile-nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .mobile-nav-link {
+            color: #6b7280;
+            text-decoration: none;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .mobile-nav-link:hover {
+            color: #2563eb;
+        }
+
+        .mobile-nav-link.active {
+            color: #111827;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .user-profile {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #111827;
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+        }
+
+        .modal-close:hover {
+            color: #374151;
+            background-color: #f3f4f6;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 4rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+
+        .btn-secondary {
+            background-color: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            border-radius: 0.25rem;
+        }
+
+        /* Patient Management Styles */
+        .patient-tab-content {
+            display: block;
+        }
+
+        .patient-tab-content.hidden {
+            display: none;
+        }
+
+        .patient-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .patient-card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .patient-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .patient-details h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .patient-details p {
+            margin: 0.25rem 0;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .patient-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .grid {
+            display: grid;
+        }
+
+        .grid-cols-1 {
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+        }
+
+        .md\\:grid-cols-2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .gap-4 {
+            gap: 1rem;
+        }
+
+        .space-y-4 > * + * {
+            margin-top: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .md\\:grid-cols-2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+
+        .hidden {
+            display: none;
+        }
+
+        /* Billing Styles */
+        .bill-item {
+            background: #f9fafb;
+            transition: all 0.2s ease;
+        }
+
+        .bill-item:hover {
+            background: #f3f4f6;
+        }
+
+        .bill-summary {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 1px solid #0ea5e9;
+        }
+
+        .bill-total {
+            color: #059669;
+            font-weight: 700;
+        }
+
+        .bill-item-remove {
+            color: #dc2626;
+            transition: color 0.2s ease;
+        }
+
+        .bill-item-remove:hover {
+            color: #b91c1c;
+        }
+
+        /* Printable Bill Styles */
+        .printable-bill {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .bill-header {
+            text-align: center;
+            border-bottom: 3px solid #2563eb;
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .bill-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2563eb;
+            margin-bottom: 0.5rem;
+        }
+
+        .bill-subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .bill-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .bill-section {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+
+        .bill-section h3 {
+            margin: 0 0 0.5rem 0;
+            color: #2563eb;
+            font-size: 1.1rem;
+        }
+
+        .bill-section p {
+            margin: 0.25rem 0;
+            font-size: 0.9rem;
+        }
+
+        .bill-items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+        }
+
+        .bill-items-table th,
+        .bill-items-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .bill-items-table th {
+            background: #f3f4f6;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .bill-items-table .text-right {
+            text-align: right;
+        }
+
+        .bill-items-table .text-center {
+            text-align: center;
+        }
+
+        .bill-totals {
+            margin-top: 2rem;
+            text-align: right;
+        }
+
+        .bill-total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .bill-total-row.final {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #059669;
+            border-top: 2px solid #059669;
+            margin-top: 1rem;
+            padding-top: 1rem;
+        }
+
+        .bill-footer {
+            margin-top: 3rem;
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .bill-notes {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #f0f9ff;
+            border-left: 4px solid #0ea5e9;
+        }
+
+        .bill-notes h4 {
+            margin: 0 0 0.5rem 0;
+            color: #0c4a6e;
+        }
+
+        @media print {
+            .printable-bill {
+                margin: 0;
+                padding: 1rem;
+                box-shadow: none;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+        }
+
+        /* File Upload Styles */
+        .file-upload-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            text-align: center;
+            transition: border-color 0.2s;
+        }
+
+        .file-upload-area:hover {
+            border-color: #3b82f6;
+        }
+
+        .file-upload-area.dragover {
+            border-color: #3b82f6;
+            background-color: #f0f9ff;
+        }
+
+
+        .cursor-pointer {
+            cursor: pointer;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* File Preview Modal Styles */
+        .file-preview-modal {
+            position: fixed;
+            z-index: 3000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .file-preview-content {
+            background-color: white;
+            border-radius: 0.5rem;
+            width: 90%;
+            height: 90%;
+            max-width: 1200px;
+            max-height: 800px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .file-preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            background-color: #f9fafb;
+            border-radius: 0.5rem 0.5rem 0 0;
+        }
+
+        .file-preview-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #111827;
+            margin: 0;
+        }
+
+        .file-preview-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .file-preview-body {
+            flex: 1;
+            padding: 1rem;
+            overflow: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .file-preview-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 0.25rem;
+        }
+
+        .file-preview-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 0.25rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .file-preview-unsupported {
+            text-align: center;
+            color: #6b7280;
+        }
+
+        .file-preview-unsupported svg {
+            width: 4rem;
+            height: 4rem;
+            margin-bottom: 1rem;
+            color: #d1d5db;
+        }
+
+        .btn-close-preview {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+        }
+
+        .btn-close-preview:hover {
+            color: #374151;
+            background-color: #f3f4f6;
+        }
+
+        /* Edit Patient Modal Styles */
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50">
+    <!-- Horizontal Navigation Menu -->
+    <nav class="nav-menu">
+        <div class="nav-container">
+            <div class="nav-wrapper">
+                <!-- Logo/Brand -->
+                <div class="nav-logo">Healthcare System</div>
+
+                <!-- Desktop Menu -->
+                <div class="nav-links">
+                    <a href="#" class="nav-link active">Dashboard</a>
+                    <a href="#" class="nav-link" onclick="showAddAppointmentModal()">Add Appointment</a>
+                    <a href="#" class="nav-link" onclick="showPatientManagement()">Patients</a>
+                    <a href="#" class="nav-link" onclick="showBillingModal()">Billing</a>
+                    <a href="#" class="nav-link">Reports</a>
+                    <a href="#" class="nav-link">Settings</a>
+                </div>
+
+                <!-- User Profile -->
+                <div class="user-profile">
+                    <div class="user-avatar">JD</div>
+                    <div class="user-info">
+                        <p class="user-name">John Doe</p>
+                        <p class="user-role">Secretary</p>
+                    </div>
+                </div>
+
+                <!-- Mobile menu button -->
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile menu -->
+        <div class="mobile-menu" id="mobile-menu">
+            <div class="mobile-nav-links">
+                <a href="#" class="mobile-nav-link active">Dashboard</a>
+                <a href="#" class="mobile-nav-link" onclick="showAddAppointmentModal()">Add Appointment</a>
+                <a href="#" class="mobile-nav-link" onclick="showPatientManagement()">Patients</a>
+                <a href="#" class="mobile-nav-link" onclick="showBillingModal()">Billing</a>
+                <a href="#" class="mobile-nav-link">Reports</a>
+                <a href="#" class="mobile-nav-link">Settings</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Add Appointment Modal -->
+    <div class="modal" id="addAppointmentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Add New Appointment</h2>
+                <button class="modal-close" onclick="closeAddAppointmentModal()">&times;</button>
+            </div>
+            
+            <form id="appointmentForm">
+                <div class="form-group">
+                    <label class="form-label" for="patientSelection">Select Patient *</label>
+                    <select id="patientSelection" class="form-input" required onchange="handlePatientSelection()">
+                        <option value="">Choose a patient...</option>
+                    </select>
+                    <div class="mt-2">
+                        <button type="button" class="btn btn-outline btn-sm" onclick="showPatientManagement()">
+                            <svg class="icon-sm mr-1" viewBox="0 0 24 24">
+                                <path d="M12 4v16m8-8H4"/>
+                            </svg>
+                            Add New Patient
+                        </button>
+                </div>
+                </div>
+                
+                <!-- Patient Details Display (Read-only) -->
+                <div id="selectedPatientDetails" class="hidden">
+                    <div class="card p-4 mb-4">
+                        <h4 class="font-semibold mb-2">Selected Patient Details</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                            <div><strong>Name:</strong> <span id="displayPatientName">-</span></div>
+                            <div><strong>Email:</strong> <span id="displayPatientEmail">-</span></div>
+                            <div><strong>Phone:</strong> <span id="displayPatientPhone">-</span></div>
+                            <div><strong>Age:</strong> <span id="displayPatientAge">-</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Hidden inputs for patient data -->
+                <input type="hidden" id="patientName" name="patientName">
+                <input type="hidden" id="patientEmail" name="patientEmail">
+                <input type="hidden" id="patientPhone" name="patientPhone">
+                
+                <div class="form-group">
+                    <label class="form-label" for="appointmentDate">Appointment Date</label>
+                    <input type="date" id="appointmentDate" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="appointmentTime">Appointment Time</label>
+                    <select id="appointmentTime" class="form-input" required>
+                        <option value="">Select time</option>
+                        <option value="09:00">9:00 AM</option>
+                        <option value="09:30">9:30 AM</option>
+                        <option value="10:00">10:00 AM</option>
+                        <option value="10:30">10:30 AM</option>
+                        <option value="11:00">11:00 AM</option>
+                        <option value="11:30">11:30 AM</option>
+                        <option value="12:00">12:00 PM</option>
+                        <option value="12:30">12:30 PM</option>
+                        <option value="13:00">1:00 PM</option>
+                        <option value="13:30">1:30 PM</option>
+                        <option value="14:00">2:00 PM</option>
+                        <option value="14:30">2:30 PM</option>
+                        <option value="15:00">3:00 PM</option>
+                        <option value="15:30">3:30 PM</option>
+                        <option value="16:00">4:00 PM</option>
+                        <option value="16:30">4:30 PM</option>
+                        <option value="17:00">5:00 PM</option>
+                        <option value="17:30">5:30 PM</option>
+                    </select>
+                </div>
+                
+                
+                <div class="form-group">
+                    <label class="form-label" for="appointmentType">Appointment Type</label>
+                    <select id="appointmentType" class="form-input" required>
+                        <option value="">Select type</option>
+                        <option value="Consultation">General Consultation</option>
+                        <option value="Follow-up">Follow-up Visit</option>
+                        <option value="Check-up">Regular Check-up</option>
+                        <option value="Emergency">Emergency Visit</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="appointmentNotes">Additional Notes</label>
+                    <textarea id="appointmentNotes" class="form-input form-textarea" placeholder="Any specific concerns or symptoms..."></textarea>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeAddAppointmentModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Appointment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Patient Management Modal -->
+    <div class="modal" id="patientManagementModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Patient Management</h2>
+                <button class="modal-close" onclick="closePatientManagement()">&times;</button>
+            </div>
+            
+            <div class="flex gap-4 mb-6">
+                <button id="addPatientTab" class="btn btn-primary" onclick="switchPatientTab('add')">Add New Patient</button>
+                <button id="viewPatientsTab" class="btn btn-secondary" onclick="switchPatientTab('view')">View All Patients</button>
+            </div>
+            
+            <!-- Add Patient Form -->
+            <div id="addPatientContent" class="patient-tab-content">
+                <form id="patientForm">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label class="form-label" for="patientFullName">Full Name *</label>
+                            <input type="text" id="patientFullName" class="form-input" placeholder="Enter patient's full name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="patientEmailAddress">Email Address *</label>
+                            <input type="email" id="patientEmailAddress" class="form-input" placeholder="patient@example.com" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="patientPhoneNumber">Phone Number *</label>
+                            <input type="tel" id="patientPhoneNumber" class="form-input" placeholder="+1 (555) 123-4567" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="patientDateOfBirth">Date of Birth</label>
+                            <input type="date" id="patientDateOfBirth" class="form-input">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="patientGender">Gender</label>
+                            <select id="patientGender" class="form-input">
+                                <option value="">Select gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                                <option value="Prefer not to say">Prefer not to say</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="patientAddress">Address</label>
+                            <input type="text" id="patientAddress" class="form-input" placeholder="Street address, City, State">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="patientMedicalHistory">Medical History / Notes</label>
+                        <textarea id="patientMedicalHistory" class="form-input form-textarea" placeholder="Any relevant medical history, allergies, or notes..."></textarea>
+                    </div>
+                    
+                    
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closePatientManagement()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Patient</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- View Patients Content -->
+            <div id="viewPatientsContent" class="patient-tab-content" style="display: none;">
+                <div class="mb-4">
+                    <input type="text" id="patientSearch" class="form-input" placeholder="Search patients by name, email, or phone..." onkeyup="searchPatients()">
+                </div>
+                
+                <div id="patientsList" class="space-y-4">
+                    <!-- Patients will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Edit Patient Modal -->
+    <div class="modal" id="editPatientModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Edit Patient</h2>
+                <button class="modal-close" onclick="closeEditPatientModal()">&times;</button>
+            </div>
+            
+            <form id="editPatientForm">
+                <input type="hidden" id="editPatientId" name="patientId">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label class="form-label" for="editPatientFullName">Full Name *</label>
+                        <input type="text" id="editPatientFullName" class="form-input" placeholder="Enter patient's full name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="editPatientEmailAddress">Email Address *</label>
+                        <input type="email" id="editPatientEmailAddress" class="form-input" placeholder="patient@example.com" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="editPatientPhoneNumber">Phone Number *</label>
+                        <input type="tel" id="editPatientPhoneNumber" class="form-input" placeholder="+1 (555) 123-4567" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="editPatientDateOfBirth">Date of Birth</label>
+                        <input type="date" id="editPatientDateOfBirth" class="form-input">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="editPatientGender">Gender</label>
+                        <select id="editPatientGender" class="form-input">
+                            <option value="">Select gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                            <option value="Prefer not to say">Prefer not to say</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="editPatientAddress">Address</label>
+                        <input type="text" id="editPatientAddress" class="form-input" placeholder="Street address, City, State">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="editPatientMedicalHistory">Medical History / Notes</label>
+                    <textarea id="editPatientMedicalHistory" class="form-input form-textarea" placeholder="Any relevant medical history, allergies, or notes..."></textarea>
+                </div>
+                
+                <!-- Medical Files Management Section -->
+                <div class="form-group">
+                    <label class="form-label">Medical Files</label>
+                    
+                    <!-- Current Files Display -->
+                    <div id="editCurrentFiles" class="mb-4">
+                        <!-- Current files will be displayed here -->
+                    </div>
+                    
+                    <!-- Add New Files -->
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div class="mt-4">
+                            <label for="editMedicalFiles" class="cursor-pointer">
+                                <span class="mt-2 block text-sm font-medium text-gray-900">
+                                    Add more medical files
+                                </span>
+                                <span class="mt-1 block text-sm text-gray-500">
+                                    PDF, DOC, DOCX, JPG, PNG up to 10MB each
+                                </span>
+                            </label>
+                            <input id="editMedicalFiles" name="editMedicalFiles" type="file" class="sr-only" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onchange="handleEditFileUpload(event)">
+                        </div>
+                    </div>
+                    
+                    <!-- New Files List Display -->
+                    <div id="editFileList" class="mt-4 space-y-2">
+                        <!-- New uploaded files will be displayed here -->
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditPatientModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Patient</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Billing Modal -->
+    <div class="modal" id="billingModal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Create Patient Bill</h2>
+                <button class="modal-close" onclick="closeBillingModal()">&times;</button>
+            </div>
+            
+            <form id="billingForm">
+                <div class="form-group">
+                    <label class="form-label" for="billPatientSelection">Select Patient *</label>
+                    <select id="billPatientSelection" class="form-input" required onchange="handleBillPatientSelection()">
+                        <option value="">Choose a patient...</option>
+                    </select>
+                </div>
+                
+                <!-- Patient Details Display (Read-only) -->
+                <div id="billPatientDetails" class="hidden">
+                    <div class="card p-4 mb-4">
+                        <h4 class="font-semibold mb-2">Patient Information</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                            <div><strong>Name:</strong> <span id="billPatientName">-</span></div>
+                            <div><strong>Email:</strong> <span id="billPatientEmail">-</span></div>
+                            <div><strong>Phone:</strong> <span id="billPatientPhone">-</span></div>
+                            <div><strong>Address:</strong> <span id="billPatientAddress">-</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Hidden inputs for patient data -->
+                <input type="hidden" id="billPatientId" name="patientId">
+                <input type="hidden" id="billPatientFullName" name="patientName">
+                <input type="hidden" id="billPatientEmailAddress" name="patientEmail">
+                <input type="hidden" id="billPatientPhoneNumber" name="patientPhone">
+                
+                <div class="form-group">
+                    <label class="form-label" for="billDate">Bill Date</label>
+                    <input type="date" id="billDate" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="billDueDate">Due Date</label>
+                    <input type="date" id="billDueDate" class="form-input" required>
+                </div>
+                
+                <!-- Bill Items Section -->
+                <div class="form-group">
+                    <label class="form-label">Bill Items</label>
+                    <div id="billItems" class="space-y-3">
+                        <div class="bill-item border border-gray-200 rounded-lg p-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="form-label" for="itemDescription1">Description</label>
+                                    <input type="text" id="itemDescription1" class="form-input" placeholder="e.g., Consultation fee" required>
+                                </div>
+                                <div>
+                                    <label class="form-label" for="itemQuantity1">Quantity</label>
+                                    <input type="number" id="itemQuantity1" class="form-input" min="1" value="1" required onchange="calculateBillTotal()" oninput="calculateBillTotal()">
+                                </div>
+                                <div>
+                                    <label class="form-label" for="itemPrice1">Price ($)</label>
+                                    <input type="number" id="itemPrice1" class="form-input" min="0" step="0.01" placeholder="0.00" required onchange="calculateBillTotal()" oninput="calculateBillTotal()">
+                                </div>
+                            </div>
+                            <div class="mt-2 flex justify-end">
+                                <button type="button" class="btn btn-outline btn-sm" onclick="removeBillItem(this)">
+                                    <svg class="icon-sm mr-1" viewBox="0 0 24 24">
+                                        <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                    Remove Item
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-outline btn-sm mt-3" onclick="addBillItem()">
+                        <svg class="icon-sm mr-1" viewBox="0 0 24 24">
+                            <path d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Add Item
+                    </button>
+                </div>
+                
+                <!-- Bill Summary -->
+                <div class="card p-4 mb-4">
+                    <h4 class="font-semibold mb-2">Bill Summary</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span>Subtotal:</span>
+                            <span id="billSubtotal">$0.00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Tax (8%):</span>
+                            <span id="billTax">$0.00</span>
+                        </div>
+                        <div class="flex justify-between font-semibold text-lg border-t pt-2">
+                            <span>Total:</span>
+                            <span id="billTotal">$0.00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="billNotes">Notes</label>
+                    <textarea id="billNotes" class="form-input form-textarea" placeholder="Additional notes or payment instructions..."></textarea>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeBillingModal()">Cancel</button>
+                    <button type="button" class="btn btn-outline" onclick="testPrintFunction()">Test Print</button>
+                    <button type="submit" class="btn btn-primary">Create Bill</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="p-4" style="margin-top: 4rem;">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">Secretary Agenda</h1>
+                        <p class="text-gray-600">Manage daily appointments and schedule</p>
+                        
+                    </div>
+                
+                    <div class="flex items-center gap-2">
+                        <button class="btn btn-outline" onclick="goToPreviousDay()">
+                            <svg class="icon mr-2" viewBox="0 0 24 24">
+                                <path d="m15 18-6-6 6-6"/>
+                            </svg>
+                            Previous
+                        </button>
+                        <button class="btn btn-outline" onclick="goToToday()">
+                            Today
+                        </button>
+                        <button class="btn btn-outline" onclick="goToNextDay()">
+                            Next
+                            <svg class="icon ml-2" viewBox="0 0 24 24">
+                                <path d="m9 18 6-6-6-6"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- Calendar Sidebar -->
+                <div class="lg:col-span-1">
+                    <div class="card p-4">
+                        <div class="flex items-center gap-2 mb-4">
+                            <svg class="icon-lg" viewBox="0 0 24 24">
+                                <path d="M8 2v4"/>
+                                <path d="M16 2v4"/>
+                                <rect width="18" height="18" x="3" y="4" rx="2"/>
+                                <path d="M3 10h18"/>
+                            </svg>
+                            <h3 class="text-lg font-semibold">Calendar</h3>
+                        </div>
+                        <div class="calendar">
+                            <div class="calendar-header">
+                                <button class="btn btn-outline p-1" onclick="previousMonth()">
+                                    <svg class="icon" viewBox="0 0 24 24">
+                                        <path d="m15 18-6-6 6-6"/>
+                                    </svg>
+                                </button>
+                                <h4 id="currentMonthYear" class="font-medium"></h4>
+                                <button class="btn btn-outline p-1" onclick="nextMonth()">
+                                    <svg class="icon" viewBox="0 0 24 24">
+                                        <path d="m9 18 6-6-6-6"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="calendar-grid" id="calendarGrid">
+                                <!-- Calendar days will be generated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="card p-6 mt-4">
+                        <h3 class="text-lg font-semibold mb-4">Today's Summary</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span>Total Appointments</span>
+                                <span id="totalAppointments" class="font-semibold">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Confirmed</span>
+                                <span id="confirmedAppointments" class="font-semibold text-green-600">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Completed</span>
+                                <span id="pendingAppointments" class="font-semibold text-blue-600">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Agenda View -->
+                <div class="lg:col-span-3">
+                    <div id="dailyAgenda">
+                        <!-- Daily agenda content will be generated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let selectedDate = new Date();
+        let currentCalendarDate = new Date();
+        
+        // Appointment storage system
+        let storedAppointments = [];
+        
+        // Patient storage system
+        let storedPatients = [];
+        
+        // Billing storage system
+        let storedBills = [];
+        
+        // File storage system
+        
+        // Edit mode variables
+        let editingPatient = null;
+        let editModeNewFiles = [];
+        let editModeRemovedFiles = [];
+        
+
+        // Helper function to format date consistently
+        const formatDateForStorage = (date) => {
+            if (typeof date === 'string') {
+                // If it's already a string in YYYY-MM-DD format, return as is
+                return date;
+            }
+            // If it's a Date object, format it consistently
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
+        // Load appointments from localStorage
+        const loadStoredAppointments = () => {
+            const saved = localStorage.getItem('healthcareAppointments');
+            console.log('Loading appointments from localStorage:', saved);
+            if (saved) {
+                storedAppointments = JSON.parse(saved);
+                console.log('Loaded appointments:', storedAppointments);
+            } else {
+                console.log('No saved appointments found');
+            }
+        };
+
+        // Load patients from localStorage
+        const loadStoredPatients = () => {
+            const saved = localStorage.getItem('healthcarePatients');
+            console.log('Loading patients from localStorage:', saved);
+            if (saved) {
+                storedPatients = JSON.parse(saved);
+                console.log('Loaded patients:', storedPatients);
+            } else {
+                console.log('No saved patients found');
+                // Add some sample patients for demonstration
+                storedPatients = [
+                    {
+                        id: 'patient-1',
+                        fullName: 'John Smith',
+                        email: 'john.smith@email.com',
+                        phone: '+1 (555) 123-4567',
+                        dateOfBirth: '1985-03-15',
+                        gender: 'Male',
+                        address: '123 Main St, New York, NY',
+                        medicalHistory: 'No known allergies. Regular check-ups.',
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: 'patient-2',
+                        fullName: 'Sarah Johnson',
+                        email: 'sarah.j@company.com',
+                        phone: '+1 (555) 234-5678',
+                        dateOfBirth: '1990-07-22',
+                        gender: 'Female',
+                        address: '456 Oak Ave, Los Angeles, CA',
+                        medicalHistory: 'Allergic to penicillin. Diabetes type 2.',
+                        createdAt: new Date().toISOString()
+                    }
+                ];
+                saveStoredPatients();
+            }
+        };
+
+        // Save appointments to localStorage
+        const saveStoredAppointments = () => {
+            localStorage.setItem('healthcareAppointments', JSON.stringify(storedAppointments));
+        };
+
+        // Save patients to localStorage
+        const saveStoredPatients = () => {
+            localStorage.setItem('healthcarePatients', JSON.stringify(storedPatients));
+        };
+
+        // Add new appointment to storage
+        const addAppointment = (appointmentData) => {
+            const newAppointment = {
+                id: `appointment-${Date.now()}`,
+                time: appointmentData.appointmentTime,
+                duration: 30, // Default duration
+                clientName: appointmentData.patientName,
+                clientPhone: appointmentData.patientPhone,
+                clientEmail: appointmentData.patientEmail || '',
+                type: appointmentData.appointmentType,
+                status: 'confirmed',
+                notes: appointmentData.appointmentNotes || '',
+                doctor: appointmentData.doctorName,
+                date: formatDateForStorage(appointmentData.appointmentDate)
+            };
+            
+            console.log('Adding appointment:', newAppointment);
+            console.log('Original date from form:', appointmentData.appointmentDate);
+            console.log('Formatted date for storage:', formatDateForStorage(appointmentData.appointmentDate));
+            storedAppointments.push(newAppointment);
+            saveStoredAppointments();
+            console.log('Stored appointments:', storedAppointments);
+            return newAppointment;
+        };
+
+        // Get appointments for a specific date
+        const getAppointmentsForDate = (date) => {
+            const dateStr = formatDateForStorage(date);
+            
+            console.log('Getting appointments for date:', dateStr);
+            console.log('Input date object:', date);
+            console.log('All stored appointments:', storedAppointments);
+            
+            // Get stored appointments for this date
+            const storedForDate = storedAppointments.filter(apt => apt.date === dateStr);
+            
+            console.log('Stored appointments for this date:', storedForDate);
+            
+            // Return only stored appointments, sorted by time
+            return storedForDate.sort((a, b) => a.time.localeCompare(b.time));
+        };
+
+
+        // Utility functions
+        const formatDate = (date) => {
+            return date.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        };
+
+        const getStatusColor = (status) => {
+            switch (status) {
+                case 'confirmed': return 'bg-green-100 text-green-800';
+                case 'completed': return 'bg-blue-100 text-blue-800';
+                case 'cancelled': return 'bg-red-100 text-red-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        };
+
+        const getTypeColor = (type) => {
+            switch (type.toLowerCase()) {
+                case 'consultation': return 'bg-blue-100 text-blue-800';
+                case 'meeting': return 'bg-purple-100 text-purple-800';
+                case 'interview': return 'bg-indigo-100 text-indigo-800';
+                case 'follow-up': return 'bg-orange-100 text-orange-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        };
+
+        // Get status action buttons for appointment cards
+        const getStatusActions = (appointment) => {
+            const actions = [];
+            
+            switch (appointment.status) {
+                case 'confirmed':
+                    actions.push(`
+                        <button onclick="updateAppointmentStatus('${appointment.id}', 'completed')" 
+                                class="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Complete
+                        </button>
+                    `);
+                    actions.push(`
+                        <button onclick="updateAppointmentStatus('${appointment.id}', 'cancelled')" 
+                                class="btn btn-sm bg-red-600 hover:bg-red-700 text-white">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            Cancel
+                        </button>
+                    `);
+                    break;
+                    
+                case 'completed':
+                    actions.push(`
+                        <span class="text-sm text-green-600 font-medium">
+                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Completed
+                        </span>
+                    `);
+                    break;
+                    
+                case 'cancelled':
+                    actions.push(`
+                        <span class="text-sm text-red-600 font-medium">
+                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            Cancelled
+                        </span>
+                    `);
+                    break;
+            }
+            
+            return actions.join('');
+        };
+
+        // Generate time slots
+        const generateTimeSlots = () => {
+            const slots = [];
+            for (let hour = 8; hour < 18; hour++) {
+                slots.push(`${hour}:00`);
+                slots.push(`${hour}:30`);
+            }
+            return slots;
+        };
+
+        // Create appointment card HTML
+        const createAppointmentCard = (appointment) => {
+            const statusActions = getStatusActions(appointment);
+            
+            return `
+                <div class="card appointment-card p-4">
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <svg class="icon" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12,6 12,12 16,14"/>
+                            </svg>
+                            <span class="font-medium">${appointment.time}</span>
+                            <span class="text-sm text-gray-500">(${appointment.duration} min)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="badge ${getStatusColor(appointment.status)}">${appointment.status}</span>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2">
+                            <svg class="icon" viewBox="0 0 24 24">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                            <span class="font-medium">${appointment.clientName}</span>
+                            <span class="badge badge-outline ${getTypeColor(appointment.type)}">${appointment.type}</span>
+                        </div>
+                        ${appointment.doctor ? `
+                            <div class="flex items-center gap-2 text-sm text-gray-600">
+                                <svg class="icon-sm" viewBox="0 0 24 24">
+                                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                                </svg>
+                                <span><strong>Doctor:</strong> ${appointment.doctor}</span>
+                            </div>
+                        ` : ''}
+                        <div class="flex flex-col gap-1 text-sm text-gray-500">
+                            ${appointment.clientPhone ? `
+                                <div class="flex items-center gap-2">
+                                    <svg class="icon-sm" viewBox="0 0 24 24">
+                                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                                    </svg>
+                                    <span>${appointment.clientPhone}</span>
+                                </div>
+                            ` : ''}
+                            ${appointment.clientEmail ? `
+                                <div class="flex items-center gap-2">
+                                    <svg class="icon-sm" viewBox="0 0 24 24">
+                                        <rect width="20" height="16" x="2" y="4" rx="2"/>
+                                        <path d="m22 7-10 5L2 7"/>
+                                    </svg>
+                                    <span>${appointment.clientEmail}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        ${appointment.notes ? `
+                            <div class="mt-2 p-2 bg-gray-50 rounded-md">
+                                <p class="text-sm">${appointment.notes}</p>
+                            </div>
+                        ` : ''}
+                        ${statusActions ? `
+                            <div class="mt-3 pt-3 border-t border-gray-200">
+                                <div class="flex gap-2">
+                                    ${statusActions}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        };
+
+        // Render daily agenda
+        const renderDailyAgenda = () => {
+            console.log('Rendering daily agenda for date:', selectedDate);
+            const appointments = getAppointmentsForDate(selectedDate);
+            console.log('Appointments to render:', appointments);
+            const timeSlots = generateTimeSlots();
+            
+            const appointmentCount = appointments.length;
+            const confirmedCount = appointments.filter(apt => apt.status === 'confirmed').length;
+            const completedCount = appointments.filter(apt => apt.status === 'completed').length;
+
+            let agendaHTML = `
+                <div class="space-y-4">
+                    <div class="card p-6">
+                        <div class="flex items-center gap-2 mb-2">
+                            <svg class="icon-lg" viewBox="0 0 24 24">
+                                <path d="M8 2v4"/>
+                                <path d="M16 2v4"/>
+                                <rect width="18" height="18" x="3" y="4" rx="2"/>
+                                <path d="M3 10h18"/>
+                            </svg>
+                            <h2 class="text-xl font-semibold">${formatDate(selectedDate)}</h2>
+                        </div>
+                        <div class="flex gap-2 mt-2">
+                            <span class="badge badge-secondary">${appointmentCount} Total</span>
+                            <span class="badge bg-green-100 text-green-800">${confirmedCount} Confirmed</span>
+                            <span class="badge bg-blue-100 text-blue-800">${completedCount} Completed</span>
+                        </div>
+                    </div>
+            `;
+
+            if (appointmentCount === 0) {
+                // Show empty state when no appointments
+                agendaHTML += `
+                    <div class="card p-8 text-center">
+                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <h3 class="text-lg font-semibold text-gray-600 mb-2">No Appointments Scheduled</h3>
+                        <p class="text-gray-500 mb-4">There are no appointments scheduled for ${formatDate(selectedDate)}.</p>
+                        <button class="btn btn-primary" onclick="showAddAppointmentModal()">
+                            <svg class="icon-sm mr-2" viewBox="0 0 24 24">
+                                <path d="M12 4v16m8-8H4"/>
+                            </svg>
+                            Add First Appointment
+                        </button>
+                    </div>
+                `;
+            } else {
+                // Show appointments in time slots
+                agendaHTML += '<div class="space-y-2">';
+
+            timeSlots.forEach(timeSlot => {
+                const slotAppointments = appointments.filter(apt => apt.time === timeSlot);
+                
+                agendaHTML += `
+                    <div class="time-slot">
+                        <div class="time-label">
+                            <svg class="icon-sm" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12,6 12,12 16,14"/>
+                            </svg>
+                            ${timeSlot}
+                        </div>
+                        <div class="slot-content">
+                `;
+
+                if (slotAppointments.length > 0) {
+                    slotAppointments.forEach(appointment => {
+                        agendaHTML += createAppointmentCard(appointment);
+                    });
+                } else {
+                    agendaHTML += '<div class="available-slot">Available</div>';
+                }
+
+                agendaHTML += '</div></div>';
+            });
+
+                agendaHTML += '</div>';
+            }
+
+            agendaHTML += '</div>';
+
+            document.getElementById('dailyAgenda').innerHTML = agendaHTML;
+            
+            // Update stats
+            document.getElementById('totalAppointments').textContent = appointmentCount;
+            document.getElementById('confirmedAppointments').textContent = confirmedCount;
+            document.getElementById('pendingAppointments').textContent = completedCount;
+        };
+
+        // Calendar functions
+        const renderCalendar = () => {
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            
+            document.getElementById('currentMonthYear').textContent = 
+                currentCalendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+            const calendarGrid = document.getElementById('calendarGrid');
+            calendarGrid.innerHTML = '';
+
+            // Add day headers
+            const dayHeaders = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+            dayHeaders.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'text-center text-sm font-medium text-gray-500 p-2';
+                dayHeader.textContent = day;
+                calendarGrid.appendChild(dayHeader);
+            });
+
+            // Add calendar days
+            for (let i = 0; i < 42; i++) {
+                const date = new Date(startDate);
+                date.setDate(startDate.getDate() + i);
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = date.getDate();
+                
+                if (date.getMonth() !== month) {
+                    dayElement.className += ' text-gray-300';
+                }
+                
+                if (date.toDateString() === selectedDate.toDateString()) {
+                    dayElement.className += ' selected';
+                }
+                
+                dayElement.onclick = () => {
+                    selectedDate = new Date(date);
+                    renderCalendar();
+                    renderDailyAgenda();
+                };
+                
+                calendarGrid.appendChild(dayElement);
+            }
+        };
+
+        // Navigation functions
+        const goToPreviousDay = () => {
+            selectedDate.setDate(selectedDate.getDate() - 1);
+            renderCalendar();
+            renderDailyAgenda();
+        };
+
+        const goToNextDay = () => {
+            selectedDate.setDate(selectedDate.getDate() + 1);
+            renderCalendar();
+            renderDailyAgenda();
+        };
+
+        const goToToday = () => {
+            selectedDate = new Date();
+            currentCalendarDate = new Date();
+            renderCalendar();
+            renderDailyAgenda();
+        };
+
+        const previousMonth = () => {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+            renderCalendar();
+        };
+
+        const nextMonth = () => {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+            renderCalendar();
+        };
+
+        // Mobile menu toggle function
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        }
+
+        // Modal functions
+        function showAddAppointmentModal() {
+            const modal = document.getElementById('addAppointmentModal');
+            modal.classList.add('active');
+            
+            // Set minimum date to today
+            const dateInput = document.getElementById('appointmentDate');
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.min = today;
+            
+            // Populate patient dropdown
+            populatePatientDropdown();
+            
+            // Reset form and hide patient details
+            resetAppointmentForm();
+            
+            // Close mobile menu if open
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.add('hidden');
+        }
+
+        function closeAddAppointmentModal() {
+            const modal = document.getElementById('addAppointmentModal');
+            modal.classList.remove('active');
+            
+            // Reset form
+            resetAppointmentForm();
+        }
+
+        // Patient selection functions
+        function populatePatientDropdown() {
+            const patientSelect = document.getElementById('patientSelection');
+            patientSelect.innerHTML = '<option value="">Choose a patient...</option>';
+            
+            if (storedPatients.length === 0) {
+                patientSelect.innerHTML = '<option value="">No patients available. Add a patient first.</option>';
+                return;
+            }
+            
+            storedPatients.forEach(patient => {
+                const option = document.createElement('option');
+                option.value = patient.id;
+                option.textContent = `${patient.fullName} (${patient.phone})`;
+                patientSelect.appendChild(option);
+            });
+        }
+
+        function handlePatientSelection() {
+            const patientSelect = document.getElementById('patientSelection');
+            const selectedPatientId = patientSelect.value;
+            const patientDetailsDiv = document.getElementById('selectedPatientDetails');
+            
+            if (!selectedPatientId) {
+                // No patient selected
+                patientDetailsDiv.classList.add('hidden');
+                clearPatientData();
+                return;
+            }
+            
+            // Find the selected patient
+            const selectedPatient = storedPatients.find(patient => patient.id === selectedPatientId);
+            
+            if (selectedPatient) {
+                // Display patient details
+                displayPatientDetails(selectedPatient);
+                
+                // Populate hidden inputs
+                populatePatientData(selectedPatient);
+                
+                // Show patient details section
+                patientDetailsDiv.classList.remove('hidden');
+            }
+        }
+
+        function displayPatientDetails(patient) {
+            document.getElementById('displayPatientName').textContent = patient.fullName;
+            document.getElementById('displayPatientEmail').textContent = patient.email;
+            document.getElementById('displayPatientPhone').textContent = patient.phone;
+            
+            // Calculate and display age
+            const age = patient.dateOfBirth ? calculateAge(patient.dateOfBirth) : 'N/A';
+            document.getElementById('displayPatientAge').textContent = age;
+        }
+
+        function populatePatientData(patient) {
+            document.getElementById('patientName').value = patient.fullName;
+            document.getElementById('patientEmail').value = patient.email;
+            document.getElementById('patientPhone').value = patient.phone;
+        }
+
+        function clearPatientData() {
+            document.getElementById('patientName').value = '';
+            document.getElementById('patientEmail').value = '';
+            document.getElementById('patientPhone').value = '';
+        }
+
+        function resetAppointmentForm() {
+            document.getElementById('appointmentForm').reset();
+            document.getElementById('selectedPatientDetails').classList.add('hidden');
+            clearPatientData();
+        }
+
+
+
+        // Edit patient functions
+        function displayCurrentFiles(files) {
+            const currentFilesDiv = document.getElementById('editCurrentFiles');
+            
+            if (!files || files.length === 0) {
+                currentFilesDiv.innerHTML = '<p class="text-gray-500 text-sm">No medical files attached.</p>';
+                return;
+            }
+            
+            currentFilesDiv.innerHTML = files.map(file => `
+                <div class="current-file-item">
+                    <div class="current-file-info">
+                        <div class="file-icon ${file.name.split('.').pop().toLowerCase()}">${file.name.split('.').pop().toUpperCase()}</div>
+                        <div class="file-details">
+                            <h4>${file.name}</h4>
+                            <p>${formatFileSize(file.size)} • Uploaded ${new Date(file.uploadedAt).toLocaleString()}</p>
+                        </div>
+                        <span class="current-file-label">Current File</span>
+                    </div>
+                    <div class="file-actions">
+                        <button class="btn-preview" onclick="previewStoredFile('${file.id}', '${file.name}', '${file.data}', '${file.type}')" title="Preview">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                        </button>
+                        <button class="btn-download" onclick="downloadStoredFile('${file.id}', '${file.name}', '${file.data}')" title="Download">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </button>
+                        <button class="btn-remove-current" onclick="removeCurrentFile('${file.id}')" title="Remove">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function removeCurrentFile(fileId) {
+            if (confirm('Are you sure you want to remove this file from the patient record?')) {
+                // Add to removed files list
+                editModeRemovedFiles.push(fileId);
+                
+                // Remove from display
+                const fileElement = document.querySelector(`[onclick="removeCurrentFile('${fileId}')"]`).closest('.current-file-item');
+                fileElement.remove();
+                
+                // Update display if no files left
+                const currentFilesDiv = document.getElementById('editCurrentFiles');
+                if (currentFilesDiv.children.length === 0) {
+                    currentFilesDiv.innerHTML = '<p class="text-gray-500 text-sm">No medical files attached.</p>';
+                }
+            }
+        }
+
+        function handleEditFileUpload(event) {
+            const files = Array.from(event.target.files);
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/jpg', 'image/png'];
+            
+            files.forEach(file => {
+                // Validate file size
+                if (file.size > maxSize) {
+                    alert(`File "${file.name}" is too large. Maximum size is 10MB.`);
+                    return;
+                }
+                
+                // Validate file type
+                if (!allowedTypes.includes(file.type)) {
+                    alert(`File "${file.name}" is not a supported format. Please upload PDF, DOC, DOCX, JPG, or PNG files.`);
+                    return;
+                }
+                
+                // Add file to edit mode new files
+                const fileData = {
+                    id: `edit-file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                    name: file.name,
+                    size: file.size,
+                    type: file.type,
+                    file: file,
+                    uploadedAt: new Date().toISOString()
+                };
+                
+                editModeNewFiles.push(fileData);
+                displayEditFileItem(fileData);
+            });
+            
+            // Clear the input
+            event.target.value = '';
+        }
+
+        function displayEditFileItem(fileData) {
+            const fileList = document.getElementById('editFileList');
+            const fileItem = createEditFileItemElement(fileData);
+            fileList.appendChild(fileItem);
+        }
+
+        function createEditFileItemElement(fileData) {
+            const div = document.createElement('div');
+            div.className = 'file-item';
+            div.id = `edit-file-${fileData.id}`;
+            
+            const fileExtension = fileData.name.split('.').pop().toLowerCase();
+            const fileSize = formatFileSize(fileData.size);
+            
+            div.innerHTML = `
+                <div class="file-info">
+                    <div class="file-icon ${fileExtension}">${fileExtension.toUpperCase()}</div>
+                    <div class="file-details">
+                        <h4>${fileData.name}</h4>
+                        <p>${fileSize} • Uploaded ${new Date(fileData.uploadedAt).toLocaleString()}</p>
+                    </div>
+                    <span class="current-file-label">New File</span>
+                </div>
+                <div class="file-actions">
+                    <button class="btn-preview" onclick="previewUploadedFile('${fileData.id}')" title="Preview">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                    </button>
+                    <button class="btn-download" onclick="downloadFile('${fileData.id}')" title="Download">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </button>
+                    <button class="btn-remove" onclick="removeEditFile('${fileData.id}')" title="Remove">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            `;
+            
+            return div;
+        }
+
+        function removeEditFile(fileId) {
+            // Remove from edit mode new files array
+            editModeNewFiles = editModeNewFiles.filter(file => file.id !== fileId);
+            
+            // Remove from DOM
+            const fileElement = document.getElementById(`edit-file-${fileId}`);
+            if (fileElement) {
+                fileElement.remove();
+            }
+        }
+
+        function closeEditPatientModal() {
+            const modal = document.getElementById('editPatientModal');
+            modal.classList.remove('active');
+            
+            // Reset form
+            document.getElementById('editPatientForm').reset();
+            
+            // Clear edit mode variables
+            editingPatient = null;
+            editModeNewFiles = [];
+            editModeRemovedFiles = [];
+            
+            // Clear file displays
+            document.getElementById('editCurrentFiles').innerHTML = '';
+            document.getElementById('editFileList').innerHTML = '';
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('addAppointmentModal');
+            if (event.target === modal) {
+                closeAddAppointmentModal();
+            }
+        });
+
+        // Handle form submission
+        document.getElementById('appointmentForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            // Get form data
+            const formData = {
+                patientName: document.getElementById('patientName').value,
+                patientEmail: document.getElementById('patientEmail').value,
+                patientPhone: document.getElementById('patientPhone').value,
+                appointmentDate: document.getElementById('appointmentDate').value,
+                appointmentTime: document.getElementById('appointmentTime').value,
+                doctorName: document.getElementById('doctorName').value,
+                appointmentType: document.getElementById('appointmentType').value,
+                appointmentNotes: document.getElementById('appointmentNotes').value
+            };
+            
+            // Validate form data
+            if (!validateAppointmentForm(formData)) {
+                return;
+            }
+            
+            // Add appointment to storage
+            const newAppointment = addAppointment(formData);
+            
+            // Show success message
+            showAppointmentSuccess(formData);
+            
+            // Close modal and reset form
+            closeAddAppointmentModal();
+        });
+
+        function validateAppointmentForm(data) {
+            // Check if patient is selected
+            const patientSelect = document.getElementById('patientSelection');
+            if (!patientSelect.value) {
+                alert('Please select a patient for the appointment.');
+                return false;
+            }
+            
+            // Basic validation
+            if (!data.patientName || !data.patientPhone || 
+                !data.appointmentDate || !data.appointmentTime || 
+                !data.doctorName || !data.appointmentType) {
+                alert('Please fill in all required fields.');
+                return false;
+            }
+            
+            // Email validation (if provided)
+            if (data.patientEmail) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(data.patientEmail)) {
+                    alert('Please enter a valid email address.');
+                    return false;
+                }
+            }
+            
+            // Date validation (not in the past)
+            const selectedDate = new Date(data.appointmentDate);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            if (selectedDate < today) {
+                alert('Please select a future date for your appointment.');
+                return false;
+            }
+            
+            return true;
+        }
+
+        function showAppointmentSuccess(data) {
+            // Create success message
+            const successMessage = `
+                <div style="background-color: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 0.5rem; padding: 1rem; margin: 1rem 0;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #059669;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <h3 style="font-size: 1.125rem; font-weight: 600; color: #065f46; margin: 0;">Appointment Added Successfully!</h3>
+                    </div>
+                    <div style="font-size: 0.875rem; color: #047857; margin-bottom: 0.75rem;">
+                        <p><strong>Patient:</strong> ${data.patientName}</p>
+                        <p><strong>Date:</strong> ${new Date(data.appointmentDate).toLocaleDateString()}</p>
+                        <p><strong>Time:</strong> ${data.appointmentTime}</p>
+                        <p><strong>Doctor:</strong> ${data.doctorName}</p>
+                        <p><strong>Type:</strong> ${data.appointmentType}</p>
+                    </div>
+                    <p style="font-size: 0.875rem; color: #059669; margin: 0;">
+                        The appointment has been added to the system. You can view it in the agenda.
+                    </p>
+                </div>
+            `;
+            
+            // Insert success message at the top of the main content
+            const mainContent = document.querySelector('.max-w-7xl');
+            const existingSuccess = mainContent.querySelector('.appointment-success');
+            if (existingSuccess) {
+                existingSuccess.remove();
+            }
+            
+            const successDiv = document.createElement('div');
+            successDiv.className = 'appointment-success';
+            successDiv.innerHTML = successMessage;
+            mainContent.insertBefore(successDiv, mainContent.firstChild);
+            
+            // Scroll to success message
+            successDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            
+            // Remove success message after 8 seconds
+            setTimeout(() => {
+                if (successDiv.parentElement) {
+                    successDiv.remove();
+                }
+            }, 8000);
+            
+            // Refresh the agenda to show the new appointment
+            renderDailyAgenda();
+        }
+
+        // Update appointment status
+        function updateAppointmentStatus(appointmentId, newStatus) {
+            console.log('Updating appointment status:', appointmentId, 'to', newStatus);
+            
+            // Find the appointment in stored appointments
+            const appointmentIndex = storedAppointments.findIndex(apt => apt.id === appointmentId);
+            
+            if (appointmentIndex !== -1) {
+                // Update the status
+                storedAppointments[appointmentIndex].status = newStatus;
+                
+                // Save to localStorage
+                saveStoredAppointments();
+                
+                // Show success message
+                showStatusUpdateMessage(storedAppointments[appointmentIndex], newStatus);
+                
+                // Refresh the agenda
+                renderDailyAgenda();
+            } else {
+                console.error('Appointment not found:', appointmentId);
+                alert('Appointment not found. Please refresh the page and try again.');
+            }
+        }
+
+        // Show status update success message
+        function showStatusUpdateMessage(appointment, newStatus) {
+            const statusMessages = {
+                'confirmed': 'Appointment confirmed successfully!',
+                'completed': 'Appointment marked as completed!',
+                'cancelled': 'Appointment cancelled successfully!'
+            };
+
+            const statusColors = {
+                'confirmed': '#059669',
+                'completed': '#2563eb',
+                'cancelled': '#dc2626'
+            };
+
+            const successMessage = `
+                <div style="background-color: #f0f9ff; border: 1px solid ${statusColors[newStatus]}; border-radius: 0.5rem; padding: 1rem; margin: 1rem 0;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: ${statusColors[newStatus]};">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <h3 style="font-size: 1.125rem; font-weight: 600; color: ${statusColors[newStatus]}; margin: 0;">${statusMessages[newStatus]}</h3>
+                    </div>
+                    <div style="font-size: 0.875rem; color: #374151; margin-bottom: 0.75rem;">
+                        <p><strong>Patient:</strong> ${appointment.clientName}</p>
+                        <p><strong>Time:</strong> ${appointment.time}</p>
+                        <p><strong>Status:</strong> <span style="color: ${statusColors[newStatus]}; font-weight: 600;">${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}</span></p>
+                    </div>
+                </div>
+            `;
+            
+            // Insert success message at the top of the main content
+            const mainContent = document.querySelector('.max-w-7xl');
+            const existingSuccess = mainContent.querySelector('.status-update-success');
+            if (existingSuccess) {
+                existingSuccess.remove();
+            }
+            
+            const successDiv = document.createElement('div');
+            successDiv.className = 'status-update-success';
+            successDiv.innerHTML = successMessage;
+            mainContent.insertBefore(successDiv, mainContent.firstChild);
+            
+            // Scroll to success message
+            successDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            
+            // Remove success message after 5 seconds
+            setTimeout(() => {
+                if (successDiv.parentElement) {
+                    successDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // Patient Management Functions
+        function showPatientManagement() {
+            const modal = document.getElementById('patientManagementModal');
+            modal.classList.add('active');
+            
+            // Close mobile menu if open
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.add('hidden');
+            
+            // Load patients list
+            loadPatientsList();
+        }
+
+        function closePatientManagement() {
+            const modal = document.getElementById('patientManagementModal');
+            modal.classList.remove('active');
+            
+            // Reset form
+            document.getElementById('patientForm').reset();
+            
+            
+            // Switch back to add patient tab
+            switchPatientTab('add');
+        }
+
+        function switchPatientTab(tab) {
+            const addContent = document.getElementById('addPatientContent');
+            const viewContent = document.getElementById('viewPatientsContent');
+            const addTab = document.getElementById('addPatientTab');
+            const viewTab = document.getElementById('viewPatientsTab');
+            
+            if (tab === 'add') {
+                addContent.style.display = 'block';
+                viewContent.style.display = 'none';
+                addTab.className = 'btn btn-primary';
+                viewTab.className = 'btn btn-secondary';
+            } else {
+                addContent.style.display = 'none';
+                viewContent.style.display = 'block';
+                addTab.className = 'btn btn-secondary';
+                viewTab.className = 'btn btn-primary';
+                loadPatientsList();
+            }
+        }
+
+        // Handle patient form submission
+        document.getElementById('patientForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            // Get form data
+            const formData = {
+                fullName: document.getElementById('patientFullName').value,
+                email: document.getElementById('patientEmailAddress').value,
+                phone: document.getElementById('patientPhoneNumber').value,
+                dateOfBirth: document.getElementById('patientDateOfBirth').value,
+                gender: document.getElementById('patientGender').value,
+                address: document.getElementById('patientAddress').value,
+                medicalHistory: document.getElementById('patientMedicalHistory').value
+            };
+            
+            // Validate form data
+            if (!validatePatientForm(formData)) {
+                return;
+            }
+            
+            // Add patient to storage
+            const newPatient = addPatient(formData);
+            
+            // Show success message
+            showPatientSuccess(newPatient);
+            
+            // Reset form
+            document.getElementById('patientForm').reset();
+        });
+
+        // Handle edit patient form submission
+        document.getElementById('editPatientForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            // Get form data
+            const formData = {
+                fullName: document.getElementById('editPatientFullName').value,
+                email: document.getElementById('editPatientEmailAddress').value,
+                phone: document.getElementById('editPatientPhoneNumber').value,
+                dateOfBirth: document.getElementById('editPatientDateOfBirth').value,
+                gender: document.getElementById('editPatientGender').value,
+                address: document.getElementById('editPatientAddress').value,
+                medicalHistory: document.getElementById('editPatientMedicalHistory').value
+            };
+            
+            // Validate form data
+            if (!validateEditPatientForm(formData)) {
+                return;
+            }
+            
+            // Update patient
+            updatePatient(formData);
+        });
+
+        function validatePatientForm(data) {
+            // Basic validation
+            if (!data.fullName || !data.email || !data.phone) {
+                alert('Please fill in all required fields (Name, Email, Phone).');
+                return false;
+            }
+            
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(data.email)) {
+                alert('Please enter a valid email address.');
+                return false;
+            }
+            
+            // Check for duplicate email
+            const existingPatient = storedPatients.find(patient => patient.email === data.email);
+            if (existingPatient) {
+                alert('A patient with this email address already exists.');
+                return false;
+            }
+            
+            return true;
+        }
+
+        function validateEditPatientForm(data) {
+            // Basic validation
+            if (!data.fullName || !data.email || !data.phone) {
+                alert('Please fill in all required fields (Name, Email, Phone).');
+                return false;
+            }
+            
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(data.email)) {
+                alert('Please enter a valid email address.');
+                return false;
+            }
+            
+            // Check for duplicate email (excluding current patient)
+            const existingPatient = storedPatients.find(patient => patient.email === data.email && patient.id !== editingPatient.id);
+            if (existingPatient) {
+                alert('A patient with this email address already exists.');
+                return false;
+            }
+            
+            return true;
+        }
+
+        function updatePatient(formData) {
+            if (!editingPatient) {
+                alert('No patient selected for editing.');
+                return;
+            }
+
+            // Process new files
+            const newFilesPromises = editModeNewFiles.map(fileData => {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        resolve({
+                            id: fileData.id,
+                            name: fileData.name,
+                            size: fileData.size,
+                            type: fileData.type,
+                            uploadedAt: fileData.uploadedAt,
+                            data: e.target.result
+                        });
+                    };
+                    reader.readAsDataURL(fileData.file);
+                });
+            });
+
+            // Wait for new files to be processed
+            Promise.all(newFilesPromises).then(newFilesData => {
+                // Get current files (excluding removed ones)
+                const currentFiles = (editingPatient.medicalFiles || []).filter(file => 
+                    !editModeRemovedFiles.includes(file.id)
+                );
+
+                // Combine current files with new files
+                const updatedFiles = [...currentFiles, ...newFilesData];
+
+                // Update patient data
+                const updatedPatient = {
+                    ...editingPatient,
+                    fullName: formData.fullName,
+                    email: formData.email,
+                    phone: formData.phone,
+                    dateOfBirth: formData.dateOfBirth || '',
+                    gender: formData.gender || '',
+                    address: formData.address || '',
+                    medicalHistory: formData.medicalHistory || '',
+                    medicalFiles: updatedFiles,
+                    updatedAt: new Date().toISOString()
+                };
+
+                // Find and update patient in storage
+                const patientIndex = storedPatients.findIndex(p => p.id === editingPatient.id);
+                if (patientIndex !== -1) {
+                    storedPatients[patientIndex] = updatedPatient;
+                    saveStoredPatients();
+                    
+                    // Show success message
+                    showEditPatientSuccess(updatedPatient);
+                    
+                    // Close modal
+                    closeEditPatientModal();
+                    
+                    // Refresh patient list
+                    loadPatientsList();
+                } else {
+                    alert('Patient not found in storage.');
+                }
+            });
+        }
+
+        function showEditPatientSuccess(patient) {
+            const successMessage = `
+                <div style="background-color: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 0.5rem; padding: 1rem; margin: 1rem 0;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #059669;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <h3 style="font-size: 1.125rem; font-weight: 600; color: #065f46; margin: 0;">Patient Updated Successfully!</h3>
+                    </div>
+                    <div style="font-size: 0.875rem; color: #047857; margin-bottom: 0.75rem;">
+                        <p><strong>Name:</strong> ${patient.fullName}</p>
+                        <p><strong>Email:</strong> ${patient.email}</p>
+                        <p><strong>Phone:</strong> ${patient.phone}</p>
+                    </div>
+                    <p style="font-size: 0.875rem; color: #059669; margin: 0;">
+                        The patient information has been updated successfully.
+                    </p>
+                </div>
+            `;
+            
+            // Insert success message at the top of the patient management modal content
+            const modalContent = document.querySelector('#patientManagementModal .modal-content');
+            const existingSuccess = modalContent.querySelector('.edit-patient-success');
+            if (existingSuccess) {
+                existingSuccess.remove();
+            }
+            
+            const successDiv = document.createElement('div');
+            successDiv.className = 'edit-patient-success';
+            successDiv.innerHTML = successMessage;
+            modalContent.insertBefore(successDiv, modalContent.children[1]);
+            
+            // Remove success message after 5 seconds
+            setTimeout(() => {
+                if (successDiv.parentElement) {
+                    successDiv.remove();
+                }
+            }, 5000);
+        }
+
+        function addPatient(patientData) {
+            const newPatient = {
+                id: `patient-${Date.now()}`,
+                fullName: patientData.fullName,
+                email: patientData.email,
+                phone: patientData.phone,
+                dateOfBirth: patientData.dateOfBirth || '',
+                gender: patientData.gender || '',
+                address: patientData.address || '',
+                medicalHistory: patientData.medicalHistory || '',
+                medicalFiles: [], // No medical files for new patients
+                createdAt: new Date().toISOString()
+            };
+            
+            console.log('Adding patient:', newPatient);
+            storedPatients.push(newPatient);
+            saveStoredPatients();
+            console.log('Stored patients:', storedPatients);
+            
+            // Show success message
+            showPatientSuccess(newPatient);
+        }
+
+        function showPatientSuccess(patient) {
+            const successMessage = `
+                <div style="background-color: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 0.5rem; padding: 1rem; margin: 1rem 0;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #059669;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <h3 style="font-size: 1.125rem; font-weight: 600; color: #065f46; margin: 0;">Patient Added Successfully!</h3>
+                    </div>
+                    <div style="font-size: 0.875rem; color: #047857; margin-bottom: 0.75rem;">
+                        <p><strong>Name:</strong> ${patient.fullName}</p>
+                        <p><strong>Email:</strong> ${patient.email}</p>
+                        <p><strong>Phone:</strong> ${patient.phone}</p>
+                    </div>
+                    <p style="font-size: 0.875rem; color: #059669; margin: 0;">
+                        The patient has been added to the system. You can now schedule appointments for this patient.
+                    </p>
+                </div>
+            `;
+            
+            // Insert success message at the top of the modal content
+            const modalContent = document.querySelector('#patientManagementModal .modal-content');
+            const existingSuccess = modalContent.querySelector('.patient-success');
+            if (existingSuccess) {
+                existingSuccess.remove();
+            }
+            
+            const successDiv = document.createElement('div');
+            successDiv.className = 'patient-success';
+            successDiv.innerHTML = successMessage;
+            modalContent.insertBefore(successDiv, modalContent.children[1]);
+            
+            // Refresh the appointment form patient dropdown if it's open
+            const appointmentModal = document.getElementById('addAppointmentModal');
+            if (appointmentModal.classList.contains('active')) {
+                populatePatientDropdown();
+            }
+            
+            // Remove success message after 5 seconds
+            setTimeout(() => {
+                if (successDiv.parentElement) {
+                    successDiv.remove();
+                }
+            }, 5000);
+        }
+
+        function loadPatientsList() {
+            const patientsList = document.getElementById('patientsList');
+            patientsList.innerHTML = '';
+            
+            if (storedPatients.length === 0) {
+                patientsList.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        <p>No patients found. Add your first patient using the form above.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            storedPatients.forEach(patient => {
+                const patientCard = createPatientCard(patient);
+                patientsList.appendChild(patientCard);
+            });
+        }
+
+        function createPatientCard(patient) {
+            const card = document.createElement('div');
+            card.className = 'patient-card';
+            
+            const age = patient.dateOfBirth ? calculateAge(patient.dateOfBirth) : 'N/A';
+            const filesCount = patient.medicalFiles ? patient.medicalFiles.length : 0;
+            
+            card.innerHTML = `
+                <div class="patient-info">
+                    <div class="patient-details">
+                        <h3>${patient.fullName}</h3>
+                        <p><strong>Email:</strong> ${patient.email}</p>
+                        <p><strong>Phone:</strong> ${patient.phone}</p>
+                        <p><strong>Age:</strong> ${age} ${patient.gender ? `• ${patient.gender}` : ''}</p>
+                        ${patient.address ? `<p><strong>Address:</strong> ${patient.address}</p>` : ''}
+                        ${patient.medicalHistory ? `<p><strong>Medical History:</strong> ${patient.medicalHistory}</p>` : ''}
+                        ${filesCount > 0 ? `<p><strong>Medical Files:</strong> ${filesCount} file(s) attached</p>` : ''}
+                        <p><strong>Added:</strong> ${new Date(patient.createdAt).toLocaleDateString()}</p>
+                    </div>
+                    <div class="patient-actions">
+                        ${filesCount > 0 ? `
+                            <button onclick="viewPatientFiles('${patient.id}')" class="btn btn-sm bg-green-600 hover:bg-green-700 text-white">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                Files
+                            </button>
+                        ` : ''}
+                        <button onclick="editPatient('${patient.id}')" class="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white">
+                            Edit
+                        </button>
+                        <button onclick="deletePatient('${patient.id}')" class="btn btn-sm bg-red-600 hover:bg-red-700 text-white">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        function calculateAge(dateOfBirth) {
+            const today = new Date();
+            const birthDate = new Date(dateOfBirth);
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            
+            return age;
+        }
+
+        function searchPatients() {
+            const searchTerm = document.getElementById('patientSearch').value.toLowerCase();
+            const patientsList = document.getElementById('patientsList');
+            const cards = patientsList.querySelectorAll('.patient-card');
+            
+            cards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function editPatient(patientId) {
+            const patient = storedPatients.find(p => p.id === patientId);
+            if (!patient) {
+                alert('Patient not found.');
+                return;
+            }
+
+            // Set editing patient
+            editingPatient = patient;
+            
+            // Reset edit mode variables
+            editModeNewFiles = [];
+            editModeRemovedFiles = [];
+            
+            // Populate form with patient data
+            document.getElementById('editPatientId').value = patient.id;
+            document.getElementById('editPatientFullName').value = patient.fullName;
+            document.getElementById('editPatientEmailAddress').value = patient.email;
+            document.getElementById('editPatientPhoneNumber').value = patient.phone;
+            document.getElementById('editPatientDateOfBirth').value = patient.dateOfBirth || '';
+            document.getElementById('editPatientGender').value = patient.gender || '';
+            document.getElementById('editPatientAddress').value = patient.address || '';
+            document.getElementById('editPatientMedicalHistory').value = patient.medicalHistory || '';
+            
+            // Display current files
+            displayCurrentFiles(patient.medicalFiles || []);
+            
+            // Clear new files list
+            document.getElementById('editFileList').innerHTML = '';
+            
+            // Show modal
+            const modal = document.getElementById('editPatientModal');
+            modal.classList.add('active');
+        }
+
+        function deletePatient(patientId) {
+            const patient = storedPatients.find(p => p.id === patientId);
+            if (patient && confirm(`Are you sure you want to delete ${patient.fullName}?`)) {
+                storedPatients = storedPatients.filter(p => p.id !== patientId);
+                saveStoredPatients();
+                loadPatientsList();
+                alert('Patient deleted successfully.');
+            }
+        }
+
+        function viewPatientFiles(patientId) {
+            const patient = storedPatients.find(p => p.id === patientId);
+            if (!patient || !patient.medicalFiles || patient.medicalFiles.length === 0) {
+                alert('No medical files found for this patient.');
+                return;
+            }
+
+            // Create modal for viewing files
+            const modal = document.createElement('div');
+            modal.className = 'modal active';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 600px;">
+                    <div class="modal-header">
+                        <h2 class="modal-title">Medical Files - ${patient.fullName}</h2>
+                        <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+                    </div>
+                    <div class="space-y-4">
+                        ${patient.medicalFiles.map(file => `
+                            <div class="file-item">
+                                <div class="file-info">
+                                    <div class="file-icon ${file.name.split('.').pop().toLowerCase()}">${file.name.split('.').pop().toUpperCase()}</div>
+                                    <div class="file-details">
+                                        <h4>${file.name}</h4>
+                                        <p>${formatFileSize(file.size)} • Uploaded ${new Date(file.uploadedAt).toLocaleString()}</p>
+                                    </div>
+                                </div>
+                                <div class="file-actions">
+                                    <button class="btn-preview" onclick="previewStoredFile('${file.id}', '${file.name}', '${file.data}', '${file.type}')" title="Preview">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                        </svg>
+                                    </button>
+                                    <button class="btn-download" onclick="downloadStoredFile('${file.id}', '${file.name}', '${file.data}')" title="Download">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Close modal when clicking outside
+            modal.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+
+        function downloadStoredFile(fileId, fileName, fileData) {
+            // Convert base64 to blob
+            const byteCharacters = atob(fileData.split(',')[1]);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray]);
+            
+            // Create download link
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // File preview functions
+        function previewUploadedFile(fileId) {
+            const fileData = uploadedFiles.find(file => file.id === fileId);
+            if (fileData) {
+                showFilePreview(fileData.name, fileData.file, fileData.type);
+            }
+        }
+
+        function previewStoredFile(fileId, fileName, fileData, fileType) {
+            // Convert base64 to blob
+            const byteCharacters = atob(fileData.split(',')[1]);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: fileType });
+            
+            showFilePreview(fileName, blob, fileType);
+        }
+
+        function showFilePreview(fileName, file, fileType) {
+            // Create preview modal
+            const modal = document.createElement('div');
+            modal.className = 'file-preview-modal';
+            modal.innerHTML = `
+                <div class="file-preview-content">
+                    <div class="file-preview-header">
+                        <h3 class="file-preview-title">${fileName}</h3>
+                        <div class="file-preview-actions">
+                            <button class="btn-close-preview" onclick="this.closest('.file-preview-modal').remove()">&times;</button>
+                        </div>
+                    </div>
+                    <div class="file-preview-body">
+                        ${getPreviewContent(fileName, file, fileType)}
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Close modal when clicking outside
+            modal.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.remove();
+                }
+            });
+            
+            // Close modal with Escape key
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    modal.remove();
+                }
+            });
+        }
+
+        function getPreviewContent(fileName, file, fileType) {
+            const fileExtension = fileName.split('.').pop().toLowerCase();
+            
+            // Handle different file types
+            if (fileType.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(fileExtension)) {
+                // Image preview
+                const url = URL.createObjectURL(file);
+                return `<img src="${url}" alt="${fileName}" class="file-preview-image" onload="URL.revokeObjectURL('${url}')">`;
+            } 
+            else if (fileType === 'application/pdf' || fileExtension === 'pdf') {
+                // PDF preview
+                const url = URL.createObjectURL(file);
+                return `<iframe src="${url}" class="file-preview-iframe" onload="URL.revokeObjectURL('${url}')"></iframe>`;
+            }
+            else if (['doc', 'docx'].includes(fileExtension)) {
+                // Word document - show unsupported message with download option
+                return `
+                    <div class="file-preview-unsupported">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <h3>Preview Not Available</h3>
+                        <p>Word documents cannot be previewed in the browser.</p>
+                        <p>Please download the file to view it.</p>
+                    </div>
+                `;
+            }
+            else {
+                // Unsupported file type
+                return `
+                    <div class="file-preview-unsupported">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <h3>Preview Not Available</h3>
+                        <p>This file type cannot be previewed in the browser.</p>
+                        <p>Please download the file to view it.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Billing Functions
+        function showBillingModal() {
+            const modal = document.getElementById('billingModal');
+            modal.classList.add('active');
+            
+            // Close mobile menu if open
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.add('hidden');
+            
+            // Load patients for billing
+            loadPatientsForBilling();
+            
+            // Set default dates
+            const today = new Date();
+            const dueDate = new Date(today);
+            dueDate.setDate(today.getDate() + 30); // 30 days from today
+            
+            document.getElementById('billDate').value = today.toISOString().split('T')[0];
+            document.getElementById('billDueDate').value = dueDate.toISOString().split('T')[0];
+            
+            // Reset form
+            resetBillingForm();
+            
+            // Initialize bill total calculation
+            calculateBillTotal();
+        }
+
+        function closeBillingModal() {
+            const modal = document.getElementById('billingModal');
+            modal.classList.remove('active');
+        }
+
+        function loadPatientsForBilling() {
+            const patientSelect = document.getElementById('billPatientSelection');
+            patientSelect.innerHTML = '<option value="">Choose a patient...</option>';
+            
+            storedPatients.forEach(patient => {
+                const option = document.createElement('option');
+                option.value = patient.id;
+                option.textContent = `${patient.fullName} (${patient.email})`;
+                patientSelect.appendChild(option);
+            });
+        }
+
+        function handleBillPatientSelection() {
+            const patientId = document.getElementById('billPatientSelection').value;
+            const patientDetails = document.getElementById('billPatientDetails');
+            
+            if (patientId) {
+                const patient = storedPatients.find(p => p.id === patientId);
+                if (patient) {
+                    // Show patient details
+                    document.getElementById('billPatientName').textContent = patient.fullName;
+                    document.getElementById('billPatientEmail').textContent = patient.email;
+                    document.getElementById('billPatientPhone').textContent = patient.phone;
+                    document.getElementById('billPatientAddress').textContent = patient.address || 'Not provided';
+                    
+                    // Set hidden inputs
+                    document.getElementById('billPatientId').value = patient.id;
+                    document.getElementById('billPatientFullName').value = patient.fullName;
+                    document.getElementById('billPatientEmailAddress').value = patient.email;
+                    document.getElementById('billPatientPhoneNumber').value = patient.phone;
+                    
+                    patientDetails.classList.remove('hidden');
+                }
+            } else {
+                patientDetails.classList.add('hidden');
+            }
+        }
+
+        function addBillItem() {
+            const billItems = document.getElementById('billItems');
+            const itemCount = billItems.children.length + 1;
+            
+            const newItem = document.createElement('div');
+            newItem.className = 'bill-item border border-gray-200 rounded-lg p-4';
+            newItem.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="form-label" for="itemDescription${itemCount}">Description</label>
+                        <input type="text" id="itemDescription${itemCount}" class="form-input" placeholder="e.g., Consultation fee" required>
+                    </div>
+                    <div>
+                        <label class="form-label" for="itemQuantity${itemCount}">Quantity</label>
+                        <input type="number" id="itemQuantity${itemCount}" class="form-input" min="1" value="1" required onchange="calculateBillTotal()" oninput="calculateBillTotal()">
+                    </div>
+                    <div>
+                        <label class="form-label" for="itemPrice${itemCount}">Price ($)</label>
+                        <input type="number" id="itemPrice${itemCount}" class="form-input" min="0" step="0.01" placeholder="0.00" required onchange="calculateBillTotal()" oninput="calculateBillTotal()">
+                    </div>
+                </div>
+                <div class="mt-2 flex justify-end">
+                    <button type="button" class="btn btn-outline btn-sm bill-item-remove" onclick="removeBillItem(this)">
+                        <svg class="icon-sm mr-1" viewBox="0 0 24 24">
+                            <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        Remove Item
+                    </button>
+                </div>
+            `;
+            
+            billItems.appendChild(newItem);
+            calculateBillTotal();
+        }
+
+        function removeBillItem(button) {
+            const billItems = document.getElementById('billItems');
+            if (billItems.children.length > 1) {
+                button.closest('.bill-item').remove();
+                calculateBillTotal();
+            } else {
+                alert('At least one item is required for the bill.');
+            }
+        }
+
+        function calculateBillTotal() {
+            const billItems = document.getElementById('billItems');
+            let subtotal = 0;
+            
+            if (!billItems) {
+                console.error('Bill items container not found');
+                return;
+            }
+            
+            billItems.querySelectorAll('.bill-item').forEach((item, index) => {
+                // Find quantity input (first number input)
+                const quantityInput = item.querySelector('input[type="number"]');
+                // Find price input (second number input)
+                const priceInput = item.querySelectorAll('input[type="number"]')[1];
+                
+                if (quantityInput && priceInput) {
+                    const quantity = parseFloat(quantityInput.value) || 0;
+                    const price = parseFloat(priceInput.value) || 0;
+                    const itemTotal = quantity * price;
+                    subtotal += itemTotal;
+                    
+                    console.log(`Item ${index + 1}: Qty=${quantity}, Price=${price}, Total=${itemTotal}`);
+                } else {
+                    console.warn(`Item ${index + 1}: Missing quantity or price input`);
+                }
+            });
+            
+            const taxRate = 0.08; // 8% tax
+            const tax = subtotal * taxRate;
+            const total = subtotal + tax;
+            
+            console.log(`Bill calculation: Subtotal=${subtotal}, Tax=${tax}, Total=${total}`);
+            
+            // Update the display
+            const subtotalElement = document.getElementById('billSubtotal');
+            const taxElement = document.getElementById('billTax');
+            const totalElement = document.getElementById('billTotal');
+            
+            if (subtotalElement) subtotalElement.textContent = `$${subtotal.toFixed(2)}`;
+            if (taxElement) taxElement.textContent = `$${tax.toFixed(2)}`;
+            if (totalElement) totalElement.textContent = `$${total.toFixed(2)}`;
+        }
+
+        function resetBillingForm() {
+            document.getElementById('billingForm').reset();
+            document.getElementById('billPatientDetails').classList.add('hidden');
+            
+            // Reset bill items to just one
+            const billItems = document.getElementById('billItems');
+            billItems.innerHTML = `
+                <div class="bill-item border border-gray-200 rounded-lg p-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="form-label" for="itemDescription1">Description</label>
+                            <input type="text" id="itemDescription1" class="form-input" placeholder="e.g., Consultation fee" required>
+                        </div>
+                        <div>
+                            <label class="form-label" for="itemQuantity1">Quantity</label>
+                            <input type="number" id="itemQuantity1" class="form-input" min="1" value="1" required onchange="calculateBillTotal()" oninput="calculateBillTotal()">
+                        </div>
+                        <div>
+                            <label class="form-label" for="itemPrice1">Price ($)</label>
+                            <input type="number" id="itemPrice1" class="form-input" min="0" step="0.01" placeholder="0.00" required onchange="calculateBillTotal()" oninput="calculateBillTotal()">
+                        </div>
+                    </div>
+                    <div class="mt-2 flex justify-end">
+                        <button type="button" class="btn btn-outline btn-sm bill-item-remove" onclick="removeBillItem(this)">
+                            <svg class="icon-sm mr-1" viewBox="0 0 24 24">
+                                <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                            Remove Item
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            calculateBillTotal();
+        }
+
+        function createBill(formData) {
+            const billId = 'bill-' + Date.now();
+            const billItems = [];
+            
+            // Collect bill items
+            document.querySelectorAll('.bill-item').forEach((item, index) => {
+                // Find quantity input (first number input)
+                const quantityInput = item.querySelector('input[type="number"]');
+                // Find price input (second number input)
+                const priceInput = item.querySelectorAll('input[type="number"]')[1];
+                const descriptionInput = item.querySelector('input[type="text"]');
+                
+                if (descriptionInput && quantityInput && priceInput) {
+                    const description = descriptionInput.value.trim();
+                    const quantity = parseFloat(quantityInput.value) || 0;
+                    const price = parseFloat(priceInput.value) || 0;
+                    
+                    if (description && quantity > 0 && price >= 0) {
+                        billItems.push({
+                            description,
+                            quantity,
+                            price,
+                            total: quantity * price
+                        });
+                    }
+                }
+            });
+            
+            // Validate that we have at least one bill item
+            if (billItems.length === 0) {
+                throw new Error('Please add at least one item to the bill.');
+            }
+            
+            const subtotal = billItems.reduce((sum, item) => sum + item.total, 0);
+            const tax = subtotal * 0.08;
+            const total = subtotal + tax;
+            
+            const newBill = {
+                id: billId,
+                patientId: formData.patientId,
+                patientName: formData.patientName,
+                patientEmail: formData.patientEmail,
+                patientPhone: formData.patientPhone,
+                billDate: formData.billDate,
+                dueDate: formData.dueDate,
+                items: billItems,
+                subtotal: subtotal,
+                tax: tax,
+                total: total,
+                notes: formData.notes || '',
+                status: 'Pending',
+                createdAt: new Date().toISOString()
+            };
+            
+            console.log('Creating bill:', newBill);
+            storedBills.push(newBill);
+            saveStoredBills();
+            
+            return newBill;
+        }
+
+        function saveStoredBills() {
+            localStorage.setItem('healthcareBills', JSON.stringify(storedBills));
+            console.log('Bills saved to localStorage');
+        }
+
+        function loadStoredBills() {
+            const saved = localStorage.getItem('healthcareBills');
+            console.log('Loading bills from localStorage:', saved);
+            if (saved) {
+                storedBills = JSON.parse(saved);
+                console.log('Loaded bills:', storedBills);
+            } else {
+                console.log('No saved bills found');
+            }
+        }
+
+        function generatePrintableBill(bill) {
+            const billDate = new Date(bill.billDate).toLocaleDateString();
+            const dueDate = new Date(bill.dueDate).toLocaleDateString();
+            const createdDate = new Date(bill.createdAt).toLocaleDateString();
+            
+            const billHTML = `
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Bill - ${bill.id}</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            line-height: 1.6;
+                            color: #333;
+                            margin: 0;
+                            padding: 20px;
+                            background: #f5f5f5;
+                        }
+                        .printable-bill {
+                            max-width: 800px;
+                            margin: 0 auto;
+                            background: white;
+                            padding: 2rem;
+                            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                        }
+                        .bill-header {
+                            text-align: center;
+                            border-bottom: 3px solid #2563eb;
+                            padding-bottom: 1rem;
+                            margin-bottom: 2rem;
+                        }
+                        .bill-title {
+                            font-size: 2rem;
+                            font-weight: bold;
+                            color: #2563eb;
+                            margin-bottom: 0.5rem;
+                        }
+                        .bill-subtitle {
+                            color: #666;
+                            font-size: 1.1rem;
+                        }
+                        .bill-info {
+                            display: grid;
+                            grid-template-columns: 1fr 1fr;
+                            gap: 2rem;
+                            margin-bottom: 2rem;
+                        }
+                        .bill-section {
+                            background: #f8fafc;
+                            padding: 1rem;
+                            border-radius: 0.5rem;
+                        }
+                        .bill-section h3 {
+                            margin: 0 0 0.5rem 0;
+                            color: #2563eb;
+                            font-size: 1.1rem;
+                        }
+                        .bill-section p {
+                            margin: 0.25rem 0;
+                            font-size: 0.9rem;
+                        }
+                        .bill-items-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin: 2rem 0;
+                        }
+                        .bill-items-table th,
+                        .bill-items-table td {
+                            padding: 0.75rem;
+                            text-align: left;
+                            border-bottom: 1px solid #e5e7eb;
+                        }
+                        .bill-items-table th {
+                            background: #f3f4f6;
+                            font-weight: 600;
+                            color: #374151;
+                        }
+                        .bill-items-table .text-right {
+                            text-align: right;
+                        }
+                        .bill-items-table .text-center {
+                            text-align: center;
+                        }
+                        .bill-totals {
+                            margin-top: 2rem;
+                            text-align: right;
+                        }
+                        .bill-total-row {
+                            display: flex;
+                            justify-content: space-between;
+                            padding: 0.5rem 0;
+                            border-bottom: 1px solid #e5e7eb;
+                        }
+                        .bill-total-row.final {
+                            font-weight: bold;
+                            font-size: 1.2rem;
+                            color: #059669;
+                            border-top: 2px solid #059669;
+                            margin-top: 1rem;
+                            padding-top: 1rem;
+                        }
+                        .bill-footer {
+                            margin-top: 3rem;
+                            text-align: center;
+                            color: #666;
+                            font-size: 0.9rem;
+                        }
+                        .bill-notes {
+                            margin-top: 2rem;
+                            padding: 1rem;
+                            background: #f0f9ff;
+                            border-left: 4px solid #0ea5e9;
+                        }
+                        .bill-notes h4 {
+                            margin: 0 0 0.5rem 0;
+                            color: #0c4a6e;
+                        }
+                        .print-actions {
+                            text-align: center;
+                            margin: 2rem 0;
+                        }
+                        .btn {
+                            display: inline-block;
+                            padding: 0.75rem 1.5rem;
+                            margin: 0 0.5rem;
+                            background: #2563eb;
+                            color: white;
+                            text-decoration: none;
+                            border-radius: 0.5rem;
+                            border: none;
+                            cursor: pointer;
+                            font-size: 1rem;
+                        }
+                        .btn:hover {
+                            background: #1d4ed8;
+                        }
+                        .btn-secondary {
+                            background: #6b7280;
+                        }
+                        .btn-secondary:hover {
+                            background: #4b5563;
+                        }
+                        @media print {
+                            .print-actions {
+                                display: none !important;
+                            }
+                            .printable-bill {
+                                margin: 0;
+                                padding: 1rem;
+                                box-shadow: none;
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="printable-bill">
+                        <div class="bill-header">
+                            <div class="bill-title">MEDICAL BILL</div>
+                            <div class="bill-subtitle">Healthcare System</div>
+                        </div>
+                        
+                        <div class="bill-info">
+                            <div class="bill-section">
+                                <h3>Bill To:</h3>
+                                <p><strong>${bill.patientName}</strong></p>
+                                <p>${bill.patientEmail}</p>
+                                <p>${bill.patientPhone}</p>
+                            </div>
+                            
+                            <div class="bill-section">
+                                <h3>Bill Information:</h3>
+                                <p><strong>Bill ID:</strong> ${bill.id}</p>
+                                <p><strong>Bill Date:</strong> ${billDate}</p>
+                                <p><strong>Due Date:</strong> ${dueDate}</p>
+                                <p><strong>Status:</strong> ${bill.status}</p>
+                            </div>
+                        </div>
+                        
+                        <table class="bill-items-table">
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th class="text-center">Quantity</th>
+                                    <th class="text-right">Price</th>
+                                    <th class="text-right">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${bill.items.map(item => `
+                                    <tr>
+                                        <td>${item.description}</td>
+                                        <td class="text-center">${item.quantity}</td>
+                                        <td class="text-right">$${item.price.toFixed(2)}</td>
+                                        <td class="text-right">$${item.total.toFixed(2)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                        
+                        <div class="bill-totals">
+                            <div class="bill-total-row">
+                                <span>Subtotal:</span>
+                                <span>$${bill.subtotal.toFixed(2)}</span>
+                            </div>
+                            <div class="bill-total-row">
+                                <span>Tax (8%):</span>
+                                <span>$${bill.tax.toFixed(2)}</span>
+                            </div>
+                            <div class="bill-total-row final">
+                                <span>Total Amount:</span>
+                                <span>$${bill.total.toFixed(2)}</span>
+                            </div>
+                        </div>
+                        
+                        ${bill.notes ? `
+                            <div class="bill-notes">
+                                <h4>Notes:</h4>
+                                <p>${bill.notes}</p>
+                            </div>
+                        ` : ''}
+                        
+                        <div class="bill-footer">
+                            <p>Thank you for choosing our healthcare services.</p>
+                            <p>For questions about this bill, please contact us at (555) 123-4567</p>
+                            <p>Generated on ${createdDate}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="print-actions">
+                        <button class="btn" onclick="window.print()">🖨️ Print Bill</button>
+                        <button class="btn btn-secondary" onclick="window.close()">Close</button>
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            return billHTML;
+        }
+
+        function showPrintableBill(bill) {
+            console.log('showPrintableBill called with bill:', bill);
+            
+            try {
+                const billHTML = generatePrintableBill(bill);
+                console.log('Generated bill HTML length:', billHTML.length);
+                
+                // Try to open new window
+                let printWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+                console.log('Print window opened:', printWindow);
+                
+                if (!printWindow || printWindow.closed || typeof printWindow.closed == 'undefined') {
+                    // Popup blocked, show alternative
+                    console.log('Popup blocked, using alternative method');
+                    alert('Popup blocked! Please allow popups for this site and try again, or use the alternative method below.');
+                    showAlternativePrint(bill);
+                    return;
+                }
+                
+                printWindow.document.write(billHTML);
+                printWindow.document.close();
+                console.log('Content written to print window');
+                
+                // Wait for content to load, then print
+                printWindow.onload = function() {
+                    console.log('Print window loaded, triggering print');
+                    setTimeout(() => {
+                        printWindow.focus();
+                        printWindow.print();
+                    }, 1000);
+                };
+                
+            } catch (error) {
+                console.error('Error opening print window:', error);
+                alert('Error opening print window. Using alternative method.');
+                showAlternativePrint(bill);
+            }
+        }
+
+        function showAlternativePrint(bill) {
+            // Create a modal with the printable bill
+            const modal = document.createElement('div');
+            modal.className = 'modal active';
+            modal.style.zIndex = '9999';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 90%; max-height: 90%; overflow-y: auto;">
+                    <div class="modal-header">
+                        <h2 class="modal-title">Printable Bill - ${bill.id}</h2>
+                        <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+                    </div>
+                    <div style="padding: 1rem;">
+                        ${generatePrintableBillContent(bill)}
+                        <div style="text-align: center; margin-top: 2rem;">
+                            <button class="btn btn-primary" onclick="printCurrentPage()">🖨️ Print This Page</button>
+                            <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        function generatePrintableBillContent(bill) {
+            const billDate = new Date(bill.billDate).toLocaleDateString();
+            const dueDate = new Date(bill.dueDate).toLocaleDateString();
+            const createdDate = new Date(bill.createdAt).toLocaleDateString();
+            
+            return `
+                <div class="printable-bill">
+                    <div class="bill-header">
+                        <div class="bill-title">MEDICAL BILL</div>
+                        <div class="bill-subtitle">Healthcare System</div>
+                    </div>
+                    
+                    <div class="bill-info">
+                        <div class="bill-section">
+                            <h3>Bill To:</h3>
+                            <p><strong>${bill.patientName}</strong></p>
+                            <p>${bill.patientEmail}</p>
+                            <p>${bill.patientPhone}</p>
+                        </div>
+                        
+                        <div class="bill-section">
+                            <h3>Bill Information:</h3>
+                            <p><strong>Bill ID:</strong> ${bill.id}</p>
+                            <p><strong>Bill Date:</strong> ${billDate}</p>
+                            <p><strong>Due Date:</strong> ${dueDate}</p>
+                            <p><strong>Status:</strong> ${bill.status}</p>
+                        </div>
+                    </div>
+                    
+                    <table class="bill-items-table">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th class="text-center">Quantity</th>
+                                <th class="text-right">Price</th>
+                                <th class="text-right">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${bill.items.map(item => `
+                                <tr>
+                                    <td>${item.description}</td>
+                                    <td class="text-center">${item.quantity}</td>
+                                    <td class="text-right">$${item.price.toFixed(2)}</td>
+                                    <td class="text-right">$${item.total.toFixed(2)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    
+                    <div class="bill-totals">
+                        <div class="bill-total-row">
+                            <span>Subtotal:</span>
+                            <span>$${bill.subtotal.toFixed(2)}</span>
+                        </div>
+                        <div class="bill-total-row">
+                            <span>Tax (8%):</span>
+                            <span>$${bill.tax.toFixed(2)}</span>
+                        </div>
+                        <div class="bill-total-row final">
+                            <span>Total Amount:</span>
+                            <span>$${bill.total.toFixed(2)}</span>
+                        </div>
+                    </div>
+                    
+                    ${bill.notes ? `
+                        <div class="bill-notes">
+                            <h4>Notes:</h4>
+                            <p>${bill.notes}</p>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="bill-footer">
+                        <p>Thank you for choosing our healthcare services.</p>
+                        <p>For questions about this bill, please contact us at (555) 123-4567</p>
+                        <p>Generated on ${createdDate}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function printCurrentPage() {
+            window.print();
+        }
+
+        function testPrintFunction() {
+            // Create a test bill for testing the print functionality
+            const testBill = {
+                id: 'test-bill-123',
+                patientId: 'test-patient',
+                patientName: 'Test Patient',
+                patientEmail: 'test@example.com',
+                patientPhone: '(555) 123-4567',
+                billDate: new Date().toISOString().split('T')[0],
+                dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                items: [
+                    {
+                        description: 'Test Consultation',
+                        quantity: 1,
+                        price: 150.00,
+                        total: 150.00
+                    },
+                    {
+                        description: 'Test Lab Work',
+                        quantity: 2,
+                        price: 75.00,
+                        total: 150.00
+                    }
+                ],
+                subtotal: 300.00,
+                tax: 24.00,
+                total: 324.00,
+                notes: 'This is a test bill for testing the print functionality.',
+                status: 'Pending',
+                createdAt: new Date().toISOString()
+            };
+            
+            console.log('Testing print function with test bill:', testBill);
+            showPrintableBill(testBill);
+        }
+
+        // Billing form submission
+        document.getElementById('billingForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                patientId: document.getElementById('billPatientId').value,
+                patientName: document.getElementById('billPatientFullName').value,
+                patientEmail: document.getElementById('billPatientEmailAddress').value,
+                patientPhone: document.getElementById('billPatientPhoneNumber').value,
+                billDate: document.getElementById('billDate').value,
+                dueDate: document.getElementById('billDueDate').value,
+                notes: document.getElementById('billNotes').value
+            };
+            
+            if (!formData.patientId) {
+                alert('Please select a patient for the bill.');
+                return;
+            }
+            
+            try {
+                const newBill = createBill(formData);
+                console.log('Bill created successfully:', newBill);
+                
+                // Show success message with print option
+                const printBill = confirm(`✅ Bill created successfully!\n\nBill ID: ${newBill.id}\nPatient: ${newBill.patientName}\nTotal: $${newBill.total.toFixed(2)}\n\nWould you like to print the bill now?`);
+                
+                if (printBill) {
+                    console.log('Attempting to show printable bill:', newBill);
+                    showPrintableBill(newBill);
+                } else {
+                    // Still show the bill in a modal for review
+                    showAlternativePrint(newBill);
+                }
+            } catch (error) {
+                console.error('Error creating bill:', error);
+                alert(`Error creating bill: ${error.message}`);
+                return;
+            }
+            
+            closeBillingModal();
+        });
+
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStoredAppointments();
+            loadStoredPatients();
+            loadStoredBills();
+            renderCalendar();
+            renderDailyAgenda();
+        });
+    </script>
+</body>
+</html>

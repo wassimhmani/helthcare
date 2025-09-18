@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedConnect - Healthcare Portal Login</title>
+    <style>
+        :root {
+            --medical-primary: #2563eb;
+            --medical-primary-dark: #1d4ed8;
+            --medical-secondary: #059669;
+            --medical-accent: #dc2626;
+            --medical-background: #f8fafc;
+            --medical-card: #ffffff;
+            --medical-text: #1e293b;
+            --medical-text-light: #64748b;
+            --medical-border: #e2e8f0;
+            --medical-input-bg: #f1f5f9;
+            --medical-success: #10b981;
+            --medical-warning: #f59e0b;
+            --medical-error: #ef4444;
+            --radius: 0.5rem;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+            background: linear-gradient(135deg, var(--medical-primary) 0%, var(--medical-secondary) 100%);
+            color: var(--medical-text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            position: relative;
+        }
+
+        /* Medical background pattern */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .login-container {
+            background: var(--medical-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 28rem;
+            padding: 2rem;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--medical-primary), var(--medical-secondary));
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .logo::before {
+            content: '⚕️';
+            font-size: 1.5rem;
+        }
+
+        .header {
+            margin-bottom: 2rem;
+        }
+
+        .title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--medical-text);
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: var(--medical-text-light);
+            text-align: center;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: var(--medical-text);
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--medical-border);
+            border-radius: var(--radius);
+            background-color: var(--medical-input-bg);
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: var(--medical-primary);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-input.error {
+            border-color: var(--medical-error);
+            background-color: #fef2f2;
+        }
+
+        .error-message {
+            color: var(--medical-error);
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            display: none;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .error-message.show {
+            display: flex;
+        }
+
+        .error-message::before {
+            content: '⚠️';
+            font-size: 0.75rem;
+        }
+
+        .role-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .role-option {
+            padding: 0.75rem 0.5rem;
+            border: 2px solid var(--medical-border);
+            border-radius: var(--radius);
+            background: var(--medical-input-bg);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .role-option:hover {
+            border-color: var(--medical-primary);
+        }
+
+        .role-option.selected {
+            border-color: var(--medical-primary);
+            background: var(--medical-primary);
+            color: white;
+        }
+
+        .security-notice {
+            background: linear-gradient(90deg, #dbeafe, #ecfdf5);
+            border: 1px solid var(--medical-border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.75rem;
+            color: var(--medical-text-light);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .security-notice::before {
+            content: '🔒';
+            font-size: 1rem;
+        }
+
+        .remember-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .remember-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--medical-text-light);
+        }
+
+        .checkbox {
+            width: 1rem;
+            height: 1rem;
+            accent-color: var(--medical-primary);
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: linear-gradient(135deg, var(--medical-primary), var(--medical-primary-dark));
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+
+        .submit-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading-spinner {
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .footer-links {
+            text-align: center;
+            font-size: 0.875rem;
+        }
+
+        .footer-links a {
+            color: var(--medical-primary);
+            text-decoration: none;
+            margin: 0 0.5rem;
+            font-weight: 500;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        .divider {
+            margin: 1rem 0;
+            text-align: center;
+            position: relative;
+            color: var(--medical-text-light);
+            font-size: 0.875rem;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--medical-border);
+        }
+
+        .divider span {
+            background: var(--medical-card);
+            padding: 0 1rem;
+        }
+
+        .compliance-footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--medical-border);
+            font-size: 0.75rem;
+            color: var(--medical-text-light);
+        }
+
+        @media (max-width: 640px) {
+            .login-container {
+                padding: 1.5rem;
+                margin: 0.5rem;
+            }
+            
+            .role-selector {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --medical-background: #0f172a;
+                --medical-card: #1e293b;
+                --medical-text: #f1f5f9;
+                --medical-text-light: #94a3b8;
+                --medical-border: #334155;
+                --medical-input-bg: #334155;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo-section">
+            <div class="logo"></div>
+        </div>
+        
+        <div class="header">
+            <h1 class="title">MedConnect Portal</h1>
+            <p class="subtitle">Secure access to your healthcare dashboard</p>
+        </div>
+
+        <form id="medicalLoginForm">
+            <div class="form-group">
+                <label class="form-label">User Role</label>
+                <div class="role-selector">
+                    <div class="role-option" data-role="doctor">👨‍⚕️ Doctor</div>
+                    <div class="role-option" data-role="secretary">👩‍⚕️ Secretary</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="employeeId" class="form-label">Employee ID</label>
+                <input
+                    type="text"
+                    id="employeeId"
+                    name="employeeId"
+                    class="form-input"
+                    placeholder="Enter your employee ID"
+                    required
+                />
+                <div class="error-message" id="employeeIdError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    class="form-input"
+                    placeholder="Enter your password"
+                    required
+                />
+                <div class="error-message" id="passwordError"></div>
+            </div>
+
+            <div class="remember-section">
+                <label class="remember-checkbox">
+                    <input type="checkbox" class="checkbox" id="rememberMe">
+                    Remember me
+                </label>
+                <a href="#" id="forgotPassword">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="submit-button" id="submitButton">
+                <span id="buttonText">Sign In to Portal</span>
+                <div class="loading-spinner" id="loadingSpinner" style="display: none;"></div>
+            </button>
+        </form>
+
+        <div class="divider">
+            <span>or</span>
+        </div>
+
+        <div class="footer-links">
+            <a href="#" id="registerLink">Register New Account</a>
+            <a href="#" id="supportLink">Technical Support</a>
+        </div>
+
+        <div class="compliance-footer">
+            <p>🔒 This system complies with HIPAA regulations</p>
+            <p>Protected by 256-bit SSL encryption</p>
+        </div>
+    </div>
+
+    <script>
+        const host ='http://127.0.0.1/helthcaresystem/';
+        const form = document.getElementById('medicalLoginForm');
+        const employeeIdInput = document.getElementById('employeeId');
+        const passwordInput = document.getElementById('password');
+        const submitButton = document.getElementById('submitButton');
+        const buttonText = document.getElementById('buttonText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const roleOptions = document.querySelectorAll('.role-option');
+
+        let selectedRole = '';
+
+        // Role selection
+        roleOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                roleOptions.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                selectedRole = option.dataset.role;
+                
+                // Update label - only employee ID for doctor and secretary
+                const employeeLabel = document.querySelector('label[for="employeeId"]');
+                employeeLabel.textContent = 'Employee ID';
+                employeeIdInput.placeholder = 'Enter your employee ID';
+            });
+        });
+
+        function validateEmployeeId(id) {
+            // Basic validation - should be alphanumeric and 4-20 characters
+            const idRegex = /^[A-Za-z0-9]{4,20}$/;
+            return idRegex.test(id);
+        }
+
+        function showError(input, errorElement, message) {
+            input.classList.add('error');
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
+        }
+
+        function clearError(input, errorElement) {
+            input.classList.remove('error');
+            errorElement.textContent = '';
+            errorElement.classList.remove('show');
+        }
+
+        function clearAllErrors() {
+            const inputs = [employeeIdInput, passwordInput];
+            const errors = [
+                document.getElementById('employeeIdError'),
+                document.getElementById('passwordError')
+            ];
+            
+            inputs.forEach((input, index) => {
+                clearError(input, errors[index]);
+            });
+        }
+
+        function validateForm() {
+            clearAllErrors();
+            let isValid = true;
+
+            // Validate role selection - only allow doctor or secretary
+            if (!selectedRole) {
+                alert('Please select your role');
+                return false;
+            }
+            
+            if (selectedRole !== 'doctor' && selectedRole !== 'secretary') {
+                alert('Only doctors and secretaries are allowed to access this system');
+                return false;
+            }
+
+            // Validate employee ID
+            const employeeId = employeeIdInput.value.trim();
+            if (!employeeId) {
+                showError(employeeIdInput, document.getElementById('employeeIdError'), 'Employee ID is required');
+                isValid = false;
+            } else if (!validateEmployeeId(employeeId)) {
+                showError(employeeIdInput, document.getElementById('employeeIdError'), 'Employee ID must be 4-20 alphanumeric characters');
+                isValid = false;
+            }
+
+            // Validate password
+            const password = passwordInput.value;
+            if (!password) {
+                showError(passwordInput, document.getElementById('passwordError'), 'Password is required');
+                isValid = false;
+            } else if (password.length < 8) {
+                showError(passwordInput, document.getElementById('passwordError'), 'Password must be at least 8 characters');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+            
+            if (!validateForm()) {
+                return;
+            }
+
+            // Show loading state
+            submitButton.disabled = true;
+            buttonText.style.display = 'none';
+            loadingSpinner.style.display = 'block';
+
+            try {
+                // Simulate secure authentication
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                const formData = {
+                    role: selectedRole,
+                    employeeId: employeeIdInput.value,
+                    password: passwordInput.value,
+                    rememberMe: document.getElementById('rememberMe').checked
+                };
+                
+                console.log('Secure medical login attempt:', formData);
+                
+                // Here you would typically make a secure API call
+                alert(`✅ Welcome to MedConnect Portal!\nRole: ${selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)}\nSecure session established.`);
+                window.location.href=host+'agenda.html';
+            } catch (error) {
+                console.error('Login failed:', error);
+                alert('❌ Login failed. Please verify your credentials and try again.');
+            } finally {
+                // Reset button state
+                submitButton.disabled = false;
+                buttonText.style.display = 'block';
+                loadingSpinner.style.display = 'none';
+            }
+        }
+
+        // Event listeners
+        form.addEventListener('submit', handleSubmit);
+
+        // Clear errors on input
+        employeeIdInput.addEventListener('input', () => {
+            if (document.getElementById('employeeIdError').classList.contains('show')) {
+                clearError(employeeIdInput, document.getElementById('employeeIdError'));
+            }
+        });
+
+        passwordInput.addEventListener('input', () => {
+            if (document.getElementById('passwordError').classList.contains('show')) {
+                clearError(passwordInput, document.getElementById('passwordError'));
+            }
+        });
+
+        // Footer link handlers
+        document.getElementById('forgotPassword').addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('🔐 Password reset functionality would redirect to secure recovery process');
+        });
+
+        document.getElementById('registerLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('📝 New user registration requires administrator approval');
+        });
+
+        document.getElementById('supportLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('📞 Technical Support: 1-800-MED-HELP\n💬 Available 24/7 for healthcare professionals');
+        });
+    </script>
+</body>
+</html>
