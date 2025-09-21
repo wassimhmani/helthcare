@@ -578,6 +578,59 @@
             display: none;
         }
 
+        /* Language settings modal styles */
+        .language-option {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .language-option:hover {
+            background-color: #f3f4f6;
+        }
+
+        .language-option input[type="radio"] {
+            margin-right: 0.75rem;
+        }
+
+        /* RTL support for Arabic */
+        [dir="rtl"] {
+            text-align: right;
+        }
+
+        [dir="rtl"] .nav-links {
+            flex-direction: row-reverse;
+        }
+
+        [dir="rtl"] .user-profile {
+            flex-direction: row-reverse;
+        }
+
+        [dir="rtl"] .modal-content {
+            direction: rtl;
+        }
+
+        /* Search interface styles */
+        .form-input.pr-10 {
+            padding-right: 2.5rem;
+        }
+
+        #clearSearch {
+            transition: opacity 0.2s ease;
+        }
+
+        #clearSearch:hover {
+            opacity: 0.8;
+        }
+
+        #searchResults {
+            font-weight: 500;
+            color: #374151;
+        }
+
         /* Billing Styles */
         .bill-item {
             background: #f9fafb;
@@ -887,12 +940,12 @@
 
                 <!-- Desktop Menu -->
                 <div class="nav-links">
-                    <a href="#" class="nav-link active">Dashboard</a>
-                    <a href="#" class="nav-link" onclick="showAddAppointmentModal()">Add Appointment</a>
-                    <a href="#" class="nav-link" onclick="showPatientManagement()">Patients</a>
-                    <a href="#" class="nav-link" onclick="showBillingModal()">Billing</a>
-                    <a href="#" class="nav-link">Reports</a>
-                    <a href="#" class="nav-link">Settings</a>
+                    <a href="#" class="nav-link active" data-translate="dashboard">Dashboard</a>
+                    <a href="#" class="nav-link" onclick="showAddAppointmentModal()" data-translate="add_appointment">Add Appointment</a>
+                    <a href="#" class="nav-link" onclick="showPatientManagement()" data-translate="patients">Patients</a>
+                    <a href="#" class="nav-link" onclick="showBillingModal()" data-translate="billing">Billing</a>
+                    <a href="#" class="nav-link" data-translate="reports">Reports</a>
+                    <a href="#" class="nav-link" onclick="showLanguageSettings()" data-translate="settings">Settings</a>
                 </div>
 
                 <!-- User Profile -->
@@ -900,7 +953,7 @@
                     <div class="user-avatar">JD</div>
                     <div class="user-info">
                         <p class="user-name">John Doe</p>
-                        <p class="user-role">Secretary</p>
+                        <p class="user-role" data-translate="secretary">Secretary</p>
                     </div>
                 </div>
 
@@ -916,12 +969,12 @@
         <!-- Mobile menu -->
         <div class="mobile-menu" id="mobile-menu">
             <div class="mobile-nav-links">
-                <a href="#" class="mobile-nav-link active">Dashboard</a>
-                <a href="#" class="mobile-nav-link" onclick="showAddAppointmentModal()">Add Appointment</a>
-                <a href="#" class="mobile-nav-link" onclick="showPatientManagement()">Patients</a>
-                <a href="#" class="mobile-nav-link" onclick="showBillingModal()">Billing</a>
-                <a href="#" class="mobile-nav-link">Reports</a>
-                <a href="#" class="mobile-nav-link">Settings</a>
+                <a href="#" class="mobile-nav-link active" data-translate="dashboard">Dashboard</a>
+                <a href="#" class="mobile-nav-link" onclick="showAddAppointmentModal()" data-translate="add_appointment">Add Appointment</a>
+                <a href="#" class="mobile-nav-link" onclick="showPatientManagement()" data-translate="patients">Patients</a>
+                <a href="#" class="mobile-nav-link" onclick="showBillingModal()" data-translate="billing">Billing</a>
+                <a href="#" class="mobile-nav-link" data-translate="reports">Reports</a>
+                <a href="#" class="mobile-nav-link" onclick="showLanguageSettings()" data-translate="settings">Settings</a>
             </div>
         </div>
     </nav>
@@ -930,13 +983,13 @@
     <div class="modal" id="addAppointmentModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">Add New Appointment</h2>
+                <h2 class="modal-title" data-translate="add_new_appointment">Add New Appointment</h2>
                 <button class="modal-close" onclick="closeAddAppointmentModal()">&times;</button>
             </div>
             
             <form id="appointmentForm">
                 <div class="form-group">
-                    <label class="form-label" for="patientSelection">Select Patient *</label>
+                    <label class="form-label" for="patientSelection" data-translate="select_patient">Select Patient *</label>
                     <select id="patientSelection" class="form-input" required onchange="handlePatientSelection()">
                         <option value="">Choose a patient...</option>
                     </select>
@@ -969,12 +1022,12 @@
                 <input type="hidden" id="patientPhone" name="patientPhone">
                 
                 <div class="form-group">
-                    <label class="form-label" for="appointmentDate">Appointment Date</label>
+                    <label class="form-label" for="appointmentDate" data-translate="appointment_date">Appointment Date</label>
                     <input type="date" id="appointmentDate" class="form-input" required>
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label" for="appointmentTime">Appointment Time</label>
+                    <label class="form-label" for="appointmentTime" data-translate="appointment_time">Appointment Time</label>
                     <select id="appointmentTime" class="form-input" required>
                         <option value="">Select time</option>
                         <option value="09:00">9:00 AM</option>
@@ -1000,7 +1053,7 @@
                 
                 
                 <div class="form-group">
-                    <label class="form-label" for="appointmentType">Appointment Type</label>
+                    <label class="form-label" for="appointmentType" data-translate="appointment_type">Appointment Type</label>
                     <select id="appointmentType" class="form-input" required>
                         <option value="">Select type</option>
                         <option value="Consultation">General Consultation</option>
@@ -1010,14 +1063,19 @@
                     </select>
                 </div>
                 
+                <!--<div class="form-group">
+                    <label class="form-label" for="doctorName" data-translate="doctor_name">Doctor Name *</label>
+                    <input type="hidden" id="doctorName" class="form-input"  value="" placeholder="Enter doctor's name" required>
+                </div>-->
+                <input type="hidden" id="doctorName" class="form-input"  value="doctor" placeholder="Enter doctor's name">
                 <div class="form-group">
-                    <label class="form-label" for="appointmentNotes">Additional Notes</label>
+                    <label class="form-label" for="appointmentNotes" data-translate="additional_notes">Additional Notes</label>
                     <textarea id="appointmentNotes" class="form-input form-textarea" placeholder="Any specific concerns or symptoms..."></textarea>
                 </div>
                 
                 <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeAddAppointmentModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Add Appointment</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeAddAppointmentModal()" data-translate="cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary" data-translate="add_appointment">Add Appointment</button>
                 </div>
             </form>
         </div>
@@ -1027,13 +1085,13 @@
     <div class="modal" id="patientManagementModal">
         <div class="modal-content" style="max-width: 800px;">
             <div class="modal-header">
-                <h2 class="modal-title">Patient Management</h2>
+                <h2 class="modal-title" data-translate="patient_management">Patient Management</h2>
                 <button class="modal-close" onclick="closePatientManagement()">&times;</button>
             </div>
             
             <div class="flex gap-4 mb-6">
-                <button id="addPatientTab" class="btn btn-primary" onclick="switchPatientTab('add')">Add New Patient</button>
-                <button id="viewPatientsTab" class="btn btn-secondary" onclick="switchPatientTab('view')">View All Patients</button>
+                <button id="addPatientTab" class="btn btn-primary" onclick="switchPatientTab('add')" data-translate="add_new_patient">Add New Patient</button>
+                <button id="viewPatientsTab" class="btn btn-secondary" onclick="switchPatientTab('view')" data-translate="view_all_patients">View All Patients</button>
             </div>
             
             <!-- Add Patient Form -->
@@ -1041,51 +1099,59 @@
                 <form id="patientForm">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="form-group">
-                            <label class="form-label" for="patientFullName">Full Name *</label>
+                            <label class="form-label" for="patientFileNumber" data-translate="patient_file_number">Patient File Number *</label>
+                            <input type="text" id="patientFileNumber" class="form-input" placeholder="Enter patient file number (e.g., P-2024-001)" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="patientCinPassport" data-translate="cin_passport">CIN or Passeport *</label>
+                            <input type="text" id="patientCinPassport" class="form-input" placeholder="Enter CIN or Passport number" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="patientFullName" data-translate="full_name">Full Name *</label>
                             <input type="text" id="patientFullName" class="form-input" placeholder="Enter patient's full name" required>
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label" for="patientEmailAddress">Email Address *</label>
-                            <input type="email" id="patientEmailAddress" class="form-input" placeholder="patient@example.com" required>
+                            <label class="form-label" for="patientEmailAddress" data-translate="email_address">Email Address</label>
+                            <input type="email" id="patientEmailAddress" class="form-input" placeholder="patient@example.com">
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label" for="patientPhoneNumber">Phone Number *</label>
+                            <label class="form-label" for="patientPhoneNumber" data-translate="phone_number">Phone Number *</label>
                             <input type="tel" id="patientPhoneNumber" class="form-input" placeholder="+1 (555) 123-4567" required>
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label" for="patientDateOfBirth">Date of Birth</label>
-                            <input type="date" id="patientDateOfBirth" class="form-input">
+                            <label class="form-label" for="patientDateOfBirth" data-translate="date_of_birth">Date of Birth *</label>
+                            <input type="date" id="patientDateOfBirth" class="form-input" required>
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label" for="patientGender">Gender</label>
+                            <label class="form-label" for="patientGender" data-translate="gender">Gender</label>
                             <select id="patientGender" class="form-input">
                                 <option value="">Select gender</option>
                                 <option value="Male">Male</option>
                                 <option value="Female">Female</option>
-                                <option value="Other">Other</option>
-                                <option value="Prefer not to say">Prefer not to say</option>
                             </select>
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label" for="patientAddress">Address</label>
+                            <label class="form-label" for="patientAddress" data-translate="address">Address</label>
                             <input type="text" id="patientAddress" class="form-input" placeholder="Street address, City, State">
                         </div>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="patientMedicalHistory">Medical History / Notes</label>
+                        <label class="form-label" for="patientMedicalHistory" data-translate="medical_history">Medical History / Notes</label>
                         <textarea id="patientMedicalHistory" class="form-input form-textarea" placeholder="Any relevant medical history, allergies, or notes..."></textarea>
                     </div>
                     
                     
                     <div class="modal-actions">
-                        <button type="button" class="btn btn-secondary" onclick="closePatientManagement()">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Add Patient</button>
+                        <button type="button" class="btn btn-secondary" onclick="closePatientManagement()" data-translate="cancel">Cancel</button>
+                        <button type="submit" class="btn btn-primary" data-translate="add_patient">Add Patient</button>
                     </div>
                 </form>
             </div>
@@ -1093,7 +1159,15 @@
             <!-- View Patients Content -->
             <div id="viewPatientsContent" class="patient-tab-content" style="display: none;">
                 <div class="mb-4">
-                    <input type="text" id="patientSearch" class="form-input" placeholder="Search patients by name, email, or phone..." onkeyup="searchPatients()">
+                    <div class="relative">
+                        <input type="text" id="patientSearch" class="form-input pr-10" placeholder="Search patients by name, CIN/Passport, file number, email, phone, or date of birth..." onkeyup="searchPatients()">
+                        <button type="button" id="clearSearch" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600" onclick="clearPatientSearch()" style="display: none;">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="searchResults" class="text-sm text-gray-600 mt-2" style="display: none;"></div>
                 </div>
                 
                 <div id="patientsList" class="space-y-4">
@@ -1108,7 +1182,7 @@
     <div class="modal" id="editPatientModal">
         <div class="modal-content" style="max-width: 800px;">
             <div class="modal-header">
-                <h2 class="modal-title">Edit Patient</h2>
+                <h2 class="modal-title" data-translate="edit_patient">Edit Patient</h2>
                 <button class="modal-close" onclick="closeEditPatientModal()">&times;</button>
             </div>
             
@@ -1117,50 +1191,58 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="form-group">
-                        <label class="form-label" for="editPatientFullName">Full Name *</label>
+                        <label class="form-label" for="editPatientFileNumber" data-translate="patient_file_number">Patient File Number *</label>
+                        <input type="text" id="editPatientFileNumber" class="form-input" placeholder="Enter patient file number (e.g., P-2024-001)" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="editPatientCinPassport" data-translate="cin_passport">CIN or Passeport *</label>
+                        <input type="text" id="editPatientCinPassport" class="form-input" placeholder="Enter CIN or Passport number" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="editPatientFullName" data-translate="full_name">Full Name *</label>
                         <input type="text" id="editPatientFullName" class="form-input" placeholder="Enter patient's full name" required>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="editPatientEmailAddress">Email Address *</label>
-                        <input type="email" id="editPatientEmailAddress" class="form-input" placeholder="patient@example.com" required>
+                        <label class="form-label" for="editPatientEmailAddress" data-translate="email_address">Email Address</label>
+                        <input type="email" id="editPatientEmailAddress" class="form-input" placeholder="patient@example.com">
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="editPatientPhoneNumber">Phone Number *</label>
+                        <label class="form-label" for="editPatientPhoneNumber" data-translate="phone_number">Phone Number *</label>
                         <input type="tel" id="editPatientPhoneNumber" class="form-input" placeholder="+1 (555) 123-4567" required>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="editPatientDateOfBirth">Date of Birth</label>
-                        <input type="date" id="editPatientDateOfBirth" class="form-input">
+                        <label class="form-label" for="editPatientDateOfBirth" data-translate="date_of_birth">Date of Birth *</label>
+                        <input type="date" id="editPatientDateOfBirth" class="form-input" required>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="editPatientGender">Gender</label>
+                        <label class="form-label" for="editPatientGender" data-translate="gender">Gender</label>
                         <select id="editPatientGender" class="form-input">
                             <option value="">Select gender</option>
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
-                            <option value="Other">Other</option>
-                            <option value="Prefer not to say">Prefer not to say</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="editPatientAddress">Address</label>
+                        <label class="form-label" for="editPatientAddress" data-translate="address">Address</label>
                         <input type="text" id="editPatientAddress" class="form-input" placeholder="Street address, City, State">
                     </div>
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label" for="editPatientMedicalHistory">Medical History / Notes</label>
+                    <label class="form-label" for="editPatientMedicalHistory" data-translate="medical_history">Medical History / Notes</label>
                     <textarea id="editPatientMedicalHistory" class="form-input form-textarea" placeholder="Any relevant medical history, allergies, or notes..."></textarea>
                 </div>
                 
                 <!-- Medical Files Management Section -->
                 <div class="form-group">
-                    <label class="form-label">Medical Files</label>
+                    <label class="form-label" data-translate="medical_files">Medical Files</label>
                     
                     <!-- Current Files Display -->
                     <div id="editCurrentFiles" class="mb-4">
@@ -1192,8 +1274,8 @@
                 </div>
                 
                 <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeEditPatientModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Update Patient</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditPatientModal()" data-translate="cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary" data-translate="update_patient">Update Patient</button>
                 </div>
             </form>
         </div>
@@ -1203,13 +1285,13 @@
     <div class="modal" id="billingModal">
         <div class="modal-content" style="max-width: 900px;">
             <div class="modal-header">
-                <h2 class="modal-title">Create Patient Bill</h2>
+                <h2 class="modal-title" data-translate="create_patient_bill">Create Patient Bill</h2>
                 <button class="modal-close" onclick="closeBillingModal()">&times;</button>
             </div>
             
             <form id="billingForm">
                 <div class="form-group">
-                    <label class="form-label" for="billPatientSelection">Select Patient *</label>
+                    <label class="form-label" for="billPatientSelection" data-translate="select_patient">Select Patient *</label>
                     <select id="billPatientSelection" class="form-input" required onchange="handleBillPatientSelection()">
                         <option value="">Choose a patient...</option>
                     </select>
@@ -1235,31 +1317,31 @@
                 <input type="hidden" id="billPatientPhoneNumber" name="patientPhone">
                 
                 <div class="form-group">
-                    <label class="form-label" for="billDate">Bill Date</label>
+                    <label class="form-label" for="billDate" data-translate="bill_date">Bill Date</label>
                     <input type="date" id="billDate" class="form-input" required>
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label" for="billDueDate">Due Date</label>
+                    <label class="form-label" for="billDueDate" data-translate="due_date">Due Date</label>
                     <input type="date" id="billDueDate" class="form-input" required>
                 </div>
                 
                 <!-- Bill Items Section -->
                 <div class="form-group">
-                    <label class="form-label">Bill Items</label>
+                    <label class="form-label" data-translate="bill_items">Bill Items</label>
                     <div id="billItems" class="space-y-3">
                         <div class="bill-item border border-gray-200 rounded-lg p-4">
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
-                                    <label class="form-label" for="itemDescription1">Description</label>
+                                    <label class="form-label" for="itemDescription1" data-translate="description">Description</label>
                                     <input type="text" id="itemDescription1" class="form-input" placeholder="e.g., Consultation fee" required>
                                 </div>
                                 <div>
-                                    <label class="form-label" for="itemQuantity1">Quantity</label>
+                                    <label class="form-label" for="itemQuantity1" data-translate="quantity">Quantity</label>
                                     <input type="number" id="itemQuantity1" class="form-input" min="1" value="1" required onchange="calculateBillTotal()" oninput="calculateBillTotal()">
                                 </div>
                                 <div>
-                                    <label class="form-label" for="itemPrice1">Price ($)</label>
+                                    <label class="form-label" for="itemPrice1" data-translate="price">Price ($)</label>
                                     <input type="number" id="itemPrice1" class="form-input" min="0" step="0.01" placeholder="0.00" required onchange="calculateBillTotal()" oninput="calculateBillTotal()">
                                 </div>
                             </div>
@@ -1268,7 +1350,7 @@
                                     <svg class="icon-sm mr-1" viewBox="0 0 24 24">
                                         <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                     </svg>
-                                    Remove Item
+                                    <span data-translate="remove_item">Remove Item</span>
                                 </button>
                             </div>
                         </div>
@@ -1277,7 +1359,7 @@
                         <svg class="icon-sm mr-1" viewBox="0 0 24 24">
                             <path d="M12 4v16m8-8H4"/>
                         </svg>
-                        Add Item
+                        <span data-translate="add_item">Add Item</span>
                     </button>
                 </div>
                 
@@ -1301,16 +1383,59 @@
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label" for="billNotes">Notes</label>
+                    <label class="form-label" for="billNotes" data-translate="notes">Notes</label>
                     <textarea id="billNotes" class="form-input form-textarea" placeholder="Additional notes or payment instructions..."></textarea>
                 </div>
                 
                 <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeBillingModal()">Cancel</button>
-                    <button type="button" class="btn btn-outline" onclick="testPrintFunction()">Test Print</button>
-                    <button type="submit" class="btn btn-primary">Create Bill</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeBillingModal()" data-translate="cancel">Cancel</button>
+                    <button type="button" class="btn btn-outline" onclick="testPrintFunction()" data-translate="test_print">Test Print</button>
+                    <button type="submit" class="btn btn-primary" data-translate="create_bill">Create Bill</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Language Settings Modal -->
+    <div class="modal" id="languageSettingsModal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 class="modal-title" data-translate="language_settings">Language Settings</h2>
+                <button class="modal-close" onclick="closeLanguageSettings()">&times;</button>
+            </div>
+            
+            <div class="p-6">
+                <div class="form-group">
+                    <label class="form-label" data-translate="select_language">Select Language:</label>
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <input type="radio" id="lang-en" name="language" value="en" class="mr-3" onchange="changeLanguage('en')">
+                            <label for="lang-en" class="flex items-center cursor-pointer">
+                                <span class="text-2xl mr-2">🇺🇸</span>
+                                <span>English</span>
+                            </label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="lang-fr" name="language" value="fr" class="mr-3" onchange="changeLanguage('fr')">
+                            <label for="lang-fr" class="flex items-center cursor-pointer">
+                                <span class="text-2xl mr-2">🇫🇷</span>
+                                <span>Français</span>
+                            </label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="lang-ar" name="language" value="ar" class="mr-3" onchange="changeLanguage('ar')">
+                            <label for="lang-ar" class="flex items-center cursor-pointer">
+                                <span class="text-2xl mr-2">🇸🇦</span>
+                                <span>العربية</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeLanguageSettings()" data-translate="close">Close</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1320,8 +1445,8 @@
             <div class="mb-6">
                 <div class="flex items-center justify-between mb-4">
                     <div>
-                        <h1 class="text-3xl font-bold text-gray-900">Secretary Agenda</h1>
-                        <p class="text-gray-600">Manage daily appointments and schedule</p>
+                        <h1 class="text-3xl font-bold text-gray-900" data-translate="secretary_agenda">Secretary Agenda</h1>
+                        <p class="text-gray-600" data-translate="manage_appointments">Manage daily appointments and schedule</p>
                         
                     </div>
                 
@@ -1419,6 +1544,250 @@
         // Patient storage system
         let storedPatients = [];
         
+        // Language system
+        let currentLanguage = localStorage.getItem('selectedLanguage') || 'en';
+        
+        // Translation objects
+        const translations = {
+            en: {
+                // Navigation
+                dashboard: 'Dashboard',
+                add_appointment: 'Add Appointment',
+                patients: 'Patients',
+                billing: 'Billing',
+                reports: 'Reports',
+                settings: 'Settings',
+                
+                // Language Settings
+                language_settings: 'Language Settings',
+                select_language: 'Select Language:',
+                close: 'Close',
+                
+                // Main Header
+                secretary_agenda: 'Secretary Agenda',
+                manage_appointments: 'Manage daily appointments and schedule',
+                
+                // Common buttons
+                cancel: 'Cancel',
+                save: 'Save',
+                edit: 'Edit',
+                delete: 'Delete',
+                add: 'Add',
+                create: 'Create',
+                
+                // User profile
+                secretary: 'Secretary',
+                
+                // Patient fields
+                patient_file_number: 'Patient File Number',
+                file_number: 'File Number',
+                cin_passport: 'CIN or Passeport *',
+                
+                // Modal titles
+                add_new_appointment: 'Add New Appointment',
+                patient_management: 'Patient Management',
+                edit_patient: 'Edit Patient',
+                create_patient_bill: 'Create Patient Bill',
+                
+                // Modal buttons
+                add_new_patient: 'Add New Patient',
+                view_all_patients: 'View All Patients',
+                add_patient: 'Add Patient',
+                update_patient: 'Update Patient',
+                create_bill: 'Create Bill',
+                test_print: 'Test Print',
+                
+                // Form labels
+                select_patient: 'Select Patient *',
+                full_name: 'Full Name *',
+                email_address: 'Email Address',
+                phone_number: 'Phone Number *',
+                
+                // Appointment form
+                appointment_date: 'Appointment Date',
+                appointment_time: 'Appointment Time',
+                appointment_type: 'Appointment Type',
+                doctor_name: 'Doctor Name *',
+                additional_notes: 'Additional Notes',
+                
+                // Patient form
+                date_of_birth: 'Date of Birth *',
+                gender: 'Gender',
+                address: 'Address',
+                medical_history: 'Medical History / Notes',
+                medical_files: 'Medical Files',
+                
+                // Billing form
+                bill_date: 'Bill Date',
+                due_date: 'Due Date',
+                bill_items: 'Bill Items',
+                description: 'Description',
+                quantity: 'Quantity',
+                price: 'Price ($)',
+                notes: 'Notes',
+                remove_item: 'Remove Item',
+                add_item: 'Add Item'
+            },
+            fr: {
+                // Navigation
+                dashboard: 'Tableau de bord',
+                add_appointment: 'Ajouter un rendez-vous',
+                patients: 'Patients',
+                billing: 'Facturation',
+                reports: 'Rapports',
+                settings: 'Paramètres',
+                
+                // Language Settings
+                language_settings: 'Paramètres de langue',
+                select_language: 'Sélectionner la langue:',
+                close: 'Fermer',
+                
+                // Main Header
+                secretary_agenda: 'Agenda de secrétaire',
+                manage_appointments: 'Gérer les rendez-vous quotidiens et les horaires',
+                
+                // Common buttons
+                cancel: 'Annuler',
+                save: 'Enregistrer',
+                edit: 'Modifier',
+                delete: 'Supprimer',
+                add: 'Ajouter',
+                create: 'Créer',
+                
+                // User profile
+                secretary: 'Secrétaire',
+                
+                // Patient fields
+                patient_file_number: 'Numéro de dossier patient',
+                file_number: 'Numéro de dossier',
+                cin_passport: 'CIN ou Passeport *',
+                
+                // Modal titles
+                add_new_appointment: 'Ajouter un nouveau rendez-vous',
+                patient_management: 'Gestion des patients',
+                edit_patient: 'Modifier le patient',
+                create_patient_bill: 'Créer une facture patient',
+                
+                // Modal buttons
+                add_new_patient: 'Ajouter un nouveau patient',
+                view_all_patients: 'Voir tous les patients',
+                add_patient: 'Ajouter un patient',
+                update_patient: 'Mettre à jour le patient',
+                create_bill: 'Créer une facture',
+                test_print: 'Test d\'impression',
+                
+                // Form labels
+                select_patient: 'Sélectionner un patient *',
+                full_name: 'Nom complet *',
+                email_address: 'Adresse e-mail',
+                phone_number: 'Numéro de téléphone *',
+                
+                // Appointment form
+                appointment_date: 'Date du rendez-vous',
+                appointment_time: 'Heure du rendez-vous',
+                appointment_type: 'Type de rendez-vous',
+                doctor_name: 'Nom du médecin *',
+                additional_notes: 'Notes supplémentaires',
+                
+                // Patient form
+                date_of_birth: 'Date de naissance *',
+                gender: 'Genre',
+                address: 'Adresse',
+                medical_history: 'Historique médical / Notes',
+                medical_files: 'Dossiers médicaux',
+                
+                // Billing form
+                bill_date: 'Date de facturation',
+                due_date: 'Date d\'échéance',
+                bill_items: 'Articles de facturation',
+                description: 'Description',
+                quantity: 'Quantité',
+                price: 'Prix ($)',
+                notes: 'Notes',
+                remove_item: 'Supprimer l\'élément',
+                add_item: 'Ajouter un élément'
+            },
+            ar: {
+                // Navigation
+                dashboard: 'لوحة التحكم',
+                add_appointment: 'إضافة موعد',
+                patients: 'المرضى',
+                billing: 'الفوترة',
+                reports: 'التقارير',
+                settings: 'الإعدادات',
+                
+                // Language Settings
+                language_settings: 'إعدادات اللغة',
+                select_language: 'اختر اللغة:',
+                close: 'إغلاق',
+                
+                // Main Header
+                secretary_agenda: 'جدول أعمال السكرتير',
+                manage_appointments: 'إدارة المواعيد اليومية والجدولة',
+                
+                // Common buttons
+                cancel: 'إلغاء',
+                save: 'حفظ',
+                edit: 'تعديل',
+                delete: 'حذف',
+                add: 'إضافة',
+                create: 'إنشاء',
+                
+                // User profile
+                secretary: 'سكرتير',
+                
+                // Patient fields
+                patient_file_number: 'رقم ملف المريض',
+                file_number: 'رقم الملف',
+                cin_passport: 'بطاقة الهوية أو جواز السفر *',
+                
+                // Modal titles
+                add_new_appointment: 'إضافة موعد جديد',
+                patient_management: 'إدارة المرضى',
+                edit_patient: 'تعديل المريض',
+                create_patient_bill: 'إنشاء فاتورة مريض',
+                
+                // Modal buttons
+                add_new_patient: 'إضافة مريض جديد',
+                view_all_patients: 'عرض جميع المرضى',
+                add_patient: 'إضافة مريض',
+                update_patient: 'تحديث المريض',
+                create_bill: 'إنشاء فاتورة',
+                test_print: 'اختبار الطباعة',
+                
+                // Form labels
+                select_patient: 'اختر مريض *',
+                full_name: 'الاسم الكامل *',
+                email_address: 'عنوان البريد الإلكتروني',
+                phone_number: 'رقم الهاتف *',
+                
+                // Appointment form
+                appointment_date: 'تاريخ الموعد',
+                appointment_time: 'وقت الموعد',
+                appointment_type: 'نوع الموعد',
+                doctor_name: 'اسم الطبيب *',
+                additional_notes: 'ملاحظات إضافية',
+                
+                // Patient form
+                date_of_birth: 'تاريخ الميلاد *',
+                gender: 'الجنس',
+                address: 'العنوان',
+                medical_history: 'التاريخ الطبي / ملاحظات',
+                medical_files: 'الملفات الطبية',
+                
+                // Billing form
+                bill_date: 'تاريخ الفاتورة',
+                due_date: 'تاريخ الاستحقاق',
+                bill_items: 'عناصر الفاتورة',
+                description: 'الوصف',
+                quantity: 'الكمية',
+                price: 'السعر ($)',
+                notes: 'ملاحظات',
+                remove_item: 'إزالة العنصر',
+                add_item: 'إضافة عنصر'
+            }
+        };
+        
         // Billing storage system
         let storedBills = [];
         
@@ -1505,6 +1874,15 @@
 
         // Add new appointment to storage
         const addAppointment = (appointmentData) => {
+            console.log('=== ADDING NEW APPOINTMENT ===');
+            console.log('Input appointment data:', appointmentData);
+            console.log('Current selectedDate:', selectedDate);
+            console.log('Selected date formatted:', formatDateForStorage(selectedDate));
+            
+            const formattedDate = formatDateForStorage(appointmentData.appointmentDate);
+            console.log('Appointment date from form:', appointmentData.appointmentDate);
+            console.log('Appointment date formatted for storage:', formattedDate);
+            
             const newAppointment = {
                 id: `appointment-${Date.now()}`,
                 time: appointmentData.appointmentTime,
@@ -1516,15 +1894,15 @@
                 status: 'confirmed',
                 notes: appointmentData.appointmentNotes || '',
                 doctor: appointmentData.doctorName,
-                date: formatDateForStorage(appointmentData.appointmentDate)
+                date: formattedDate
             };
             
-            console.log('Adding appointment:', newAppointment);
-            console.log('Original date from form:', appointmentData.appointmentDate);
-            console.log('Formatted date for storage:', formatDateForStorage(appointmentData.appointmentDate));
+            console.log('New appointment object:', newAppointment);
             storedAppointments.push(newAppointment);
             saveStoredAppointments();
-            console.log('Stored appointments:', storedAppointments);
+            console.log('Total appointments after adding:', storedAppointments.length);
+            console.log('All stored appointments:', storedAppointments);
+            console.log('=== APPOINTMENT ADDED ===');
             return newAppointment;
         };
 
@@ -1532,14 +1910,25 @@
         const getAppointmentsForDate = (date) => {
             const dateStr = formatDateForStorage(date);
             
-            console.log('Getting appointments for date:', dateStr);
-            console.log('Input date object:', date);
-            console.log('All stored appointments:', storedAppointments);
+            console.log('=== GETTING APPOINTMENTS FOR DATE ===');
+            console.log('Requested date object:', date);
+            console.log('Requested date formatted:', dateStr);
+            console.log('Total stored appointments:', storedAppointments.length);
+            
+            // Debug each stored appointment's date
+            storedAppointments.forEach((apt, index) => {
+                console.log(`Appointment ${index + 1}: date="${apt.date}", matches="${apt.date === dateStr}"`);
+            });
             
             // Get stored appointments for this date
-            const storedForDate = storedAppointments.filter(apt => apt.date === dateStr);
+            const storedForDate = storedAppointments.filter(apt => {
+                const matches = apt.date === dateStr;
+                console.log(`Checking appointment ${apt.id}: stored date="${apt.date}" vs requested="${dateStr}" = ${matches}`);
+                return matches;
+            });
             
-            console.log('Stored appointments for this date:', storedForDate);
+            console.log('Filtered appointments for this date:', storedForDate);
+            console.log('=== END GETTING APPOINTMENTS ===');
             
             // Return only stored appointments, sorted by time
             return storedForDate.sort((a, b) => a.time.localeCompare(b.time));
@@ -1713,8 +2102,10 @@
         // Render daily agenda
         const renderDailyAgenda = () => {
             console.log('Rendering daily agenda for date:', selectedDate);
+            console.log('Selected date formatted for storage:', formatDateForStorage(selectedDate));
             const appointments = getAppointmentsForDate(selectedDate);
             console.log('Appointments to render:', appointments);
+            console.log('Total stored appointments:', storedAppointments.length);
             const timeSlots = generateTimeSlots();
             
             const appointmentCount = appointments.length;
@@ -1902,6 +2293,9 @@
             // Populate patient dropdown
             populatePatientDropdown();
             
+            // Update modal translations
+            updateModalTranslations();
+            
             // Reset form and hide patient details
             resetAppointmentForm();
             
@@ -1931,7 +2325,7 @@
             storedPatients.forEach(patient => {
                 const option = document.createElement('option');
                 option.value = patient.id;
-                option.textContent = `${patient.fullName} (${patient.phone})`;
+                option.textContent = `${patient.fullName} (${patient.fileNumber || 'No file#'}) - ${patient.phone}`;
                 patientSelect.appendChild(option);
             });
         }
@@ -1983,6 +2377,11 @@
             document.getElementById('patientName').value = '';
             document.getElementById('patientEmail').value = '';
             document.getElementById('patientPhone').value = '';
+            // Clear doctor name as well
+            const doctorField = document.getElementById('doctorName');
+            if (doctorField) {
+                doctorField.value = '';
+            }
         }
 
         function resetAppointmentForm() {
@@ -1993,7 +2392,52 @@
 
 
 
-        // Edit patient functions
+
+
+        // Medical file functionality restored
+        
+        function viewPatientFiles(patientId) {
+            const patient = storedPatients.find(p => p.id === patientId);
+            if (!patient || !patient.medicalFiles || patient.medicalFiles.length === 0) {
+                alert('No medical files found for this patient.');
+                return;
+            }
+
+            // Create modal for viewing files
+            const modal = document.createElement('div');
+            modal.className = 'modal active';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 600px;">
+                    <div class="modal-header">
+                        <h2 class="modal-title">Medical Files - ${patient.fullName}</h2>
+                        <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+                    </div>
+                    <div class="space-y-4">
+                        ${patient.medicalFiles.map(file => `
+                            <div class="file-item">
+                                <div class="file-info">
+                                    <div class="file-icon ${file.name.split('.').pop().toLowerCase()}">${file.name.split('.').pop().toUpperCase()}</div>
+                                    <div class="file-details">
+                                        <h4>${file.name}</h4>
+                                        <p>Uploaded ${new Date(file.uploadedAt).toLocaleString()}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Close modal when clicking outside
+            modal.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+
         function displayCurrentFiles(files) {
             const currentFilesDiv = document.getElementById('editCurrentFiles');
             
@@ -2008,68 +2452,19 @@
                         <div class="file-icon ${file.name.split('.').pop().toLowerCase()}">${file.name.split('.').pop().toUpperCase()}</div>
                         <div class="file-details">
                             <h4>${file.name}</h4>
-                            <p>${formatFileSize(file.size)} • Uploaded ${new Date(file.uploadedAt).toLocaleString()}</p>
+                            <p>Uploaded ${new Date(file.uploadedAt).toLocaleString()}</p>
                         </div>
                         <span class="current-file-label">Current File</span>
-                    </div>
-                    <div class="file-actions">
-                        <button class="btn-preview" onclick="previewStoredFile('${file.id}', '${file.name}', '${file.data}', '${file.type}')" title="Preview">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                            </svg>
-                        </button>
-                        <button class="btn-download" onclick="downloadStoredFile('${file.id}', '${file.name}', '${file.data}')" title="Download">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                        </button>
-                        <button class="btn-remove-current" onclick="removeCurrentFile('${file.id}')" title="Remove">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
                     </div>
                 </div>
             `).join('');
         }
 
-        function removeCurrentFile(fileId) {
-            if (confirm('Are you sure you want to remove this file from the patient record?')) {
-                // Add to removed files list
-                editModeRemovedFiles.push(fileId);
-                
-                // Remove from display
-                const fileElement = document.querySelector(`[onclick="removeCurrentFile('${fileId}')"]`).closest('.current-file-item');
-                fileElement.remove();
-                
-                // Update display if no files left
-                const currentFilesDiv = document.getElementById('editCurrentFiles');
-                if (currentFilesDiv.children.length === 0) {
-                    currentFilesDiv.innerHTML = '<p class="text-gray-500 text-sm">No medical files attached.</p>';
-                }
-            }
-        }
-
         function handleEditFileUpload(event) {
+            // Basic file upload handler - files will be stored as empty for now
             const files = Array.from(event.target.files);
-            const maxSize = 10 * 1024 * 1024; // 10MB
-            const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/jpg', 'image/png'];
             
             files.forEach(file => {
-                // Validate file size
-                if (file.size > maxSize) {
-                    alert(`File "${file.name}" is too large. Maximum size is 10MB.`);
-                    return;
-                }
-                
-                // Validate file type
-                if (!allowedTypes.includes(file.type)) {
-                    alert(`File "${file.name}" is not a supported format. Please upload PDF, DOC, DOCX, JPG, or PNG files.`);
-                    return;
-                }
-                
-                // Add file to edit mode new files
                 const fileData = {
                     id: `edit-file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                     name: file.name,
@@ -2080,69 +2475,15 @@
                 };
                 
                 editModeNewFiles.push(fileData);
-                displayEditFileItem(fileData);
             });
             
             // Clear the input
             event.target.value = '';
+            alert(`${files.length} file(s) selected for upload.`);
         }
-
-        function displayEditFileItem(fileData) {
-            const fileList = document.getElementById('editFileList');
-            const fileItem = createEditFileItemElement(fileData);
-            fileList.appendChild(fileItem);
-        }
-
-        function createEditFileItemElement(fileData) {
-            const div = document.createElement('div');
-            div.className = 'file-item';
-            div.id = `edit-file-${fileData.id}`;
-            
-            const fileExtension = fileData.name.split('.').pop().toLowerCase();
-            const fileSize = formatFileSize(fileData.size);
-            
-            div.innerHTML = `
-                <div class="file-info">
-                    <div class="file-icon ${fileExtension}">${fileExtension.toUpperCase()}</div>
-                    <div class="file-details">
-                        <h4>${fileData.name}</h4>
-                        <p>${fileSize} • Uploaded ${new Date(fileData.uploadedAt).toLocaleString()}</p>
-                    </div>
-                    <span class="current-file-label">New File</span>
-                </div>
-                <div class="file-actions">
-                    <button class="btn-preview" onclick="previewUploadedFile('${fileData.id}')" title="Preview">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                        </svg>
-                    </button>
-                    <button class="btn-download" onclick="downloadFile('${fileData.id}')" title="Download">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                    </button>
-                    <button class="btn-remove" onclick="removeEditFile('${fileData.id}')" title="Remove">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-            `;
-            
-            return div;
-        }
-
-        function removeEditFile(fileId) {
-            // Remove from edit mode new files array
-            editModeNewFiles = editModeNewFiles.filter(file => file.id !== fileId);
-            
-            // Remove from DOM
-            const fileElement = document.getElementById(`edit-file-${fileId}`);
-            if (fileElement) {
-                fileElement.remove();
-            }
-        }
+        
+        
+        // Patient Management Functions
 
         function closeEditPatientModal() {
             const modal = document.getElementById('editPatientModal');
@@ -2191,10 +2532,17 @@
             }
             
             // Add appointment to storage
+            console.log('About to add appointment with data:', formData);
             const newAppointment = addAppointment(formData);
+            console.log('New appointment created:', newAppointment);
             
             // Show success message
             showAppointmentSuccess(formData);
+            
+            // Force refresh the agenda display
+            console.log('Refreshing agenda after appointment creation...');
+            renderDailyAgenda();
+            renderCalendar();
             
             // Close modal and reset form
             closeAddAppointmentModal();
@@ -2210,8 +2558,7 @@
             
             // Basic validation
             if (!data.patientName || !data.patientPhone || 
-                !data.appointmentDate || !data.appointmentTime || 
-                !data.doctorName || !data.appointmentType) {
+                !data.appointmentDate || !data.appointmentTime ||  !data.appointmentType) {
                 alert('Please fill in all required fields.');
                 return false;
             }
@@ -2376,6 +2723,9 @@
             
             // Load patients list
             loadPatientsList();
+            
+            // Update modal translations
+            updateModalTranslations();
         }
 
         function closePatientManagement() {
@@ -2416,6 +2766,8 @@
             
             // Get form data
             const formData = {
+                fileNumber: document.getElementById('patientFileNumber').value,
+                cinPassport: document.getElementById('patientCinPassport').value,
                 fullName: document.getElementById('patientFullName').value,
                 email: document.getElementById('patientEmailAddress').value,
                 phone: document.getElementById('patientPhoneNumber').value,
@@ -2446,6 +2798,8 @@
             
             // Get form data
             const formData = {
+                fileNumber: document.getElementById('editPatientFileNumber').value,
+                cinPassport: document.getElementById('editPatientCinPassport').value,
                 fullName: document.getElementById('editPatientFullName').value,
                 email: document.getElementById('editPatientEmailAddress').value,
                 phone: document.getElementById('editPatientPhoneNumber').value,
@@ -2466,22 +2820,38 @@
 
         function validatePatientForm(data) {
             // Basic validation
-            if (!data.fullName || !data.email || !data.phone) {
-                alert('Please fill in all required fields (Name, Email, Phone).');
+            if (!data.fileNumber || !data.cinPassport || !data.fullName || !data.phone || !data.dateOfBirth) {
+                alert('Please fill in all required fields (File Number, CIN/Passport, Name, Phone, Date of Birth).');
                 return false;
             }
             
-            // Email validation
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(data.email)) {
-                alert('Please enter a valid email address.');
+            // Email validation (if provided)
+            if (data.email && data.email.trim()) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(data.email)) {
+                    alert('Please enter a valid email address.');
+                    return false;
+                }
+                
+                // Check for duplicate email (only if email is provided)
+                const existingPatient = storedPatients.find(patient => patient.email === data.email);
+                if (existingPatient) {
+                    alert('A patient with this email address already exists.');
+                    return false;
+                }
+            }
+            
+            // Check for duplicate file number
+            const existingFileNumber = storedPatients.find(patient => patient.fileNumber === data.fileNumber);
+            if (existingFileNumber) {
+                alert('A patient with this file number already exists.');
                 return false;
             }
             
-            // Check for duplicate email
-            const existingPatient = storedPatients.find(patient => patient.email === data.email);
-            if (existingPatient) {
-                alert('A patient with this email address already exists.');
+            // Check for duplicate CIN/Passport
+            const existingCinPassport = storedPatients.find(patient => patient.cinPassport === data.cinPassport);
+            if (existingCinPassport) {
+                alert('A patient with this CIN/Passport number already exists.');
                 return false;
             }
             
@@ -2490,22 +2860,38 @@
 
         function validateEditPatientForm(data) {
             // Basic validation
-            if (!data.fullName || !data.email || !data.phone) {
-                alert('Please fill in all required fields (Name, Email, Phone).');
+            if (!data.fileNumber || !data.cinPassport || !data.fullName || !data.phone || !data.dateOfBirth) {
+                alert('Please fill in all required fields (File Number, CIN/Passport, Name, Phone, Date of Birth).');
                 return false;
             }
             
-            // Email validation
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(data.email)) {
-                alert('Please enter a valid email address.');
+            // Email validation (if provided)
+            if (data.email && data.email.trim()) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(data.email)) {
+                    alert('Please enter a valid email address.');
+                    return false;
+                }
+                
+                // Check for duplicate email (excluding current patient and only if email is provided)
+                const existingPatient = storedPatients.find(patient => patient.email === data.email && patient.id !== editingPatient.id);
+                if (existingPatient) {
+                    alert('A patient with this email address already exists.');
+                    return false;
+                }
+            }
+            
+            // Check for duplicate file number (excluding current patient)
+            const existingFileNumber = storedPatients.find(patient => patient.fileNumber === data.fileNumber && patient.id !== editingPatient.id);
+            if (existingFileNumber) {
+                alert('A patient with this file number already exists.');
                 return false;
             }
             
-            // Check for duplicate email (excluding current patient)
-            const existingPatient = storedPatients.find(patient => patient.email === data.email && patient.id !== editingPatient.id);
-            if (existingPatient) {
-                alert('A patient with this email address already exists.');
+            // Check for duplicate CIN/Passport (excluding current patient)
+            const existingCinPassport = storedPatients.find(patient => patient.cinPassport === data.cinPassport && patient.id !== editingPatient.id);
+            if (existingCinPassport) {
+                alert('A patient with this CIN/Passport number already exists.');
                 return false;
             }
             
@@ -2517,6 +2903,8 @@
                 alert('No patient selected for editing.');
                 return;
             }
+
+
 
             // Process new files
             const newFilesPromises = editModeNewFiles.map(fileData => {
@@ -2549,6 +2937,8 @@
                 // Update patient data
                 const updatedPatient = {
                     ...editingPatient,
+                    fileNumber: formData.fileNumber,
+                    cinPassport: formData.cinPassport,
                     fullName: formData.fullName,
                     email: formData.email,
                     phone: formData.phone,
@@ -2623,6 +3013,8 @@
         function addPatient(patientData) {
             const newPatient = {
                 id: `patient-${Date.now()}`,
+                fileNumber: patientData.fileNumber,
+                cinPassport: patientData.cinPassport,
                 fullName: patientData.fullName,
                 email: patientData.email,
                 phone: patientData.phone,
@@ -2722,7 +3114,9 @@
                 <div class="patient-info">
                     <div class="patient-details">
                         <h3>${patient.fullName}</h3>
-                        <p><strong>Email:</strong> ${patient.email}</p>
+                        <p><strong>File Number:</strong> ${patient.fileNumber || 'N/A'}</p>
+                        <p><strong>CIN/Passport:</strong> ${patient.cinPassport || 'N/A'}</p>
+                        <p><strong>Email:</strong> ${patient.email || 'N/A'}</p>
                         <p><strong>Phone:</strong> ${patient.phone}</p>
                         <p><strong>Age:</strong> ${age} ${patient.gender ? `• ${patient.gender}` : ''}</p>
                         ${patient.address ? `<p><strong>Address:</strong> ${patient.address}</p>` : ''}
@@ -2766,18 +3160,118 @@
         }
 
         function searchPatients() {
-            const searchTerm = document.getElementById('patientSearch').value.toLowerCase();
+            const searchTerm = document.getElementById('patientSearch').value.toLowerCase().trim();
             const patientsList = document.getElementById('patientsList');
-            const cards = patientsList.querySelectorAll('.patient-card');
+            const searchResults = document.getElementById('searchResults');
+            const clearButton = document.getElementById('clearSearch');
             
-            cards.forEach(card => {
-                const text = card.textContent.toLowerCase();
-                if (text.includes(searchTerm)) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
+            // Show/hide clear button based on search input
+            if (searchTerm) {
+                clearButton.style.display = 'block';
+            } else {
+                clearButton.style.display = 'none';
+            }
+            
+            // If search term is empty, show all patients and hide search results
+            if (!searchTerm) {
+                loadPatientsList();
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            // Filter patients based on search criteria
+            const filteredPatients = storedPatients.filter(patient => {
+                // Search in full name
+                if (patient.fullName && patient.fullName.toLowerCase().includes(searchTerm)) {
+                    return true;
                 }
+                
+                // Search in CIN/Passport
+                if (patient.cinPassport && patient.cinPassport.toLowerCase().includes(searchTerm)) {
+                    return true;
+                }
+                
+                // Search in file number
+                if (patient.fileNumber && patient.fileNumber.toLowerCase().includes(searchTerm)) {
+                    return true;
+                }
+                
+                // Search in email
+                if (patient.email && patient.email.toLowerCase().includes(searchTerm)) {
+                    return true;
+                }
+                
+                // Search in phone
+                if (patient.phone && patient.phone.toLowerCase().includes(searchTerm)) {
+                    return true;
+                }
+                
+                // Search in date of birth (format: YYYY-MM-DD)
+                if (patient.dateOfBirth && patient.dateOfBirth.includes(searchTerm)) {
+                    return true;
+                }
+                
+                // Search in formatted date of birth (DD/MM/YYYY or MM/DD/YYYY)
+                if (patient.dateOfBirth) {
+                    const formattedDate = new Date(patient.dateOfBirth).toLocaleDateString();
+                    if (formattedDate.toLowerCase().includes(searchTerm)) {
+                        return true;
+                    }
+                    
+                    // Also search in year, month, day separately
+                    const dateObj = new Date(patient.dateOfBirth);
+                    const year = dateObj.getFullYear().toString();
+                    const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+                    const day = dateObj.getDate().toString().padStart(2, '0');
+                    
+                    if (year.includes(searchTerm) || month.includes(searchTerm) || day.includes(searchTerm)) {
+                        return true;
+                    }
+                }
+                
+                return false;
             });
+            
+            // Clear and display filtered results
+            patientsList.innerHTML = '';
+            
+            // Show search results count
+            searchResults.style.display = 'block';
+            if (filteredPatients.length === 0) {
+                searchResults.innerHTML = `No patients found matching "${searchTerm}"`;
+                patientsList.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <p>No patients found matching "${searchTerm}"</p>
+                        <p class="text-sm mt-2">Try searching by name, CIN/Passport, file number, email, phone, or date of birth</p>
+                    </div>
+                `;
+            } else {
+                const resultText = filteredPatients.length === 1 ? 
+                    `Found 1 patient matching "${searchTerm}"` : 
+                    `Found ${filteredPatients.length} patients matching "${searchTerm}"`;
+                searchResults.innerHTML = resultText;
+                
+                filteredPatients.forEach(patient => {
+                    const card = createPatientCard(patient);
+                    patientsList.appendChild(card);
+                });
+            }
+        }
+
+        function clearPatientSearch() {
+            const searchInput = document.getElementById('patientSearch');
+            const searchResults = document.getElementById('searchResults');
+            const clearButton = document.getElementById('clearSearch');
+            
+            // Clear the search input
+            searchInput.value = '';
+            
+            // Hide search results and clear button
+            searchResults.style.display = 'none';
+            clearButton.style.display = 'none';
+            
+            // Reload all patients
+            loadPatientsList();
         }
 
         function editPatient(patientId) {
@@ -2796,6 +3290,8 @@
             
             // Populate form with patient data
             document.getElementById('editPatientId').value = patient.id;
+            document.getElementById('editPatientFileNumber').value = patient.fileNumber || '';
+            document.getElementById('editPatientCinPassport').value = patient.cinPassport || '';
             document.getElementById('editPatientFullName').value = patient.fullName;
             document.getElementById('editPatientEmailAddress').value = patient.email;
             document.getElementById('editPatientPhoneNumber').value = patient.phone;
@@ -2813,6 +3309,9 @@
             // Show modal
             const modal = document.getElementById('editPatientModal');
             modal.classList.add('active');
+            
+            // Update modal translations
+            updateModalTranslations();
         }
 
         function deletePatient(patientId) {
@@ -3011,6 +3510,9 @@
             // Load patients for billing
             loadPatientsForBilling();
             
+            // Update modal translations
+            updateModalTranslations();
+            
             // Set default dates
             const today = new Date();
             const dueDate = new Date(today);
@@ -3029,6 +3531,110 @@
         function closeBillingModal() {
             const modal = document.getElementById('billingModal');
             modal.classList.remove('active');
+        }
+
+        // Language Settings Functions
+        function showLanguageSettings() {
+            const modal = document.getElementById('languageSettingsModal');
+            modal.classList.add('active');
+            modal.style.opacity = '1'; // Reset opacity
+            
+            // Set current language as selected
+            const currentLangRadio = document.getElementById(`lang-${currentLanguage}`);
+            if (currentLangRadio) {
+                currentLangRadio.checked = true;
+            }
+            
+            // Update modal translations immediately
+            updateModalTranslations();
+            
+            // Close mobile menu if open
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.add('hidden');
+        }
+
+        function updateModalTranslations() {
+            // Update translations for all modal elements
+            const modalElements = document.querySelectorAll('.modal [data-translate]');
+            modalElements.forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (translations[currentLanguage] && translations[currentLanguage][key]) {
+                    element.textContent = translations[currentLanguage][key];
+                }
+            });
+        }
+
+        function closeLanguageSettings() {
+            const modal = document.getElementById('languageSettingsModal');
+            modal.classList.remove('active');
+        }
+
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('selectedLanguage', lang);
+            
+            // Update HTML lang attribute
+            document.documentElement.lang = lang;
+            
+            // Update text direction for Arabic
+            if (lang === 'ar') {
+                document.documentElement.dir = 'rtl';
+                document.body.style.fontFamily = 'Arial, sans-serif';
+            } else {
+                document.documentElement.dir = 'ltr';
+                document.body.style.fontFamily = '';
+            }
+            
+            // Add visual feedback for language change
+            const modal = document.getElementById('languageSettingsModal');
+            modal.style.opacity = '0.7';
+            
+            // Update all translatable elements immediately
+            updateTranslations();
+            
+            // Also update modal translations specifically
+            updateModalTranslations();
+            
+            // Restore modal opacity and close after showing the change
+            setTimeout(() => {
+                modal.style.opacity = '1';
+                setTimeout(() => {
+                    closeLanguageSettings();
+                }, 300);
+            }, 400);
+        }
+
+        function updateTranslations() {
+            const elements = document.querySelectorAll('[data-translate]');
+            
+            elements.forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (translations[currentLanguage] && translations[currentLanguage][key]) {
+                    element.textContent = translations[currentLanguage][key];
+                }
+            });
+        }
+
+        // Initialize language on page load
+        function initializeLanguage() {
+            const savedLang = localStorage.getItem('selectedLanguage') || 'en';
+            currentLanguage = savedLang;
+            if (savedLang !== 'en') {
+                changeLanguage(savedLang);
+            } else {
+                updateTranslations();
+            }
+        }
+
+        // Test function for language modal (for debugging)
+        function testLanguageModal() {
+            console.log('Current language:', currentLanguage);
+            console.log('Available translations:', Object.keys(translations));
+            console.log('Modal elements with data-translate:');
+            const modalElements = document.querySelectorAll('#languageSettingsModal [data-translate]');
+            modalElements.forEach(el => {
+                console.log(`- ${el.getAttribute('data-translate')}: "${el.textContent}"`);
+            });
         }
 
         function loadPatientsForBilling() {
@@ -3078,15 +3684,15 @@
             newItem.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label class="form-label" for="itemDescription${itemCount}">Description</label>
+                        <label class="form-label" for="itemDescription${itemCount}" data-translate="description">Description</label>
                         <input type="text" id="itemDescription${itemCount}" class="form-input" placeholder="e.g., Consultation fee" required>
                     </div>
                     <div>
-                        <label class="form-label" for="itemQuantity${itemCount}">Quantity</label>
+                        <label class="form-label" for="itemQuantity${itemCount}" data-translate="quantity">Quantity</label>
                         <input type="number" id="itemQuantity${itemCount}" class="form-input" min="1" value="1" required onchange="calculateBillTotal()" oninput="calculateBillTotal()">
                     </div>
                     <div>
-                        <label class="form-label" for="itemPrice${itemCount}">Price ($)</label>
+                        <label class="form-label" for="itemPrice${itemCount}" data-translate="price">Price ($)</label>
                         <input type="number" id="itemPrice${itemCount}" class="form-input" min="0" step="0.01" placeholder="0.00" required onchange="calculateBillTotal()" oninput="calculateBillTotal()">
                     </div>
                 </div>
@@ -3095,12 +3701,16 @@
                         <svg class="icon-sm mr-1" viewBox="0 0 24 24">
                             <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                         </svg>
-                        Remove Item
+                        <span data-translate="remove_item">Remove Item</span>
                     </button>
                 </div>
             `;
             
             billItems.appendChild(newItem);
+            
+            // Update translations for the new item
+            updateModalTranslations();
+            
             calculateBillTotal();
         }
 
@@ -3746,6 +4356,7 @@
             loadStoredBills();
             renderCalendar();
             renderDailyAgenda();
+            initializeLanguage();
         });
     </script>
 </body>
