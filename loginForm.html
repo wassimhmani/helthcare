@@ -87,6 +87,122 @@
             font-size: 1.5rem;
         }
 
+        /* Footer styles */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+            padding: 1rem 0;
+            border-top: 1px solid #d4af37;
+            z-index: 1000;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .footer-logo-emblem {
+            width: 32px;
+            height: 32px;
+            flex-shrink: 0;
+        }
+
+        .footer-logo-text {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .footer-logo-company {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #d4af37;
+            margin: 0;
+            letter-spacing: 0.5px;
+            line-height: 1;
+        }
+
+        .footer-logo-tagline {
+            font-size: 0.6rem;
+            color: #d4af37;
+            margin: 0;
+            letter-spacing: 0.3px;
+            opacity: 0.8;
+            line-height: 1;
+        }
+
+        .footer-separator {
+            width: 1px;
+            height: 30px;
+            background-color: #d4af37;
+            opacity: 0.5;
+        }
+
+        .footer-copyright {
+            font-size: 0.7rem;
+            color: #d4af37;
+            opacity: 0.7;
+        }
+
+        /* Adjust body padding for footer */
+        body {
+            padding-bottom: 80px;
+        }
+
+        /* Mobile responsive footer */
+        @media (max-width: 768px) {
+            .footer-content {
+                flex-direction: column;
+                gap: 0.5rem;
+                text-align: center;
+            }
+            
+            .footer-separator {
+                display: none;
+            }
+            
+            .footer-logo {
+                gap: 0.5rem;
+            }
+            
+            .footer-logo-emblem {
+                width: 28px;
+                height: 28px;
+            }
+            
+            .footer-logo-company {
+                font-size: 0.9rem;
+            }
+            
+            .footer-logo-tagline {
+                font-size: 0.55rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .footer-logo-text {
+                display: none;
+            }
+            
+            .footer-logo {
+                gap: 0;
+            }
+        }
+
         .header {
             margin-bottom: 2rem;
         }
@@ -591,5 +707,27 @@
             alert('📞 Technical Support: 1-800-MED-HELP\n💬 Available 24/7 for healthcare professionals');
         });
     </script>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">
+                <svg class="footer-logo-emblem" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Sailboat and waves -->
+                    <path d="M16 5 L13 13 L19 13 Z" fill="#d4af37" stroke="#b8941f" stroke-width="0.3"/>
+                    <path d="M16 5 L14 13 L18 13 Z" fill="#f4d03f" opacity="0.8"/>
+                    <path d="M10 16 Q13 14 16 16 Q19 14 22 16 Q19 18 16 16 Q13 18 10 16 Z" fill="#d4af37" stroke="#b8941f" stroke-width="0.3"/>
+                    <path d="M8 19 Q13 17 16 19 Q19 17 24 19 Q19 21 16 19 Q13 21 8 19 Z" fill="#d4af37" stroke="#b8941f" stroke-width="0.3"/>
+                    <path d="M6 22 Q13 20 16 22 Q19 20 26 22 Q19 24 16 22 Q13 24 6 22 Z" fill="#d4af37" stroke="#b8941f" stroke-width="0.3"/>
+                </svg>
+                <div class="footer-logo-text">
+                    <div class="footer-logo-company">CERCINATECK</div>
+                    <div class="footer-logo-tagline">VOTRE PARTENAIRE POUR UNE GESTION OPTIMALE</div>
+                </div>
+            </div>
+            <div class="footer-separator"></div>
+            <div class="footer-copyright">© 2024 CERCINATECK. Tous droits réservés.</div>
+        </div>
+    </footer>
 </body>
 </html>
