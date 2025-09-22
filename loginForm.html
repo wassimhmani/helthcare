@@ -424,10 +424,15 @@
         const submitButton = document.getElementById('submitButton');
         const buttonText = document.getElementById('buttonText');
         const loadingSpinner = document.getElementById('loadingSpinner');
-        const roleOptions = document.querySelectorAll('.role-option');
-
+                const roleOptions = document.querySelectorAll('.role-option');
+        
+        const mockUsers = [
+            { role: 'doctor', employeeId: 'DOC2001', password: 'doctor1234', name: 'Dr. John Smith' },
+            { role: 'secretary', employeeId: 'SEC1001', password: 'secretary123', name: 'Alice Johnson' }
+        ];
+        
         let selectedRole = '';
-
+        
         // Role selection
         roleOptions.forEach(option => {
             option.addEventListener('click', () => {
@@ -523,21 +528,26 @@
             loadingSpinner.style.display = 'block';
 
             try {
-                // Simulate secure authentication
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                
-                const formData = {
-                    role: selectedRole,
-                    employeeId: employeeIdInput.value,
-                    password: passwordInput.value,
-                    rememberMe: document.getElementById('rememberMe').checked
-                };
-                
-                console.log('Secure medical login attempt:', formData);
-                
-                // Here you would typically make a secure API call
-                alert(`✅ Welcome to MedConnect Portal!\nRole: ${selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)}\nSecure session established.`);
-                window.location.href=host+'agenda.html';
+                // Simulate network delay
+                await new Promise(resolve => setTimeout(resolve, 800));
+
+                const employeeId = employeeIdInput.value.trim();
+                const password = passwordInput.value;
+
+                const user = mockUsers.find(u => u.role === selectedRole && u.employeeId === employeeId && u.password === password);
+
+                if (!user) {
+                    alert('❌ Invalid credentials. Please check your role, employee ID, or password.');
+                    return;
+                }
+
+                // Store simple session
+                const session = { role: user.role, employeeId: user.employeeId, name: user.name, loggedInAt: Date.now() };
+                try { localStorage.setItem('medconnect_session', JSON.stringify(session)); } catch {}
+
+                // Redirect
+                alert(`✅ Welcome ${user.name}!\nRole: ${user.role.charAt(0).toUpperCase() + user.role.slice(1)}`);
+                window.location.href = host + 'agenda.html';
             } catch (error) {
                 console.error('Login failed:', error);
                 alert('❌ Login failed. Please verify your credentials and try again.');
