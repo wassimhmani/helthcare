@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -424,24 +425,24 @@
                 gap: 0.5rem;
                 text-align: center;
             }
-            
+
             .footer-separator {
                 display: none;
             }
-            
+
             .footer-logo {
                 gap: 0.5rem;
             }
-            
+
             .footer-logo-emblem {
                 width: 24px;
                 height: 24px;
             }
-            
+
             .footer-logo-company {
                 font-size: 0.8rem;
             }
-            
+
             .footer-logo-tagline {
                 font-size: 0.5rem;
             }
@@ -451,7 +452,7 @@
             .footer-logo-text {
                 display: none;
             }
-            
+
             .footer-logo {
                 gap: 0;
             }
@@ -710,7 +711,7 @@
             gap: 1rem;
         }
 
-        .space-y-4 > * + * {
+        .space-y-4>*+* {
             margin-top: 1rem;
         }
 
@@ -934,7 +935,7 @@
                 padding: 1rem;
                 box-shadow: none;
             }
-            
+
             .no-print {
                 display: none !important;
             }
@@ -1077,6 +1078,7 @@
         /* Edit Patient Modal Styles */
     </style>
 </head>
+
 <body class="min-h-screen bg-gray-50">
     <!-- Horizontal Navigation Menu -->
     <nav class="nav-menu">
@@ -1088,11 +1090,14 @@
                 <!-- Desktop Menu -->
                 <div class="nav-links">
                     <a href="#" class="nav-link active" data-translate="dashboard">Dashboard</a>
-                    <a href="#" class="nav-link" onclick="showAddAppointmentModal()" data-translate="add_appointment">Add Appointment</a>
-                    <a href="#" class="nav-link" onclick="showPatientManagement()" data-translate="patients">Patients</a>
+                    <a href="#" class="nav-link" onclick="showAddAppointmentModal()"
+                        data-translate="add_appointment">Add Appointment</a>
+                    <a href="#" class="nav-link" onclick="showPatientManagement()"
+                        data-translate="patients">Patients</a>
                     <a href="#" class="nav-link" onclick="showBillingModal()" data-translate="billing">Billing</a>
                     <a href="#" class="nav-link" data-translate="reports">Reports</a>
-                    <a href="#" id="consultationsLink" class="nav-link" style="display:none" onclick="showConsultationModal()">Consultations</a>
+                    <a href="#" id="consultationsLink" class="nav-link" style="display:none"
+                        onclick="showConsultationModal()">Consultations</a>
                     <a href="#" class="nav-link" onclick="showLanguageSettings()" data-translate="settings">Settings</a>
                 </div>
 
@@ -1105,7 +1110,8 @@
                     </div>
                     <button class="logout-btn" onclick="logout()" title="Logout">
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
                     </button>
                 </div>
@@ -1113,7 +1119,8 @@
                 <!-- Mobile menu button -->
                 <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
                     <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                 </button>
             </div>
@@ -1123,15 +1130,21 @@
         <div class="mobile-menu" id="mobile-menu">
             <div class="mobile-nav-links">
                 <a href="#" class="mobile-nav-link active" data-translate="dashboard">Dashboard</a>
-                <a href="#" class="mobile-nav-link" onclick="showAddAppointmentModal()" data-translate="add_appointment">Add Appointment</a>
-                <a href="#" class="mobile-nav-link" onclick="showPatientManagement()" data-translate="patients">Patients</a>
+                <a href="#" class="mobile-nav-link" onclick="showAddAppointmentModal()"
+                    data-translate="add_appointment">Add Appointment</a>
+                <a href="#" class="mobile-nav-link" onclick="showPatientManagement()"
+                    data-translate="patients">Patients</a>
                 <a href="#" class="mobile-nav-link" onclick="showBillingModal()" data-translate="billing">Billing</a>
                 <a href="#" class="mobile-nav-link" data-translate="reports">Reports</a>
-                <a href="#" id="consultationsLinkMobile" class="mobile-nav-link" style="display:none" onclick="showConsultationModal()">Consultations</a>
-                <a href="#" class="mobile-nav-link" onclick="showLanguageSettings()" data-translate="settings">Settings</a>
+                <a href="#" id="consultationsLinkMobile" class="mobile-nav-link" style="display:none"
+                    onclick="showConsultationModal()">Consultations</a>
+                <a href="#" class="mobile-nav-link" onclick="showLanguageSettings()"
+                    data-translate="settings">Settings</a>
                 <a href="#" class="mobile-nav-link logout-mobile" onclick="logout()">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right: 8px;">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        style="margin-right: 8px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
                     Logout
                 </a>
@@ -1146,23 +1159,24 @@
                 <h2 class="modal-title" data-translate="add_new_appointment">Add New Appointment</h2>
                 <button class="modal-close" onclick="closeAddAppointmentModal()">&times;</button>
             </div>
-            
+
             <form id="appointmentForm">
                 <div class="form-group">
-                    <label class="form-label" for="patientSelection" data-translate="select_patient">Select Patient *</label>
+                    <label class="form-label" for="patientSelection" data-translate="select_patient">Select Patient
+                        *</label>
                     <select id="patientSelection" class="form-input" required onchange="handlePatientSelection()">
                         <option value="">Choose a patient...</option>
                     </select>
                     <div class="mt-2">
                         <button type="button" class="btn btn-outline btn-sm" onclick="showPatientManagement()">
                             <svg class="icon-sm mr-1" viewBox="0 0 24 24">
-                                <path d="M12 4v16m8-8H4"/>
+                                <path d="M12 4v16m8-8H4" />
                             </svg>
                             Add New Patient
                         </button>
+                    </div>
                 </div>
-                </div>
-                
+
                 <!-- Patient Details Display (Read-only) -->
                 <div id="selectedPatientDetails" class="hidden">
                     <div class="card p-4 mb-4">
@@ -1175,19 +1189,21 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Hidden inputs for patient data -->
                 <input type="hidden" id="patientName" name="patientName">
                 <input type="hidden" id="patientEmail" name="patientEmail">
                 <input type="hidden" id="patientPhone" name="patientPhone">
-                
+
                 <div class="form-group">
-                    <label class="form-label" for="appointmentDate" data-translate="appointment_date">Appointment Date</label>
+                    <label class="form-label" for="appointmentDate" data-translate="appointment_date">Appointment
+                        Date</label>
                     <input type="date" id="appointmentDate" class="form-input" required>
                 </div>
-                
+
                 <div class="form-group">
-                    <label class="form-label" for="appointmentTime" data-translate="appointment_time">Appointment Time</label>
+                    <label class="form-label" for="appointmentTime" data-translate="appointment_time">Appointment
+                        Time</label>
                     <select id="appointmentTime" class="form-input" required>
                         <option value="">Select time</option>
                         <option value="09:00">9:00 AM</option>
@@ -1210,10 +1226,11 @@
                         <option value="17:30">5:30 PM</option>
                     </select>
                 </div>
-                
-                
+
+
                 <div class="form-group">
-                    <label class="form-label" for="appointmentType" data-translate="appointment_type">Appointment Type</label>
+                    <label class="form-label" for="appointmentType" data-translate="appointment_type">Appointment
+                        Type</label>
                     <select id="appointmentType" class="form-input" required>
                         <option value="">Select type</option>
                         <option value="Consultation">General Consultation</option>
@@ -1222,20 +1239,25 @@
                         <option value="Emergency">Emergency Visit</option>
                     </select>
                 </div>
-                
+
                 <!--<div class="form-group">
                     <label class="form-label" for="doctorName" data-translate="doctor_name">Doctor Name *</label>
                     <input type="hidden" id="doctorName" class="form-input"  value="" placeholder="Enter doctor's name" required>
                 </div>-->
-                <input type="hidden" id="doctorName" class="form-input"  value="doctor" placeholder="Enter doctor's name">
+                <input type="hidden" id="doctorName" class="form-input" value="doctor"
+                    placeholder="Enter doctor's name">
                 <div class="form-group">
-                    <label class="form-label" for="appointmentNotes" data-translate="additional_notes">Additional Notes</label>
-                    <textarea id="appointmentNotes" class="form-input form-textarea" placeholder="Any specific concerns or symptoms..."></textarea>
+                    <label class="form-label" for="appointmentNotes" data-translate="additional_notes">Additional
+                        Notes</label>
+                    <textarea id="appointmentNotes" class="form-input form-textarea"
+                        placeholder="Any specific concerns or symptoms..."></textarea>
                 </div>
-                
+
                 <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeAddAppointmentModal()" data-translate="cancel">Cancel</button>
-                    <button type="submit" class="btn btn-primary" data-translate="add_appointment">Add Appointment</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeAddAppointmentModal()"
+                        data-translate="cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary" data-translate="add_appointment">Add
+                        Appointment</button>
                 </div>
             </form>
         </div>
@@ -1253,17 +1275,42 @@
                     <label class="form-label" for="consultPatient">Select Patient *</label>
                     <select id="consultPatient" class="form-input" required></select>
                 </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label class="form-label" for="consultHeight">Height (cm)</label>
+                        <input type="number" id="consultHeight" class="form-input" placeholder="e.g., 175" min="50"
+                            max="250" step="0.1" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="consultWeight">Weight (kg)</label>
+                        <input type="number" id="consultWeight" class="form-input" placeholder="e.g., 70.5" min="10"
+                            max="300" step="0.1" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">IMC (BMI)</label>
+                    <div class="form-input bg-gray-50 flex items-center gap-2">
+                        <span id="consultIMCValue">—</span>
+                        <span id="consultBMICategory" class="text-sm text-gray-500">&nbsp;</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="consultTemperature">Temperature (°C)</label>
+                    <input type="number" id="consultTemperature" class="form-input" placeholder="e.g., 37.0" min="30" max="45" step="0.1" />
+                </div>
                 <div class="form-group">
                     <label class="form-label" for="consultDiagnosis">Diagnosis *</label>
                     <input id="consultDiagnosis" class="form-input" placeholder="Enter diagnosis" required />
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="consultNotes">Clinical Notes *</label>
-                    <textarea id="consultNotes" class="form-input form-textarea" placeholder="Enter notes" required></textarea>
+                    <textarea id="consultNotes" class="form-input form-textarea" placeholder="Enter notes"
+                        required></textarea>
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="consultPrescription">Prescription</label>
-                    <textarea id="consultPrescription" class="form-input form-textarea" placeholder="Drugs, dosage, duration"></textarea>
+                    <textarea id="consultPrescription" class="form-input form-textarea"
+                        placeholder="Drugs, dosage, duration"></textarea>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeConsultationModal()">Cancel</button>
@@ -1280,46 +1327,59 @@
                 <h2 class="modal-title" data-translate="patient_management">Patient Management</h2>
                 <button class="modal-close" onclick="closePatientManagement()">&times;</button>
             </div>
-            
+
             <div class="flex gap-4 mb-6">
-                <button id="addPatientTab" class="btn btn-primary" onclick="switchPatientTab('add')" data-translate="add_new_patient">Add New Patient</button>
-                <button id="viewPatientsTab" class="btn btn-secondary" onclick="switchPatientTab('view')" data-translate="view_all_patients">View All Patients</button>
+                <button id="addPatientTab" class="btn btn-primary" onclick="switchPatientTab('add')"
+                    data-translate="add_new_patient">Add New Patient</button>
+                <button id="viewPatientsTab" class="btn btn-secondary" onclick="switchPatientTab('view')"
+                    data-translate="view_all_patients">View All Patients</button>
             </div>
-            
+
             <!-- Add Patient Form -->
             <div id="addPatientContent" class="patient-tab-content">
                 <form id="patientForm">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="form-group">
-                            <label class="form-label" for="patientFileNumber" data-translate="patient_file_number">Patient File Number *</label>
-                            <input type="text" id="patientFileNumber" class="form-input" placeholder="Enter patient file number (e.g., P-2024-001)" required>
+                            <label class="form-label" for="patientFileNumber"
+                                data-translate="patient_file_number">Patient File Number *</label>
+                            <input type="text" id="patientFileNumber" class="form-input"
+                                placeholder="Enter patient file number (e.g., P-2024-001)" required>
                         </div>
-                        
+
                         <div class="form-group">
-                            <label class="form-label" for="patientCinPassport" data-translate="cin_passport">CIN or Passeport *</label>
-                            <input type="text" id="patientCinPassport" class="form-input" placeholder="Enter CIN or Passport number" required>
+                            <label class="form-label" for="patientCinPassport" data-translate="cin_passport">CIN or
+                                Passeport *</label>
+                            <input type="text" id="patientCinPassport" class="form-input"
+                                placeholder="Enter CIN or Passport number" required>
                         </div>
-                        
+
                         <div class="form-group">
-                            <label class="form-label" for="patientFullName" data-translate="full_name">Full Name *</label>
-                            <input type="text" id="patientFullName" class="form-input" placeholder="Enter patient's full name" required>
+                            <label class="form-label" for="patientFullName" data-translate="full_name">Full Name
+                                *</label>
+                            <input type="text" id="patientFullName" class="form-input"
+                                placeholder="Enter patient's full name" required>
                         </div>
-                        
+
                         <div class="form-group">
-                            <label class="form-label" for="patientEmailAddress" data-translate="email_address">Email Address</label>
-                            <input type="email" id="patientEmailAddress" class="form-input" placeholder="patient@example.com">
+                            <label class="form-label" for="patientEmailAddress" data-translate="email_address">Email
+                                Address</label>
+                            <input type="email" id="patientEmailAddress" class="form-input"
+                                placeholder="patient@example.com">
                         </div>
-                        
+
                         <div class="form-group">
-                            <label class="form-label" for="patientPhoneNumber" data-translate="phone_number">Phone Number *</label>
-                            <input type="tel" id="patientPhoneNumber" class="form-input" placeholder="+1 (555) 123-4567" required>
+                            <label class="form-label" for="patientPhoneNumber" data-translate="phone_number">Phone
+                                Number *</label>
+                            <input type="tel" id="patientPhoneNumber" class="form-input" placeholder="+1 (555) 123-4567"
+                                required>
                         </div>
-                        
+
                         <div class="form-group">
-                            <label class="form-label" for="patientDateOfBirth" data-translate="date_of_birth">Date of Birth *</label>
+                            <label class="form-label" for="patientDateOfBirth" data-translate="date_of_birth">Date of
+                                Birth *</label>
                             <input type="date" id="patientDateOfBirth" class="form-input" required>
                         </div>
-                        
+
                         <div class="form-group">
                             <label class="form-label" for="patientGender" data-translate="gender">Gender</label>
                             <select id="patientGender" class="form-input">
@@ -1328,40 +1388,49 @@
                                 <option value="Female">Female</option>
                             </select>
                         </div>
-                        
+
                         <div class="form-group">
                             <label class="form-label" for="patientAddress" data-translate="address">Address</label>
-                            <input type="text" id="patientAddress" class="form-input" placeholder="Street address, City, State">
+                            <input type="text" id="patientAddress" class="form-input"
+                                placeholder="Street address, City, State">
                         </div>
                     </div>
-                    
+
                     <div class="form-group">
-                        <label class="form-label" for="patientMedicalHistory" data-translate="medical_history">Medical History / Notes</label>
-                        <textarea id="patientMedicalHistory" class="form-input form-textarea" placeholder="Any relevant medical history, allergies, or notes..."></textarea>
+                        <label class="form-label" for="patientMedicalHistory" data-translate="medical_history">Medical
+                            History / Notes</label>
+                        <textarea id="patientMedicalHistory" class="form-input form-textarea"
+                            placeholder="Any relevant medical history, allergies, or notes..."></textarea>
                     </div>
-                    
-                    
+
+
                     <div class="modal-actions">
-                        <button type="button" class="btn btn-secondary" onclick="closePatientManagement()" data-translate="cancel">Cancel</button>
+                        <button type="button" class="btn btn-secondary" onclick="closePatientManagement()"
+                            data-translate="cancel">Cancel</button>
                         <button type="submit" class="btn btn-primary" data-translate="add_patient">Add Patient</button>
                     </div>
                 </form>
             </div>
-            
+
             <!-- View Patients Content -->
             <div id="viewPatientsContent" class="patient-tab-content" style="display: none;">
                 <div class="mb-4">
                     <div class="relative">
-                        <input type="text" id="patientSearch" class="form-input pr-10" placeholder="Search patients by name, CIN/Passport, file number, email, phone, or date of birth..." onkeyup="searchPatients()">
-                        <button type="button" id="clearSearch" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600" onclick="clearPatientSearch()" style="display: none;">
+                        <input type="text" id="patientSearch" class="form-input pr-10"
+                            placeholder="Search patients by name, CIN/Passport, file number, email, phone, or date of birth..."
+                            onkeyup="searchPatients()">
+                        <button type="button" id="clearSearch"
+                            class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            onclick="clearPatientSearch()" style="display: none;">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
                         </button>
                     </div>
                     <div id="searchResults" class="text-sm text-gray-600 mt-2" style="display: none;"></div>
                 </div>
-                
+
                 <div id="patientsList" class="space-y-4">
                     <!-- Patients will be loaded here -->
                 </div>
@@ -1377,41 +1446,52 @@
                 <h2 class="modal-title" data-translate="edit_patient">Edit Patient</h2>
                 <button class="modal-close" onclick="closeEditPatientModal()">&times;</button>
             </div>
-            
+
             <form id="editPatientForm">
                 <input type="hidden" id="editPatientId" name="patientId">
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="form-group">
-                        <label class="form-label" for="editPatientFileNumber" data-translate="patient_file_number">Patient File Number *</label>
-                        <input type="text" id="editPatientFileNumber" class="form-input" placeholder="Enter patient file number (e.g., P-2024-001)" required>
+                        <label class="form-label" for="editPatientFileNumber"
+                            data-translate="patient_file_number">Patient File Number *</label>
+                        <input type="text" id="editPatientFileNumber" class="form-input"
+                            placeholder="Enter patient file number (e.g., P-2024-001)" required>
                     </div>
-                    
+
                     <div class="form-group">
-                        <label class="form-label" for="editPatientCinPassport" data-translate="cin_passport">CIN or Passeport *</label>
-                        <input type="text" id="editPatientCinPassport" class="form-input" placeholder="Enter CIN or Passport number" required>
+                        <label class="form-label" for="editPatientCinPassport" data-translate="cin_passport">CIN or
+                            Passeport *</label>
+                        <input type="text" id="editPatientCinPassport" class="form-input"
+                            placeholder="Enter CIN or Passport number" required>
                     </div>
-                    
+
                     <div class="form-group">
-                        <label class="form-label" for="editPatientFullName" data-translate="full_name">Full Name *</label>
-                        <input type="text" id="editPatientFullName" class="form-input" placeholder="Enter patient's full name" required>
+                        <label class="form-label" for="editPatientFullName" data-translate="full_name">Full Name
+                            *</label>
+                        <input type="text" id="editPatientFullName" class="form-input"
+                            placeholder="Enter patient's full name" required>
                     </div>
-                    
+
                     <div class="form-group">
-                        <label class="form-label" for="editPatientEmailAddress" data-translate="email_address">Email Address</label>
-                        <input type="email" id="editPatientEmailAddress" class="form-input" placeholder="patient@example.com">
+                        <label class="form-label" for="editPatientEmailAddress" data-translate="email_address">Email
+                            Address</label>
+                        <input type="email" id="editPatientEmailAddress" class="form-input"
+                            placeholder="patient@example.com">
                     </div>
-                    
+
                     <div class="form-group">
-                        <label class="form-label" for="editPatientPhoneNumber" data-translate="phone_number">Phone Number *</label>
-                        <input type="tel" id="editPatientPhoneNumber" class="form-input" placeholder="+1 (555) 123-4567" required>
+                        <label class="form-label" for="editPatientPhoneNumber" data-translate="phone_number">Phone
+                            Number *</label>
+                        <input type="tel" id="editPatientPhoneNumber" class="form-input" placeholder="+1 (555) 123-4567"
+                            required>
                     </div>
-                    
+
                     <div class="form-group">
-                        <label class="form-label" for="editPatientDateOfBirth" data-translate="date_of_birth">Date of Birth *</label>
+                        <label class="form-label" for="editPatientDateOfBirth" data-translate="date_of_birth">Date of
+                            Birth *</label>
                         <input type="date" id="editPatientDateOfBirth" class="form-input" required>
                     </div>
-                    
+
                     <div class="form-group">
                         <label class="form-label" for="editPatientGender" data-translate="gender">Gender</label>
                         <select id="editPatientGender" class="form-input">
@@ -1420,31 +1500,37 @@
                             <option value="Female">Female</option>
                         </select>
                     </div>
-                    
+
                     <div class="form-group">
                         <label class="form-label" for="editPatientAddress" data-translate="address">Address</label>
-                        <input type="text" id="editPatientAddress" class="form-input" placeholder="Street address, City, State">
+                        <input type="text" id="editPatientAddress" class="form-input"
+                            placeholder="Street address, City, State">
                     </div>
                 </div>
-                
+
                 <div class="form-group">
-                    <label class="form-label" for="editPatientMedicalHistory" data-translate="medical_history">Medical History / Notes</label>
-                    <textarea id="editPatientMedicalHistory" class="form-input form-textarea" placeholder="Any relevant medical history, allergies, or notes..."></textarea>
+                    <label class="form-label" for="editPatientMedicalHistory" data-translate="medical_history">Medical
+                        History / Notes</label>
+                    <textarea id="editPatientMedicalHistory" class="form-input form-textarea"
+                        placeholder="Any relevant medical history, allergies, or notes..."></textarea>
                 </div>
-                
+
                 <!-- Medical Files Management Section -->
                 <div class="form-group">
                     <label class="form-label" data-translate="medical_files">Medical Files</label>
-                    
+
                     <!-- Current Files Display -->
                     <div id="editCurrentFiles" class="mb-4">
                         <!-- Current files will be displayed here -->
                     </div>
-                    
+
                     <!-- Add New Files -->
                     <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none"
+                            viewBox="0 0 48 48">
+                            <path
+                                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                         <div class="mt-4">
                             <label for="editMedicalFiles" class="cursor-pointer">
@@ -1455,19 +1541,30 @@
                                     PDF, DOC, DOCX, JPG, PNG up to 10MB each
                                 </span>
                             </label>
-                            <input id="editMedicalFiles" name="editMedicalFiles" type="file" class="sr-only" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onchange="handleEditFileUpload(event)">
+                            <input id="editMedicalFiles" name="editMedicalFiles" type="file" class="sr-only" multiple
+                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onchange="handleEditFileUpload(event)">
                         </div>
                     </div>
-                    
+
                     <!-- New Files List Display -->
                     <div id="editFileList" class="mt-4 space-y-2">
                         <!-- New uploaded files will be displayed here -->
                     </div>
                 </div>
-                
+
+                <!-- Vitals History Section -->
+                <div class="form-group">
+                    <label class="form-label">Vitals History</label>
+                    <div id="editVitalsHistory" class="card p-3">
+                        <div class="text-sm text-gray-500">No vitals recorded yet.</div>
+                    </div>
+                </div>
+
                 <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeEditPatientModal()" data-translate="cancel">Cancel</button>
-                    <button type="submit" class="btn btn-primary" data-translate="update_patient">Update Patient</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditPatientModal()"
+                        data-translate="cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary" data-translate="update_patient">Update
+                        Patient</button>
                 </div>
             </form>
         </div>
@@ -1480,15 +1577,17 @@
                 <h2 class="modal-title" data-translate="create_patient_bill">Create Patient Bill</h2>
                 <button class="modal-close" onclick="closeBillingModal()">&times;</button>
             </div>
-            
+
             <form id="billingForm">
                 <div class="form-group">
-                    <label class="form-label" for="billPatientSelection" data-translate="select_patient">Select Patient *</label>
-                    <select id="billPatientSelection" class="form-input" required onchange="handleBillPatientSelection()">
+                    <label class="form-label" for="billPatientSelection" data-translate="select_patient">Select Patient
+                        *</label>
+                    <select id="billPatientSelection" class="form-input" required
+                        onchange="handleBillPatientSelection()">
                         <option value="">Choose a patient...</option>
                     </select>
                 </div>
-                
+
                 <!-- Patient Details Display (Read-only) -->
                 <div id="billPatientDetails" class="hidden">
                     <div class="card p-4 mb-4">
@@ -1501,23 +1600,23 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Hidden inputs for patient data -->
                 <input type="hidden" id="billPatientId" name="patientId">
                 <input type="hidden" id="billPatientFullName" name="patientName">
                 <input type="hidden" id="billPatientEmailAddress" name="patientEmail">
                 <input type="hidden" id="billPatientPhoneNumber" name="patientPhone">
-                
+
                 <div class="form-group">
                     <label class="form-label" for="billDate" data-translate="bill_date">Bill Date</label>
                     <input type="date" id="billDate" class="form-input" required>
                 </div>
-                
+
                 <div class="form-group">
                     <label class="form-label" for="billDueDate" data-translate="due_date">Due Date</label>
                     <input type="date" id="billDueDate" class="form-input" required>
                 </div>
-                
+
                 <!-- Bill Items Section -->
                 <div class="form-group">
                     <label class="form-label" data-translate="bill_items">Bill Items</label>
@@ -1525,22 +1624,29 @@
                         <div class="bill-item border border-gray-200 rounded-lg p-4">
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
-                                    <label class="form-label" for="itemDescription1" data-translate="description">Description</label>
-                                    <input type="text" id="itemDescription1" class="form-input" placeholder="e.g., Consultation fee" required>
+                                    <label class="form-label" for="itemDescription1"
+                                        data-translate="description">Description</label>
+                                    <input type="text" id="itemDescription1" class="form-input"
+                                        placeholder="e.g., Consultation fee" required>
                                 </div>
                                 <div>
-                                    <label class="form-label" for="itemQuantity1" data-translate="quantity">Quantity</label>
-                                    <input type="number" id="itemQuantity1" class="form-input" min="1" value="1" required onchange="calculateBillTotal()" oninput="calculateBillTotal()">
+                                    <label class="form-label" for="itemQuantity1"
+                                        data-translate="quantity">Quantity</label>
+                                    <input type="number" id="itemQuantity1" class="form-input" min="1" value="1"
+                                        required onchange="calculateBillTotal()" oninput="calculateBillTotal()">
                                 </div>
                                 <div>
                                     <label class="form-label" for="itemPrice1" data-translate="price">Price ($)</label>
-                                    <input type="number" id="itemPrice1" class="form-input" min="0" step="0.01" placeholder="0.00" required onchange="calculateBillTotal()" oninput="calculateBillTotal()">
+                                    <input type="number" id="itemPrice1" class="form-input" min="0" step="0.01"
+                                        placeholder="0.00" required onchange="calculateBillTotal()"
+                                        oninput="calculateBillTotal()">
                                 </div>
                             </div>
                             <div class="mt-2 flex justify-end">
                                 <button type="button" class="btn btn-outline btn-sm" onclick="removeBillItem(this)">
                                     <svg class="icon-sm mr-1" viewBox="0 0 24 24">
-                                        <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        <path
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
                                     <span data-translate="remove_item">Remove Item</span>
                                 </button>
@@ -1549,12 +1655,12 @@
                     </div>
                     <button type="button" class="btn btn-outline btn-sm mt-3" onclick="addBillItem()">
                         <svg class="icon-sm mr-1" viewBox="0 0 24 24">
-                            <path d="M12 4v16m8-8H4"/>
+                            <path d="M12 4v16m8-8H4" />
                         </svg>
                         <span data-translate="add_item">Add Item</span>
                     </button>
                 </div>
-                
+
                 <!-- Bill Summary -->
                 <div class="card p-4 mb-4">
                     <h4 class="font-semibold mb-2">Bill Summary</h4>
@@ -1573,15 +1679,18 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="form-group">
                     <label class="form-label" for="billNotes" data-translate="notes">Notes</label>
-                    <textarea id="billNotes" class="form-input form-textarea" placeholder="Additional notes or payment instructions..."></textarea>
+                    <textarea id="billNotes" class="form-input form-textarea"
+                        placeholder="Additional notes or payment instructions..."></textarea>
                 </div>
-                
+
                 <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeBillingModal()" data-translate="cancel">Cancel</button>
-                    <button type="button" class="btn btn-outline" onclick="testPrintFunction()" data-translate="test_print">Test Print</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeBillingModal()"
+                        data-translate="cancel">Cancel</button>
+                    <button type="button" class="btn btn-outline" onclick="testPrintFunction()"
+                        data-translate="test_print">Test Print</button>
                     <button type="submit" class="btn btn-primary" data-translate="create_bill">Create Bill</button>
                 </div>
             </form>
@@ -1595,27 +1704,30 @@
                 <h2 class="modal-title" data-translate="language_settings">Language Settings</h2>
                 <button class="modal-close" onclick="closeLanguageSettings()">&times;</button>
             </div>
-            
+
             <div class="p-6">
                 <div class="form-group">
                     <label class="form-label" data-translate="select_language">Select Language:</label>
                     <div class="space-y-3">
                         <div class="flex items-center">
-                            <input type="radio" id="lang-en" name="language" value="en" class="mr-3" onchange="changeLanguage('en')">
+                            <input type="radio" id="lang-en" name="language" value="en" class="mr-3"
+                                onchange="changeLanguage('en')">
                             <label for="lang-en" class="flex items-center cursor-pointer">
                                 <span class="text-2xl mr-2">🇺🇸</span>
                                 <span>English</span>
                             </label>
                         </div>
                         <div class="flex items-center">
-                            <input type="radio" id="lang-fr" name="language" value="fr" class="mr-3" onchange="changeLanguage('fr')">
+                            <input type="radio" id="lang-fr" name="language" value="fr" class="mr-3"
+                                onchange="changeLanguage('fr')">
                             <label for="lang-fr" class="flex items-center cursor-pointer">
                                 <span class="text-2xl mr-2">🇫🇷</span>
                                 <span>Français</span>
                             </label>
                         </div>
                         <div class="flex items-center">
-                            <input type="radio" id="lang-ar" name="language" value="ar" class="mr-3" onchange="changeLanguage('ar')">
+                            <input type="radio" id="lang-ar" name="language" value="ar" class="mr-3"
+                                onchange="changeLanguage('ar')">
                             <label for="lang-ar" class="flex items-center cursor-pointer">
                                 <span class="text-2xl mr-2">🇸🇦</span>
                                 <span>العربية</span>
@@ -1623,9 +1735,10 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeLanguageSettings()" data-translate="close">Close</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeLanguageSettings()"
+                        data-translate="close">Close</button>
                 </div>
             </div>
         </div>
@@ -1637,15 +1750,17 @@
             <div class="mb-6">
                 <div class="flex items-center justify-between mb-4">
                     <div>
-                        <h1 class="text-3xl font-bold text-gray-900" data-translate="secretary_agenda">Secretary Agenda</h1>
-                        <p class="text-gray-600" data-translate="manage_appointments">Manage daily appointments and schedule</p>
-                        
+                        <h1 class="text-3xl font-bold text-gray-900" data-translate="secretary_agenda">Secretary Agenda
+                        </h1>
+                        <p class="text-gray-600" data-translate="manage_appointments">Manage daily appointments and
+                            schedule</p>
+
                     </div>
-                
+
                     <div class="flex items-center gap-2">
                         <button class="btn btn-outline" onclick="goToPreviousDay()">
                             <svg class="icon mr-2" viewBox="0 0 24 24">
-                                <path d="m15 18-6-6 6-6"/>
+                                <path d="m15 18-6-6 6-6" />
                             </svg>
                             Previous
                         </button>
@@ -1655,7 +1770,7 @@
                         <button class="btn btn-outline" onclick="goToNextDay()">
                             Next
                             <svg class="icon ml-2" viewBox="0 0 24 24">
-                                <path d="m9 18 6-6-6-6"/>
+                                <path d="m9 18 6-6-6-6" />
                             </svg>
                         </button>
                     </div>
@@ -1668,10 +1783,10 @@
                     <div class="card p-4">
                         <div class="flex items-center gap-2 mb-4">
                             <svg class="icon-lg" viewBox="0 0 24 24">
-                                <path d="M8 2v4"/>
-                                <path d="M16 2v4"/>
-                                <rect width="18" height="18" x="3" y="4" rx="2"/>
-                                <path d="M3 10h18"/>
+                                <path d="M8 2v4" />
+                                <path d="M16 2v4" />
+                                <rect width="18" height="18" x="3" y="4" rx="2" />
+                                <path d="M3 10h18" />
                             </svg>
                             <h3 class="text-lg font-semibold">Calendar</h3>
                         </div>
@@ -1679,13 +1794,13 @@
                             <div class="calendar-header">
                                 <button class="btn btn-outline p-1" onclick="previousMonth()">
                                     <svg class="icon" viewBox="0 0 24 24">
-                                        <path d="m15 18-6-6 6-6"/>
+                                        <path d="m15 18-6-6 6-6" />
                                     </svg>
                                 </button>
                                 <h4 id="currentMonthYear" class="font-medium"></h4>
                                 <button class="btn btn-outline p-1" onclick="nextMonth()">
                                     <svg class="icon" viewBox="0 0 24 24">
-                                        <path d="m9 18 6-6-6-6"/>
+                                        <path d="m9 18 6-6-6-6" />
                                     </svg>
                                 </button>
                             </div>
@@ -1729,16 +1844,16 @@
         // Global state
         let selectedDate = new Date();
         let currentCalendarDate = new Date();
-        
+
         // Appointment storage system
         let storedAppointments = [];
-        
+
         // Patient storage system
         let storedPatients = [];
-        
+
         // Language system
         let currentLanguage = localStorage.getItem('selectedLanguage') || 'en';
-        
+
         // Translation objects
         const translations = {
             en: {
@@ -1749,16 +1864,16 @@
                 billing: 'Billing',
                 reports: 'Reports',
                 settings: 'Settings',
-                
+
                 // Language Settings
                 language_settings: 'Language Settings',
                 select_language: 'Select Language:',
                 close: 'Close',
-                
+
                 // Main Header
                 secretary_agenda: 'Secretary Agenda',
                 manage_appointments: 'Manage daily appointments and schedule',
-                
+
                 // Common buttons
                 cancel: 'Cancel',
                 save: 'Save',
@@ -1766,21 +1881,21 @@
                 delete: 'Delete',
                 add: 'Add',
                 create: 'Create',
-                
+
                 // User profile
                 secretary: 'Secretary',
-                
+
                 // Patient fields
                 patient_file_number: 'Patient File Number',
                 file_number: 'File Number',
                 cin_passport: 'CIN or Passeport *',
-                
+
                 // Modal titles
                 add_new_appointment: 'Add New Appointment',
                 patient_management: 'Patient Management',
                 edit_patient: 'Edit Patient',
                 create_patient_bill: 'Create Patient Bill',
-                
+
                 // Modal buttons
                 add_new_patient: 'Add New Patient',
                 view_all_patients: 'View All Patients',
@@ -1788,27 +1903,27 @@
                 update_patient: 'Update Patient',
                 create_bill: 'Create Bill',
                 test_print: 'Test Print',
-                
+
                 // Form labels
                 select_patient: 'Select Patient *',
                 full_name: 'Full Name *',
                 email_address: 'Email Address',
                 phone_number: 'Phone Number *',
-                
+
                 // Appointment form
                 appointment_date: 'Appointment Date',
                 appointment_time: 'Appointment Time',
                 appointment_type: 'Appointment Type',
                 doctor_name: 'Doctor Name *',
                 additional_notes: 'Additional Notes',
-                
+
                 // Patient form
                 date_of_birth: 'Date of Birth *',
                 gender: 'Gender',
                 address: 'Address',
                 medical_history: 'Medical History / Notes',
                 medical_files: 'Medical Files',
-                
+
                 // Billing form
                 bill_date: 'Bill Date',
                 due_date: 'Due Date',
@@ -1828,16 +1943,16 @@
                 billing: 'Facturation',
                 reports: 'Rapports',
                 settings: 'Paramètres',
-                
+
                 // Language Settings
                 language_settings: 'Paramètres de langue',
                 select_language: 'Sélectionner la langue:',
                 close: 'Fermer',
-                
+
                 // Main Header
                 secretary_agenda: 'Agenda de secrétaire',
                 manage_appointments: 'Gérer les rendez-vous quotidiens et les horaires',
-                
+
                 // Common buttons
                 cancel: 'Annuler',
                 save: 'Enregistrer',
@@ -1845,21 +1960,21 @@
                 delete: 'Supprimer',
                 add: 'Ajouter',
                 create: 'Créer',
-                
+
                 // User profile
                 secretary: 'Secrétaire',
-                
+
                 // Patient fields
                 patient_file_number: 'Numéro de dossier patient',
                 file_number: 'Numéro de dossier',
                 cin_passport: 'CIN ou Passeport *',
-                
+
                 // Modal titles
                 add_new_appointment: 'Ajouter un nouveau rendez-vous',
                 patient_management: 'Gestion des patients',
                 edit_patient: 'Modifier le patient',
                 create_patient_bill: 'Créer une facture patient',
-                
+
                 // Modal buttons
                 add_new_patient: 'Ajouter un nouveau patient',
                 view_all_patients: 'Voir tous les patients',
@@ -1867,27 +1982,27 @@
                 update_patient: 'Mettre à jour le patient',
                 create_bill: 'Créer une facture',
                 test_print: 'Test d\'impression',
-                
+
                 // Form labels
                 select_patient: 'Sélectionner un patient *',
                 full_name: 'Nom complet *',
                 email_address: 'Adresse e-mail',
                 phone_number: 'Numéro de téléphone *',
-                
+
                 // Appointment form
                 appointment_date: 'Date du rendez-vous',
                 appointment_time: 'Heure du rendez-vous',
                 appointment_type: 'Type de rendez-vous',
                 doctor_name: 'Nom du médecin *',
                 additional_notes: 'Notes supplémentaires',
-                
+
                 // Patient form
                 date_of_birth: 'Date de naissance *',
                 gender: 'Genre',
                 address: 'Adresse',
                 medical_history: 'Historique médical / Notes',
                 medical_files: 'Dossiers médicaux',
-                
+
                 // Billing form
                 bill_date: 'Date de facturation',
                 due_date: 'Date d\'échéance',
@@ -1907,16 +2022,16 @@
                 billing: 'الفوترة',
                 reports: 'التقارير',
                 settings: 'الإعدادات',
-                
+
                 // Language Settings
                 language_settings: 'إعدادات اللغة',
                 select_language: 'اختر اللغة:',
                 close: 'إغلاق',
-                
+
                 // Main Header
                 secretary_agenda: 'جدول أعمال السكرتير',
                 manage_appointments: 'إدارة المواعيد اليومية والجدولة',
-                
+
                 // Common buttons
                 cancel: 'إلغاء',
                 save: 'حفظ',
@@ -1924,21 +2039,21 @@
                 delete: 'حذف',
                 add: 'إضافة',
                 create: 'إنشاء',
-                
+
                 // User profile
                 secretary: 'سكرتير',
-                
+
                 // Patient fields
                 patient_file_number: 'رقم ملف المريض',
                 file_number: 'رقم الملف',
                 cin_passport: 'بطاقة الهوية أو جواز السفر *',
-                
+
                 // Modal titles
                 add_new_appointment: 'إضافة موعد جديد',
                 patient_management: 'إدارة المرضى',
                 edit_patient: 'تعديل المريض',
                 create_patient_bill: 'إنشاء فاتورة مريض',
-                
+
                 // Modal buttons
                 add_new_patient: 'إضافة مريض جديد',
                 view_all_patients: 'عرض جميع المرضى',
@@ -1946,27 +2061,27 @@
                 update_patient: 'تحديث المريض',
                 create_bill: 'إنشاء فاتورة',
                 test_print: 'اختبار الطباعة',
-                
+
                 // Form labels
                 select_patient: 'اختر مريض *',
                 full_name: 'الاسم الكامل *',
                 email_address: 'عنوان البريد الإلكتروني',
                 phone_number: 'رقم الهاتف *',
-                
+
                 // Appointment form
                 appointment_date: 'تاريخ الموعد',
                 appointment_time: 'وقت الموعد',
                 appointment_type: 'نوع الموعد',
                 doctor_name: 'اسم الطبيب *',
                 additional_notes: 'ملاحظات إضافية',
-                
+
                 // Patient form
                 date_of_birth: 'تاريخ الميلاد *',
                 gender: 'الجنس',
                 address: 'العنوان',
                 medical_history: 'التاريخ الطبي / ملاحظات',
                 medical_files: 'الملفات الطبية',
-                
+
                 // Billing form
                 bill_date: 'تاريخ الفاتورة',
                 due_date: 'تاريخ الاستحقاق',
@@ -1979,17 +2094,17 @@
                 add_item: 'إضافة عنصر'
             }
         };
-        
+
         // Billing storage system
         let storedBills = [];
-        
+
         // File storage system
-        
+
         // Edit mode variables
         let editingPatient = null;
         let editModeNewFiles = [];
         let editModeRemovedFiles = [];
-        
+
 
         // Helper function to format date consistently
         const formatDateForStorage = (date) => {
@@ -2070,11 +2185,11 @@
             console.log('Input appointment data:', appointmentData);
             console.log('Current selectedDate:', selectedDate);
             console.log('Selected date formatted:', formatDateForStorage(selectedDate));
-            
+
             const formattedDate = formatDateForStorage(appointmentData.appointmentDate);
             console.log('Appointment date from form:', appointmentData.appointmentDate);
             console.log('Appointment date formatted for storage:', formattedDate);
-            
+
             const newAppointment = {
                 id: `appointment-${Date.now()}`,
                 time: appointmentData.appointmentTime,
@@ -2088,7 +2203,7 @@
                 doctor: appointmentData.doctorName,
                 date: formattedDate
             };
-            
+
             console.log('New appointment object:', newAppointment);
             storedAppointments.push(newAppointment);
             saveStoredAppointments();
@@ -2101,27 +2216,27 @@
         // Get appointments for a specific date
         const getAppointmentsForDate = (date) => {
             const dateStr = formatDateForStorage(date);
-            
+
             console.log('=== GETTING APPOINTMENTS FOR DATE ===');
             console.log('Requested date object:', date);
             console.log('Requested date formatted:', dateStr);
             console.log('Total stored appointments:', storedAppointments.length);
-            
+
             // Debug each stored appointment's date
             storedAppointments.forEach((apt, index) => {
                 console.log(`Appointment ${index + 1}: date="${apt.date}", matches="${apt.date === dateStr}"`);
             });
-            
+
             // Get stored appointments for this date
             const storedForDate = storedAppointments.filter(apt => {
                 const matches = apt.date === dateStr;
                 console.log(`Checking appointment ${apt.id}: stored date="${apt.date}" vs requested="${dateStr}" = ${matches}`);
                 return matches;
             });
-            
+
             console.log('Filtered appointments for this date:', storedForDate);
             console.log('=== END GETTING APPOINTMENTS ===');
-            
+
             // Return only stored appointments, sorted by time
             return storedForDate.sort((a, b) => a.time.localeCompare(b.time));
         };
@@ -2159,7 +2274,7 @@
         // Get status action buttons for appointment cards
         const getStatusActions = (appointment) => {
             const actions = [];
-            
+
             switch (appointment.status) {
                 case 'confirmed':
                     actions.push(`
@@ -2181,7 +2296,7 @@
                         </button>
                     `);
                     break;
-                    
+
                 case 'completed':
                     actions.push(`
                         <span class="text-sm text-green-600 font-medium">
@@ -2192,7 +2307,7 @@
                         </span>
                     `);
                     break;
-                    
+
                 case 'cancelled':
                     actions.push(`
                         <span class="text-sm text-red-600 font-medium">
@@ -2204,7 +2319,7 @@
                     `);
                     break;
             }
-            
+
             return actions.join('');
         };
 
@@ -2221,7 +2336,7 @@
         // Create appointment card HTML
         const createAppointmentCard = (appointment) => {
             const statusActions = getStatusActions(appointment);
-            
+
             return `
                 <div class="card appointment-card p-4">
                     <div class="flex items-start justify-between mb-2">
@@ -2299,7 +2414,7 @@
             console.log('Appointments to render:', appointments);
             console.log('Total stored appointments:', storedAppointments.length);
             const timeSlots = generateTimeSlots();
-            
+
             const appointmentCount = appointments.length;
             const confirmedCount = appointments.filter(apt => apt.status === 'confirmed').length;
             const completedCount = appointments.filter(apt => apt.status === 'completed').length;
@@ -2345,10 +2460,10 @@
                 // Show appointments in time slots
                 agendaHTML += '<div class="space-y-2">';
 
-            timeSlots.forEach(timeSlot => {
-                const slotAppointments = appointments.filter(apt => apt.time === timeSlot);
-                
-                agendaHTML += `
+                timeSlots.forEach(timeSlot => {
+                    const slotAppointments = appointments.filter(apt => apt.time === timeSlot);
+
+                    agendaHTML += `
                     <div class="time-slot">
                         <div class="time-label">
                             <svg class="icon-sm" viewBox="0 0 24 24">
@@ -2360,16 +2475,16 @@
                         <div class="slot-content">
                 `;
 
-                if (slotAppointments.length > 0) {
-                    slotAppointments.forEach(appointment => {
-                        agendaHTML += createAppointmentCard(appointment);
-                    });
-                } else {
-                    agendaHTML += '<div class="available-slot">Available</div>';
-                }
+                    if (slotAppointments.length > 0) {
+                        slotAppointments.forEach(appointment => {
+                            agendaHTML += createAppointmentCard(appointment);
+                        });
+                    } else {
+                        agendaHTML += '<div class="available-slot">Available</div>';
+                    }
 
-                agendaHTML += '</div></div>';
-            });
+                    agendaHTML += '</div></div>';
+                });
 
                 agendaHTML += '</div>';
             }
@@ -2377,7 +2492,7 @@
             agendaHTML += '</div>';
 
             document.getElementById('dailyAgenda').innerHTML = agendaHTML;
-            
+
             // Update stats
             document.getElementById('totalAppointments').textContent = appointmentCount;
             document.getElementById('confirmedAppointments').textContent = confirmedCount;
@@ -2388,8 +2503,8 @@
         const renderCalendar = () => {
             const year = currentCalendarDate.getFullYear();
             const month = currentCalendarDate.getMonth();
-            
-            document.getElementById('currentMonthYear').textContent = 
+
+            document.getElementById('currentMonthYear').textContent =
                 currentCalendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
             const firstDay = new Date(year, month, 1);
@@ -2413,25 +2528,25 @@
             for (let i = 0; i < 42; i++) {
                 const date = new Date(startDate);
                 date.setDate(startDate.getDate() + i);
-                
+
                 const dayElement = document.createElement('div');
                 dayElement.className = 'calendar-day';
                 dayElement.textContent = date.getDate();
-                
+
                 if (date.getMonth() !== month) {
                     dayElement.className += ' text-gray-300';
                 }
-                
+
                 if (date.toDateString() === selectedDate.toDateString()) {
                     dayElement.className += ' selected';
                 }
-                
+
                 dayElement.onclick = () => {
                     selectedDate = new Date(date);
                     renderCalendar();
                     renderDailyAgenda();
                 };
-                
+
                 calendarGrid.appendChild(dayElement);
             }
         };
@@ -2476,21 +2591,21 @@
         function showAddAppointmentModal() {
             const modal = document.getElementById('addAppointmentModal');
             modal.classList.add('active');
-            
+
             // Set minimum date to today
             const dateInput = document.getElementById('appointmentDate');
             const today = new Date().toISOString().split('T')[0];
             dateInput.min = today;
-            
+
             // Populate patient dropdown
             populatePatientDropdown();
-            
+
             // Update modal translations
             updateModalTranslations();
-            
+
             // Reset form and hide patient details
             resetAppointmentForm();
-            
+
             // Close mobile menu if open
             const mobileMenu = document.getElementById('mobile-menu');
             mobileMenu.classList.add('hidden');
@@ -2499,7 +2614,7 @@
         function closeAddAppointmentModal() {
             const modal = document.getElementById('addAppointmentModal');
             modal.classList.remove('active');
-            
+
             // Reset form
             resetAppointmentForm();
         }
@@ -2508,12 +2623,12 @@
         function populatePatientDropdown() {
             const patientSelect = document.getElementById('patientSelection');
             patientSelect.innerHTML = '<option value="">Choose a patient...</option>';
-            
+
             if (storedPatients.length === 0) {
                 patientSelect.innerHTML = '<option value="">No patients available. Add a patient first.</option>';
                 return;
             }
-            
+
             storedPatients.forEach(patient => {
                 const option = document.createElement('option');
                 option.value = patient.id;
@@ -2526,24 +2641,24 @@
             const patientSelect = document.getElementById('patientSelection');
             const selectedPatientId = patientSelect.value;
             const patientDetailsDiv = document.getElementById('selectedPatientDetails');
-            
+
             if (!selectedPatientId) {
                 // No patient selected
                 patientDetailsDiv.classList.add('hidden');
                 clearPatientData();
                 return;
             }
-            
+
             // Find the selected patient
             const selectedPatient = storedPatients.find(patient => patient.id === selectedPatientId);
-            
+
             if (selectedPatient) {
                 // Display patient details
                 displayPatientDetails(selectedPatient);
-                
+
                 // Populate hidden inputs
                 populatePatientData(selectedPatient);
-                
+
                 // Show patient details section
                 patientDetailsDiv.classList.remove('hidden');
             }
@@ -2553,7 +2668,7 @@
             document.getElementById('displayPatientName').textContent = patient.fullName;
             document.getElementById('displayPatientEmail').textContent = patient.email;
             document.getElementById('displayPatientPhone').textContent = patient.phone;
-            
+
             // Calculate and display age
             const age = patient.dateOfBirth ? calculateAge(patient.dateOfBirth) : 'N/A';
             document.getElementById('displayPatientAge').textContent = age;
@@ -2587,7 +2702,7 @@
 
 
         // Medical file functionality restored
-        
+
         function viewPatientFiles(patientId) {
             const patient = storedPatients.find(p => p.id === patientId);
             if (!patient || !patient.medicalFiles || patient.medicalFiles.length === 0) {
@@ -2619,11 +2734,11 @@
                     </div>
                 </div>
             `;
-            
+
             document.body.appendChild(modal);
-            
+
             // Close modal when clicking outside
-            modal.addEventListener('click', function(event) {
+            modal.addEventListener('click', function (event) {
                 if (event.target === modal) {
                     modal.remove();
                 }
@@ -2632,12 +2747,12 @@
 
         function displayCurrentFiles(files) {
             const currentFilesDiv = document.getElementById('editCurrentFiles');
-            
+
             if (!files || files.length === 0) {
                 currentFilesDiv.innerHTML = '<p class="text-gray-500 text-sm">No medical files attached.</p>';
                 return;
             }
-            
+
             currentFilesDiv.innerHTML = files.map(file => `
                 <div class="current-file-item">
                     <div class="current-file-info">
@@ -2655,7 +2770,7 @@
         function handleEditFileUpload(event) {
             // Basic file upload handler - files will be stored as empty for now
             const files = Array.from(event.target.files);
-            
+
             files.forEach(file => {
                 const fileData = {
                     id: `edit-file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -2665,37 +2780,37 @@
                     file: file,
                     uploadedAt: new Date().toISOString()
                 };
-                
+
                 editModeNewFiles.push(fileData);
             });
-            
+
             // Clear the input
             event.target.value = '';
             alert(`${files.length} file(s) selected for upload.`);
         }
-        
-        
+
+
         // Patient Management Functions
 
         function closeEditPatientModal() {
             const modal = document.getElementById('editPatientModal');
             modal.classList.remove('active');
-            
+
             // Reset form
             document.getElementById('editPatientForm').reset();
-            
+
             // Clear edit mode variables
             editingPatient = null;
             editModeNewFiles = [];
             editModeRemovedFiles = [];
-            
+
             // Clear file displays
             document.getElementById('editCurrentFiles').innerHTML = '';
             document.getElementById('editFileList').innerHTML = '';
         }
 
         // Close modal when clicking outside
-        document.addEventListener('click', function(event) {
+        document.addEventListener('click', function (event) {
             const modal = document.getElementById('addAppointmentModal');
             if (event.target === modal) {
                 closeAddAppointmentModal();
@@ -2703,9 +2818,9 @@
         });
 
         // Handle form submission
-        document.getElementById('appointmentForm').addEventListener('submit', function(event) {
+        document.getElementById('appointmentForm').addEventListener('submit', function (event) {
             event.preventDefault();
-            
+
             // Get form data
             const formData = {
                 patientName: document.getElementById('patientName').value,
@@ -2717,25 +2832,25 @@
                 appointmentType: document.getElementById('appointmentType').value,
                 appointmentNotes: document.getElementById('appointmentNotes').value
             };
-            
+
             // Validate form data
             if (!validateAppointmentForm(formData)) {
                 return;
             }
-            
+
             // Add appointment to storage
             console.log('About to add appointment with data:', formData);
             const newAppointment = addAppointment(formData);
             console.log('New appointment created:', newAppointment);
-            
+
             // Show success message
             showAppointmentSuccess(formData);
-            
+
             // Force refresh the agenda display
             console.log('Refreshing agenda after appointment creation...');
             renderDailyAgenda();
             renderCalendar();
-            
+
             // Close modal and reset form
             closeAddAppointmentModal();
         });
@@ -2747,14 +2862,14 @@
                 alert('Please select a patient for the appointment.');
                 return false;
             }
-            
+
             // Basic validation
-            if (!data.patientName || !data.patientPhone || 
-                !data.appointmentDate || !data.appointmentTime ||  !data.appointmentType) {
+            if (!data.patientName || !data.patientPhone ||
+                !data.appointmentDate || !data.appointmentTime || !data.appointmentType) {
                 alert('Please fill in all required fields.');
                 return false;
             }
-            
+
             // Email validation (if provided)
             if (data.patientEmail) {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -2763,17 +2878,17 @@
                     return false;
                 }
             }
-            
+
             // Date validation (not in the past)
             const selectedDate = new Date(data.appointmentDate);
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            
+
             if (selectedDate < today) {
                 alert('Please select a future date for your appointment.');
                 return false;
             }
-            
+
             return true;
         }
 
@@ -2799,29 +2914,29 @@
                     </p>
                 </div>
             `;
-            
+
             // Insert success message at the top of the main content
             const mainContent = document.querySelector('.max-w-7xl');
             const existingSuccess = mainContent.querySelector('.appointment-success');
             if (existingSuccess) {
                 existingSuccess.remove();
             }
-            
+
             const successDiv = document.createElement('div');
             successDiv.className = 'appointment-success';
             successDiv.innerHTML = successMessage;
             mainContent.insertBefore(successDiv, mainContent.firstChild);
-            
+
             // Scroll to success message
             successDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            
+
             // Remove success message after 8 seconds
             setTimeout(() => {
                 if (successDiv.parentElement) {
                     successDiv.remove();
                 }
             }, 8000);
-            
+
             // Refresh the agenda to show the new appointment
             renderDailyAgenda();
         }
@@ -2829,20 +2944,20 @@
         // Update appointment status
         function updateAppointmentStatus(appointmentId, newStatus) {
             console.log('Updating appointment status:', appointmentId, 'to', newStatus);
-            
+
             // Find the appointment in stored appointments
             const appointmentIndex = storedAppointments.findIndex(apt => apt.id === appointmentId);
-            
+
             if (appointmentIndex !== -1) {
                 // Update the status
                 storedAppointments[appointmentIndex].status = newStatus;
-                
+
                 // Save to localStorage
                 saveStoredAppointments();
-                
+
                 // Show success message
                 showStatusUpdateMessage(storedAppointments[appointmentIndex], newStatus);
-                
+
                 // Refresh the agenda
                 renderDailyAgenda();
             } else {
@@ -2880,22 +2995,22 @@
                     </div>
                 </div>
             `;
-            
+
             // Insert success message at the top of the main content
             const mainContent = document.querySelector('.max-w-7xl');
             const existingSuccess = mainContent.querySelector('.status-update-success');
             if (existingSuccess) {
                 existingSuccess.remove();
             }
-            
+
             const successDiv = document.createElement('div');
             successDiv.className = 'status-update-success';
             successDiv.innerHTML = successMessage;
             mainContent.insertBefore(successDiv, mainContent.firstChild);
-            
+
             // Scroll to success message
             successDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            
+
             // Remove success message after 5 seconds
             setTimeout(() => {
                 if (successDiv.parentElement) {
@@ -2908,14 +3023,14 @@
         function showPatientManagement() {
             const modal = document.getElementById('patientManagementModal');
             modal.classList.add('active');
-            
+
             // Close mobile menu if open
             const mobileMenu = document.getElementById('mobile-menu');
             mobileMenu.classList.add('hidden');
-            
+
             // Load patients list
             loadPatientsList();
-            
+
             // Update modal translations
             updateModalTranslations();
         }
@@ -2923,11 +3038,11 @@
         function closePatientManagement() {
             const modal = document.getElementById('patientManagementModal');
             modal.classList.remove('active');
-            
+
             // Reset form
             document.getElementById('patientForm').reset();
-            
-            
+
+
             // Switch back to add patient tab
             switchPatientTab('add');
         }
@@ -2937,7 +3052,7 @@
             const viewContent = document.getElementById('viewPatientsContent');
             const addTab = document.getElementById('addPatientTab');
             const viewTab = document.getElementById('viewPatientsTab');
-            
+
             if (tab === 'add') {
                 addContent.style.display = 'block';
                 viewContent.style.display = 'none';
@@ -2953,9 +3068,9 @@
         }
 
         // Handle patient form submission
-        document.getElementById('patientForm').addEventListener('submit', function(event) {
+        document.getElementById('patientForm').addEventListener('submit', function (event) {
             event.preventDefault();
-            
+
             // Get form data
             const formData = {
                 fileNumber: document.getElementById('patientFileNumber').value,
@@ -2968,26 +3083,26 @@
                 address: document.getElementById('patientAddress').value,
                 medicalHistory: document.getElementById('patientMedicalHistory').value
             };
-            
+
             // Validate form data
             if (!validatePatientForm(formData)) {
                 return;
             }
-            
+
             // Add patient to storage
             const newPatient = addPatient(formData);
-            
+
             // Show success message
             showPatientSuccess(newPatient);
-            
+
             // Reset form
             document.getElementById('patientForm').reset();
         });
 
         // Handle edit patient form submission
-        document.getElementById('editPatientForm').addEventListener('submit', function(event) {
+        document.getElementById('editPatientForm').addEventListener('submit', function (event) {
             event.preventDefault();
-            
+
             // Get form data
             const formData = {
                 fileNumber: document.getElementById('editPatientFileNumber').value,
@@ -3000,12 +3115,12 @@
                 address: document.getElementById('editPatientAddress').value,
                 medicalHistory: document.getElementById('editPatientMedicalHistory').value
             };
-            
+
             // Validate form data
             if (!validateEditPatientForm(formData)) {
                 return;
             }
-            
+
             // Update patient
             updatePatient(formData);
         });
@@ -3016,7 +3131,7 @@
                 alert('Please fill in all required fields (File Number, CIN/Passport, Name, Phone, Date of Birth).');
                 return false;
             }
-            
+
             // Email validation (if provided)
             if (data.email && data.email.trim()) {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -3024,7 +3139,7 @@
                     alert('Please enter a valid email address.');
                     return false;
                 }
-                
+
                 // Check for duplicate email (only if email is provided)
                 const existingPatient = storedPatients.find(patient => patient.email === data.email);
                 if (existingPatient) {
@@ -3032,21 +3147,21 @@
                     return false;
                 }
             }
-            
+
             // Check for duplicate file number
             const existingFileNumber = storedPatients.find(patient => patient.fileNumber === data.fileNumber);
             if (existingFileNumber) {
                 alert('A patient with this file number already exists.');
                 return false;
             }
-            
+
             // Check for duplicate CIN/Passport
             const existingCinPassport = storedPatients.find(patient => patient.cinPassport === data.cinPassport);
             if (existingCinPassport) {
                 alert('A patient with this CIN/Passport number already exists.');
                 return false;
             }
-            
+
             return true;
         }
 
@@ -3056,7 +3171,7 @@
                 alert('Please fill in all required fields (File Number, CIN/Passport, Name, Phone, Date of Birth).');
                 return false;
             }
-            
+
             // Email validation (if provided)
             if (data.email && data.email.trim()) {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -3064,7 +3179,7 @@
                     alert('Please enter a valid email address.');
                     return false;
                 }
-                
+
                 // Check for duplicate email (excluding current patient and only if email is provided)
                 const existingPatient = storedPatients.find(patient => patient.email === data.email && patient.id !== editingPatient.id);
                 if (existingPatient) {
@@ -3072,21 +3187,21 @@
                     return false;
                 }
             }
-            
+
             // Check for duplicate file number (excluding current patient)
             const existingFileNumber = storedPatients.find(patient => patient.fileNumber === data.fileNumber && patient.id !== editingPatient.id);
             if (existingFileNumber) {
                 alert('A patient with this file number already exists.');
                 return false;
             }
-            
+
             // Check for duplicate CIN/Passport (excluding current patient)
             const existingCinPassport = storedPatients.find(patient => patient.cinPassport === data.cinPassport && patient.id !== editingPatient.id);
             if (existingCinPassport) {
                 alert('A patient with this CIN/Passport number already exists.');
                 return false;
             }
-            
+
             return true;
         }
 
@@ -3102,7 +3217,7 @@
             const newFilesPromises = editModeNewFiles.map(fileData => {
                 return new Promise((resolve) => {
                     const reader = new FileReader();
-                    reader.onload = function(e) {
+                    reader.onload = function (e) {
                         resolve({
                             id: fileData.id,
                             name: fileData.name,
@@ -3119,7 +3234,7 @@
             // Wait for new files to be processed
             Promise.all(newFilesPromises).then(newFilesData => {
                 // Get current files (excluding removed ones)
-                const currentFiles = (editingPatient.medicalFiles || []).filter(file => 
+                const currentFiles = (editingPatient.medicalFiles || []).filter(file =>
                     !editModeRemovedFiles.includes(file.id)
                 );
 
@@ -3147,13 +3262,13 @@
                 if (patientIndex !== -1) {
                     storedPatients[patientIndex] = updatedPatient;
                     saveStoredPatients();
-                    
+
                     // Show success message
                     showEditPatientSuccess(updatedPatient);
-                    
+
                     // Close modal
                     closeEditPatientModal();
-                    
+
                     // Refresh patient list
                     loadPatientsList();
                 } else {
@@ -3181,19 +3296,19 @@
                     </p>
                 </div>
             `;
-            
+
             // Insert success message at the top of the patient management modal content
             const modalContent = document.querySelector('#patientManagementModal .modal-content');
             const existingSuccess = modalContent.querySelector('.edit-patient-success');
             if (existingSuccess) {
                 existingSuccess.remove();
             }
-            
+
             const successDiv = document.createElement('div');
             successDiv.className = 'edit-patient-success';
             successDiv.innerHTML = successMessage;
             modalContent.insertBefore(successDiv, modalContent.children[1]);
-            
+
             // Remove success message after 5 seconds
             setTimeout(() => {
                 if (successDiv.parentElement) {
@@ -3217,12 +3332,12 @@
                 medicalFiles: [], // No medical files for new patients
                 createdAt: new Date().toISOString()
             };
-            
+
             console.log('Adding patient:', newPatient);
             storedPatients.push(newPatient);
             saveStoredPatients();
             console.log('Stored patients:', storedPatients);
-            
+
             // Show success message
             showPatientSuccess(newPatient);
         }
@@ -3246,25 +3361,25 @@
                     </p>
                 </div>
             `;
-            
+
             // Insert success message at the top of the modal content
             const modalContent = document.querySelector('#patientManagementModal .modal-content');
             const existingSuccess = modalContent.querySelector('.patient-success');
             if (existingSuccess) {
                 existingSuccess.remove();
             }
-            
+
             const successDiv = document.createElement('div');
             successDiv.className = 'patient-success';
             successDiv.innerHTML = successMessage;
             modalContent.insertBefore(successDiv, modalContent.children[1]);
-            
+
             // Refresh the appointment form patient dropdown if it's open
             const appointmentModal = document.getElementById('addAppointmentModal');
             if (appointmentModal.classList.contains('active')) {
                 populatePatientDropdown();
             }
-            
+
             // Remove success message after 5 seconds
             setTimeout(() => {
                 if (successDiv.parentElement) {
@@ -3276,7 +3391,7 @@
         function loadPatientsList() {
             const patientsList = document.getElementById('patientsList');
             patientsList.innerHTML = '';
-            
+
             if (storedPatients.length === 0) {
                 patientsList.innerHTML = `
                     <div class="text-center py-8 text-gray-500">
@@ -3288,7 +3403,7 @@
                 `;
                 return;
             }
-            
+
             storedPatients.forEach(patient => {
                 const patientCard = createPatientCard(patient);
                 patientsList.appendChild(patientCard);
@@ -3298,10 +3413,10 @@
         function createPatientCard(patient) {
             const card = document.createElement('div');
             card.className = 'patient-card';
-            
+
             const age = patient.dateOfBirth ? calculateAge(patient.dateOfBirth) : 'N/A';
             const filesCount = patient.medicalFiles ? patient.medicalFiles.length : 0;
-            
+
             card.innerHTML = `
                 <div class="patient-info">
                     <div class="patient-details">
@@ -3334,7 +3449,7 @@
                     </div>
                 </div>
             `;
-            
+
             return card;
         }
 
@@ -3343,11 +3458,11 @@
             const birthDate = new Date(dateOfBirth);
             let age = today.getFullYear() - birthDate.getFullYear();
             const monthDiff = today.getMonth() - birthDate.getMonth();
-            
+
             if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
                 age--;
             }
-            
+
             return age;
         }
 
@@ -3356,77 +3471,77 @@
             const patientsList = document.getElementById('patientsList');
             const searchResults = document.getElementById('searchResults');
             const clearButton = document.getElementById('clearSearch');
-            
+
             // Show/hide clear button based on search input
             if (searchTerm) {
                 clearButton.style.display = 'block';
             } else {
                 clearButton.style.display = 'none';
             }
-            
+
             // If search term is empty, show all patients and hide search results
             if (!searchTerm) {
                 loadPatientsList();
                 searchResults.style.display = 'none';
                 return;
             }
-            
+
             // Filter patients based on search criteria
             const filteredPatients = storedPatients.filter(patient => {
                 // Search in full name
                 if (patient.fullName && patient.fullName.toLowerCase().includes(searchTerm)) {
                     return true;
                 }
-                
+
                 // Search in CIN/Passport
                 if (patient.cinPassport && patient.cinPassport.toLowerCase().includes(searchTerm)) {
                     return true;
                 }
-                
+
                 // Search in file number
                 if (patient.fileNumber && patient.fileNumber.toLowerCase().includes(searchTerm)) {
                     return true;
                 }
-                
+
                 // Search in email
                 if (patient.email && patient.email.toLowerCase().includes(searchTerm)) {
                     return true;
                 }
-                
+
                 // Search in phone
                 if (patient.phone && patient.phone.toLowerCase().includes(searchTerm)) {
                     return true;
                 }
-                
+
                 // Search in date of birth (format: YYYY-MM-DD)
                 if (patient.dateOfBirth && patient.dateOfBirth.includes(searchTerm)) {
                     return true;
                 }
-                
+
                 // Search in formatted date of birth (DD/MM/YYYY or MM/DD/YYYY)
                 if (patient.dateOfBirth) {
                     const formattedDate = new Date(patient.dateOfBirth).toLocaleDateString();
                     if (formattedDate.toLowerCase().includes(searchTerm)) {
                         return true;
                     }
-                    
+
                     // Also search in year, month, day separately
                     const dateObj = new Date(patient.dateOfBirth);
                     const year = dateObj.getFullYear().toString();
                     const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
                     const day = dateObj.getDate().toString().padStart(2, '0');
-                    
+
                     if (year.includes(searchTerm) || month.includes(searchTerm) || day.includes(searchTerm)) {
                         return true;
                     }
                 }
-                
+
                 return false;
             });
-            
+
             // Clear and display filtered results
             patientsList.innerHTML = '';
-            
+
             // Show search results count
             searchResults.style.display = 'block';
             if (filteredPatients.length === 0) {
@@ -3438,11 +3553,11 @@
                     </div>
                 `;
             } else {
-                const resultText = filteredPatients.length === 1 ? 
-                    `Found 1 patient matching "${searchTerm}"` : 
+                const resultText = filteredPatients.length === 1 ?
+                    `Found 1 patient matching "${searchTerm}"` :
                     `Found ${filteredPatients.length} patients matching "${searchTerm}"`;
                 searchResults.innerHTML = resultText;
-                
+
                 filteredPatients.forEach(patient => {
                     const card = createPatientCard(patient);
                     patientsList.appendChild(card);
@@ -3454,14 +3569,14 @@
             const searchInput = document.getElementById('patientSearch');
             const searchResults = document.getElementById('searchResults');
             const clearButton = document.getElementById('clearSearch');
-            
+
             // Clear the search input
             searchInput.value = '';
-            
+
             // Hide search results and clear button
             searchResults.style.display = 'none';
             clearButton.style.display = 'none';
-            
+
             // Reload all patients
             loadPatientsList();
         }
@@ -3475,11 +3590,11 @@
 
             // Set editing patient
             editingPatient = patient;
-            
+
             // Reset edit mode variables
             editModeNewFiles = [];
             editModeRemovedFiles = [];
-            
+
             // Populate form with patient data
             document.getElementById('editPatientId').value = patient.id;
             document.getElementById('editPatientFileNumber').value = patient.fileNumber || '';
@@ -3491,19 +3606,91 @@
             document.getElementById('editPatientGender').value = patient.gender || '';
             document.getElementById('editPatientAddress').value = patient.address || '';
             document.getElementById('editPatientMedicalHistory').value = patient.medicalHistory || '';
-            
+
             // Display current files
             displayCurrentFiles(patient.medicalFiles || []);
-            
+
             // Clear new files list
             document.getElementById('editFileList').innerHTML = '';
-            
+
             // Show modal
             const modal = document.getElementById('editPatientModal');
             modal.classList.add('active');
-            
+
             // Update modal translations
             updateModalTranslations();
+
+            // Render vitals history
+            const vitalsHost = document.getElementById('editVitalsHistory');
+            if (vitalsHost) {
+                const hist = Array.isArray(patient.vitalsHistory) ? [...patient.vitalsHistory] : [];
+                // Sort descending by date
+                hist.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                if (hist.length === 0) {
+                    vitalsHost.innerHTML = '<div class="text-sm text-gray-500">No vitals recorded yet.</div>';
+                } else {
+                    const getCat = (imc) => {
+                        if (!isFinite(imc)) return '';
+                        if (imc < 18.5) return 'Underweight';
+                        if (imc < 25) return 'Normal';
+                        if (imc < 30) return 'Overweight';
+                        return 'Obesity';
+                    };
+                    const getCatClass = (cat) => {
+                        switch (cat) {
+                            case 'Underweight': return 'badge bg-yellow-100 text-yellow-800';
+                            case 'Normal': return 'badge bg-green-100 text-green-800';
+                            case 'Overweight': return 'badge bg-orange-100 text-orange-800';
+                            case 'Obesity': return 'badge bg-red-100 text-red-800';
+                            default: return 'text-sm text-gray-500';
+                        }
+                    };
+
+                    const rows = hist.map((h) => {
+                        const dt = h.date ? new Date(h.date) : null;
+                        const dateStr = dt ? dt.toLocaleString() : '';
+                        const heightStr = (h.height ?? '') !== '' && h.height != null ? `${h.height} cm` : '';
+                        const weightStr = (h.weight ?? '') !== '' && h.weight != null ? `${h.weight} kg` : '';
+                        const imcVal = (typeof h.imc === 'number') ? h.imc : (
+                            (h.height && h.weight) ? +(h.weight / Math.pow(h.height/100, 2)).toFixed(1) : null
+                        );
+                        const tempStr = (h.temperature ?? '') !== '' && h.temperature != null ? `${h.temperature} °C` : '';
+                        const cat = (imcVal != null) ? getCat(imcVal) : '';
+                        const catClass = getCatClass(cat);
+                        return `
+                            <tr>
+                                <td class="p-2 border-b text-sm text-gray-600">${dateStr}</td>
+                                <td class="p-2 border-b text-sm">${heightStr}</td>
+                                <td class="p-2 border-b text-sm">${weightStr}</td>
+                                <td class="p-2 border-b text-sm">${imcVal != null ? imcVal.toFixed(1) : ''}</td>
+                                <td class=\"p-2 border-b text-sm\">${tempStr}</td>
+                                <td class="p-2 border-b"><span class="${catClass}">${cat}</span></td>
+                            </tr>
+                        `;
+                    }).join('');
+
+                    vitalsHost.innerHTML = `
+                        <div class="overflow-auto">
+                            <table class="min-w-full text-left">
+                                <thead>
+                                    <tr class="text-xs uppercase text-gray-500">
+                                        <th class="p-2 border-b">Date</th>
+                                        <th class="p-2 border-b">Height</th>
+                                        <th class="p-2 border-b">Weight</th>
+                                        <th class="p-2 border-b">IMC</th>
+                                        <th class=\"p-2 border-b\">Temp (°C)</th>
+                                        <th class="p-2 border-b">Category</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${rows}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                }
+            }
         }
 
         function deletePatient(patientId) {
@@ -3560,11 +3747,11 @@
                     </div>
                 </div>
             `;
-            
+
             document.body.appendChild(modal);
-            
+
             // Close modal when clicking outside
-            modal.addEventListener('click', function(event) {
+            modal.addEventListener('click', function (event) {
                 if (event.target === modal) {
                     modal.remove();
                 }
@@ -3580,7 +3767,7 @@
             }
             const byteArray = new Uint8Array(byteNumbers);
             const blob = new Blob([byteArray]);
-            
+
             // Create download link
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -3609,7 +3796,7 @@
             }
             const byteArray = new Uint8Array(byteNumbers);
             const blob = new Blob([byteArray], { type: fileType });
-            
+
             showFilePreview(fileName, blob, fileType);
         }
 
@@ -3630,18 +3817,18 @@
                     </div>
                 </div>
             `;
-            
+
             document.body.appendChild(modal);
-            
+
             // Close modal when clicking outside
-            modal.addEventListener('click', function(event) {
+            modal.addEventListener('click', function (event) {
                 if (event.target === modal) {
                     modal.remove();
                 }
             });
-            
+
             // Close modal with Escape key
-            document.addEventListener('keydown', function(event) {
+            document.addEventListener('keydown', function (event) {
                 if (event.key === 'Escape') {
                     modal.remove();
                 }
@@ -3650,13 +3837,13 @@
 
         function getPreviewContent(fileName, file, fileType) {
             const fileExtension = fileName.split('.').pop().toLowerCase();
-            
+
             // Handle different file types
             if (fileType.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(fileExtension)) {
                 // Image preview
                 const url = URL.createObjectURL(file);
                 return `<img src="${url}" alt="${fileName}" class="file-preview-image" onload="URL.revokeObjectURL('${url}')">`;
-            } 
+            }
             else if (fileType === 'application/pdf' || fileExtension === 'pdf') {
                 // PDF preview
                 const url = URL.createObjectURL(file);
@@ -3694,28 +3881,28 @@
         function showBillingModal() {
             const modal = document.getElementById('billingModal');
             modal.classList.add('active');
-            
+
             // Close mobile menu if open
             const mobileMenu = document.getElementById('mobile-menu');
             mobileMenu.classList.add('hidden');
-            
+
             // Load patients for billing
             loadPatientsForBilling();
-            
+
             // Update modal translations
             updateModalTranslations();
-            
+
             // Set default dates
             const today = new Date();
             const dueDate = new Date(today);
             dueDate.setDate(today.getDate() + 30); // 30 days from today
-            
+
             document.getElementById('billDate').value = today.toISOString().split('T')[0];
             document.getElementById('billDueDate').value = dueDate.toISOString().split('T')[0];
-            
+
             // Reset form
             resetBillingForm();
-            
+
             // Initialize bill total calculation
             calculateBillTotal();
         }
@@ -3730,16 +3917,16 @@
             const modal = document.getElementById('languageSettingsModal');
             modal.classList.add('active');
             modal.style.opacity = '1'; // Reset opacity
-            
+
             // Set current language as selected
             const currentLangRadio = document.getElementById(`lang-${currentLanguage}`);
             if (currentLangRadio) {
                 currentLangRadio.checked = true;
             }
-            
+
             // Update modal translations immediately
             updateModalTranslations();
-            
+
             // Close mobile menu if open
             const mobileMenu = document.getElementById('mobile-menu');
             mobileMenu.classList.add('hidden');
@@ -3764,10 +3951,10 @@
         function changeLanguage(lang) {
             currentLanguage = lang;
             localStorage.setItem('selectedLanguage', lang);
-            
+
             // Update HTML lang attribute
             document.documentElement.lang = lang;
-            
+
             // Update text direction for Arabic
             if (lang === 'ar') {
                 document.documentElement.dir = 'rtl';
@@ -3776,17 +3963,17 @@
                 document.documentElement.dir = 'ltr';
                 document.body.style.fontFamily = '';
             }
-            
+
             // Add visual feedback for language change
             const modal = document.getElementById('languageSettingsModal');
             modal.style.opacity = '0.7';
-            
+
             // Update all translatable elements immediately
             updateTranslations();
-            
+
             // Also update modal translations specifically
             updateModalTranslations();
-            
+
             // Restore modal opacity and close after showing the change
             setTimeout(() => {
                 modal.style.opacity = '1';
@@ -3798,7 +3985,7 @@
 
         function updateTranslations() {
             const elements = document.querySelectorAll('[data-translate]');
-            
+
             elements.forEach(element => {
                 const key = element.getAttribute('data-translate');
                 if (translations[currentLanguage] && translations[currentLanguage][key]) {
@@ -3832,7 +4019,7 @@
         function loadPatientsForBilling() {
             const patientSelect = document.getElementById('billPatientSelection');
             patientSelect.innerHTML = '<option value="">Choose a patient...</option>';
-            
+
             storedPatients.forEach(patient => {
                 const option = document.createElement('option');
                 option.value = patient.id;
@@ -3844,7 +4031,7 @@
         function handleBillPatientSelection() {
             const patientId = document.getElementById('billPatientSelection').value;
             const patientDetails = document.getElementById('billPatientDetails');
-            
+
             if (patientId) {
                 const patient = storedPatients.find(p => p.id === patientId);
                 if (patient) {
@@ -3853,13 +4040,13 @@
                     document.getElementById('billPatientEmail').textContent = patient.email;
                     document.getElementById('billPatientPhone').textContent = patient.phone;
                     document.getElementById('billPatientAddress').textContent = patient.address || 'Not provided';
-                    
+
                     // Set hidden inputs
                     document.getElementById('billPatientId').value = patient.id;
                     document.getElementById('billPatientFullName').value = patient.fullName;
                     document.getElementById('billPatientEmailAddress').value = patient.email;
                     document.getElementById('billPatientPhoneNumber').value = patient.phone;
-                    
+
                     patientDetails.classList.remove('hidden');
                 }
             } else {
@@ -3870,7 +4057,7 @@
         function addBillItem() {
             const billItems = document.getElementById('billItems');
             const itemCount = billItems.children.length + 1;
-            
+
             const newItem = document.createElement('div');
             newItem.className = 'bill-item border border-gray-200 rounded-lg p-4';
             newItem.innerHTML = `
@@ -3897,12 +4084,12 @@
                     </button>
                 </div>
             `;
-            
+
             billItems.appendChild(newItem);
-            
+
             // Update translations for the new item
             updateModalTranslations();
-            
+
             calculateBillTotal();
         }
 
@@ -3919,41 +4106,41 @@
         function calculateBillTotal() {
             const billItems = document.getElementById('billItems');
             let subtotal = 0;
-            
+
             if (!billItems) {
                 console.error('Bill items container not found');
                 return;
             }
-            
+
             billItems.querySelectorAll('.bill-item').forEach((item, index) => {
                 // Find quantity input (first number input)
                 const quantityInput = item.querySelector('input[type="number"]');
                 // Find price input (second number input)
                 const priceInput = item.querySelectorAll('input[type="number"]')[1];
-                
+
                 if (quantityInput && priceInput) {
                     const quantity = parseFloat(quantityInput.value) || 0;
                     const price = parseFloat(priceInput.value) || 0;
                     const itemTotal = quantity * price;
                     subtotal += itemTotal;
-                    
+
                     console.log(`Item ${index + 1}: Qty=${quantity}, Price=${price}, Total=${itemTotal}`);
                 } else {
                     console.warn(`Item ${index + 1}: Missing quantity or price input`);
                 }
             });
-            
+
             const taxRate = 0.08; // 8% tax
             const tax = subtotal * taxRate;
             const total = subtotal + tax;
-            
+
             console.log(`Bill calculation: Subtotal=${subtotal}, Tax=${tax}, Total=${total}`);
-            
+
             // Update the display
             const subtotalElement = document.getElementById('billSubtotal');
             const taxElement = document.getElementById('billTax');
             const totalElement = document.getElementById('billTotal');
-            
+
             if (subtotalElement) subtotalElement.textContent = `$${subtotal.toFixed(2)}`;
             if (taxElement) taxElement.textContent = `$${tax.toFixed(2)}`;
             if (totalElement) totalElement.textContent = `$${total.toFixed(2)}`;
@@ -3962,7 +4149,7 @@
         function resetBillingForm() {
             document.getElementById('billingForm').reset();
             document.getElementById('billPatientDetails').classList.add('hidden');
-            
+
             // Reset bill items to just one
             const billItems = document.getElementById('billItems');
             billItems.innerHTML = `
@@ -3991,14 +4178,14 @@
                     </div>
                 </div>
             `;
-            
+
             calculateBillTotal();
         }
 
         function createBill(formData) {
             const billId = 'bill-' + Date.now();
             const billItems = [];
-            
+
             // Collect bill items
             document.querySelectorAll('.bill-item').forEach((item, index) => {
                 // Find quantity input (first number input)
@@ -4006,12 +4193,12 @@
                 // Find price input (second number input)
                 const priceInput = item.querySelectorAll('input[type="number"]')[1];
                 const descriptionInput = item.querySelector('input[type="text"]');
-                
+
                 if (descriptionInput && quantityInput && priceInput) {
                     const description = descriptionInput.value.trim();
                     const quantity = parseFloat(quantityInput.value) || 0;
                     const price = parseFloat(priceInput.value) || 0;
-                    
+
                     if (description && quantity > 0 && price >= 0) {
                         billItems.push({
                             description,
@@ -4022,16 +4209,16 @@
                     }
                 }
             });
-            
+
             // Validate that we have at least one bill item
             if (billItems.length === 0) {
                 throw new Error('Please add at least one item to the bill.');
             }
-            
+
             const subtotal = billItems.reduce((sum, item) => sum + item.total, 0);
             const tax = subtotal * 0.08;
             const total = subtotal + tax;
-            
+
             const newBill = {
                 id: billId,
                 patientId: formData.patientId,
@@ -4048,11 +4235,11 @@
                 status: 'Pending',
                 createdAt: new Date().toISOString()
             };
-            
+
             console.log('Creating bill:', newBill);
             storedBills.push(newBill);
             saveStoredBills();
-            
+
             return newBill;
         }
 
@@ -4076,7 +4263,7 @@
             const billDate = new Date(bill.billDate).toLocaleDateString();
             const dueDate = new Date(bill.dueDate).toLocaleDateString();
             const createdDate = new Date(bill.createdAt).toLocaleDateString();
-            
+
             const billHTML = `
                 <!DOCTYPE html>
                 <html lang="en">
@@ -4310,21 +4497,21 @@
                 </body>
                 </html>
             `;
-            
+
             return billHTML;
         }
 
         function showPrintableBill(bill) {
             console.log('showPrintableBill called with bill:', bill);
-            
+
             try {
                 const billHTML = generatePrintableBill(bill);
                 console.log('Generated bill HTML length:', billHTML.length);
-                
+
                 // Try to open new window
                 let printWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
                 console.log('Print window opened:', printWindow);
-                
+
                 if (!printWindow || printWindow.closed || typeof printWindow.closed == 'undefined') {
                     // Popup blocked, show alternative
                     console.log('Popup blocked, using alternative method');
@@ -4332,20 +4519,20 @@
                     showAlternativePrint(bill);
                     return;
                 }
-                
+
                 printWindow.document.write(billHTML);
                 printWindow.document.close();
                 console.log('Content written to print window');
-                
+
                 // Wait for content to load, then print
-                printWindow.onload = function() {
+                printWindow.onload = function () {
                     console.log('Print window loaded, triggering print');
                     setTimeout(() => {
                         printWindow.focus();
                         printWindow.print();
                     }, 1000);
                 };
-                
+
             } catch (error) {
                 console.error('Error opening print window:', error);
                 alert('Error opening print window. Using alternative method.');
@@ -4373,7 +4560,7 @@
                     </div>
                 </div>
             `;
-            
+
             document.body.appendChild(modal);
         }
 
@@ -4381,7 +4568,7 @@
             const billDate = new Date(bill.billDate).toLocaleDateString();
             const dueDate = new Date(bill.dueDate).toLocaleDateString();
             const createdDate = new Date(bill.createdAt).toLocaleDateString();
-            
+
             return `
                 <div class="printable-bill">
                     <div class="bill-header">
@@ -4493,7 +4680,7 @@
                 status: 'Pending',
                 createdAt: new Date().toISOString()
             };
-            
+
             console.log('Testing print function with test bill:', testBill);
             showPrintableBill(testBill);
         }
@@ -4501,7 +4688,7 @@
         // Billing form submission
         document.getElementById('billingForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            
+
             const formData = {
                 patientId: document.getElementById('billPatientId').value,
                 patientName: document.getElementById('billPatientFullName').value,
@@ -4511,19 +4698,19 @@
                 dueDate: document.getElementById('billDueDate').value,
                 notes: document.getElementById('billNotes').value
             };
-            
+
             if (!formData.patientId) {
                 alert('Please select a patient for the bill.');
                 return;
             }
-            
+
             try {
                 const newBill = createBill(formData);
                 console.log('Bill created successfully:', newBill);
-                
+
                 // Show success message with print option
                 const printBill = confirm(`✅ Bill created successfully!\n\nBill ID: ${newBill.id}\nPatient: ${newBill.patientName}\nTotal: $${newBill.total.toFixed(2)}\n\nWould you like to print the bill now?`);
-                
+
                 if (printBill) {
                     console.log('Attempting to show printable bill:', newBill);
                     showPrintableBill(newBill);
@@ -4536,7 +4723,7 @@
                 alert(`Error creating bill: ${error.message}`);
                 return;
             }
-            
+
             closeBillingModal();
         });
 
@@ -4552,7 +4739,7 @@
 
             // Role-based UI
             let session = null;
-            try { session = JSON.parse(localStorage.getItem('medconnect_session')); } catch {}
+            try { session = JSON.parse(localStorage.getItem('medconnect_session')); } catch { }
             const isDoctor = session && session.role === 'doctor';
 
             const consultLink = document.getElementById('consultationsLink');
@@ -4566,21 +4753,21 @@
                 const avatarEl = document.querySelector('.user-avatar');
                 if (nameEl && session.name) nameEl.textContent = session.name;
                 if (roleEl) roleEl.textContent = 'Doctor';
-                if (avatarEl && session.name) avatarEl.textContent = (session.name.match(/\b([A-Z])/gi) || ['D','R']).slice(0,2).join('').toUpperCase();
+                if (avatarEl && session.name) avatarEl.textContent = (session.name.match(/\b([A-Z])/gi) || ['D', 'R']).slice(0, 2).join('').toUpperCase();
             } else if (session && session.role === 'secretary') {
                 const nameEl = document.querySelector('.user-name');
                 const roleEl = document.querySelector('.user-role');
                 const avatarEl = document.querySelector('.user-avatar');
                 if (nameEl && session.name) nameEl.textContent = session.name;
                 if (roleEl) roleEl.textContent = 'Secretary';
-                if (avatarEl && session.name) avatarEl.textContent = (session.name.match(/\b([A-Z])/gi) || ['S','E']).slice(0,2).join('').toUpperCase();
+                if (avatarEl && session.name) avatarEl.textContent = (session.name.match(/\b([A-Z])/gi) || ['S', 'E']).slice(0, 2).join('').toUpperCase();
             }
 
             // Consultation modal handlers
             const consultationModal = document.getElementById('consultationModal');
             const consultationForm = document.getElementById('consultationForm');
 
-            window.showConsultationModal = function() {
+            window.showConsultationModal = function () {
                 if (!isDoctor) {
                     alert('Consultations are available to doctors only.');
                     return;
@@ -4590,12 +4777,80 @@
                 const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
                 patientSelect.innerHTML = '<option value="">Choose a patient...</option>' +
                     patients.map(p => `<option value="${p.id}">${p.fullName} (${p.fileNumber || 'No file#'}) - ${p.phone}</option>`).join('');
+
+                // Setup live IMC (BMI) calculation
+                const heightInput = document.getElementById('consultHeight');
+                const weightInput = document.getElementById('consultWeight');
+                const imcEl = document.getElementById('consultIMCValue');
+                const bmiCatEl = document.getElementById('consultBMICategory');
+
+                const getBMICategory = (bmi) => {
+                    if (!isFinite(bmi)) return '';
+                    if (bmi < 18.5) return 'Underweight';
+                    if (bmi < 25) return 'Normal';
+                    if (bmi < 30) return 'Overweight';
+                    return 'Obesity';
+                };
+
+                const getBMICategoryStyle = (cat) => {
+                    switch (cat) {
+                        case 'Underweight':
+                            return 'badge bg-yellow-100 text-yellow-800';
+                        case 'Normal':
+                            return 'badge bg-green-100 text-green-800';
+                        case 'Overweight':
+                            return 'badge bg-orange-100 text-orange-800';
+                        case 'Obesity':
+                            return 'badge bg-red-100 text-red-800';
+                        default:
+                            return 'text-sm text-gray-500';
+                    }
+                };
+
+                const updateIMC = () => {
+                    if (!imcEl) return;
+                    const h = parseFloat(heightInput?.value || '');
+                    const w = parseFloat(weightInput?.value || '');
+                    if (!isFinite(h) || !isFinite(w) || h <= 0 || w <= 0) {
+                        imcEl.textContent = '—';
+                        if (bmiCatEl) {
+                            bmiCatEl.textContent = '';
+                            bmiCatEl.className = 'text-sm text-gray-500';
+                        }
+                        return;
+                    }
+                    // Convert cm to meters and compute BMI
+                    const m = h / 100;
+                    const bmi = w / (m * m);
+                    imcEl.textContent = bmi.toFixed(1);
+                    if (bmiCatEl) {
+                        const cat = getBMICategory(bmi);
+                        bmiCatEl.textContent = cat;
+                        bmiCatEl.className = getBMICategoryStyle(cat);
+                    }
+                };
+
+                if (heightInput && weightInput) {
+                    heightInput.removeEventListener('input', updateIMC);
+                    weightInput.removeEventListener('input', updateIMC);
+                    heightInput.addEventListener('input', updateIMC);
+                    weightInput.addEventListener('input', updateIMC);
+                    updateIMC();
+                }
+
                 consultationModal.classList.add('active');
             };
 
-            window.closeConsultationModal = function() {
+            window.closeConsultationModal = function () {
                 consultationModal.classList.remove('active');
                 if (consultationForm) consultationForm.reset();
+                const imcEl = document.getElementById('consultIMCValue');
+                if (imcEl) imcEl.textContent = '—';
+                const bmiCatEl = document.getElementById('consultBMICategory');
+                if (bmiCatEl) {
+                    bmiCatEl.textContent = '';
+                    bmiCatEl.className = 'text-sm text-gray-500';
+                }
             };
 
             if (consultationForm) {
@@ -4606,17 +4861,70 @@
                         return;
                     }
                     const patientId = document.getElementById('consultPatient').value;
+                    const heightVal = document.getElementById('consultHeight')?.value;
+                    const weightVal = document.getElementById('consultWeight')?.value;
+                    const tempVal = document.getElementById('consultTemperature')?.value;
                     const diagnosis = document.getElementById('consultDiagnosis').value.trim();
                     const notes = document.getElementById('consultNotes').value.trim();
                     const prescription = document.getElementById('consultPrescription').value.trim();
+
                     if (!patientId || !diagnosis || !notes) {
                         alert('Please fill required fields.');
                         return;
                     }
+
+                    const height = heightVal ? parseFloat(heightVal) : null;
+                    const weight = weightVal ? parseFloat(weightVal) : null;
+                    const temperature = tempVal ? parseFloat(tempVal) : null;
+                    let imc = null; let bmiCategory = null;
+                    if (height && weight) {
+                        const m = height / 100;
+                        imc = +(weight / (m * m)).toFixed(1);
+                        // same thresholds as UI
+                        if (imc < 18.5) bmiCategory = 'Underweight';
+                        else if (imc < 25) bmiCategory = 'Normal';
+                        else if (imc < 30) bmiCategory = 'Overweight';
+                        else bmiCategory = 'Obesity';
+                    }
+
                     const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
                     const id = 'CONS-' + Date.now();
-                    consultations.push({ id, patientId, diagnosis, notes, prescription, doctor: session?.name || 'Doctor', createdAt: new Date().toISOString() });
+                    consultations.push({
+                        id,
+                        patientId,
+                        height,
+                        weight,
+                        temperature,
+                        imc,
+                        bmiCategory,
+                        diagnosis,
+                        notes,
+                        prescription,
+                        doctor: session?.name || 'Doctor',
+                        createdAt: new Date().toISOString()
+                    });
                     localStorage.setItem('consultations', JSON.stringify(consultations));
+
+                    // Optionally update the patient's latest height/weight
+                    try {
+                        const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
+                        const idx = patients.findIndex(p => p.id === patientId);
+                        if (idx !== -1) {
+                            if (height !== null) patients[idx].height = height;
+                            if (weight !== null) patients[idx].weight = weight;
+                            if (temperature !== null) patients[idx].temperature = temperature;
+                            // Append vitals history entry
+                            const entry = { date: new Date().toISOString(), height, weight, imc, temperature };
+                            if (!Array.isArray(patients[idx].vitalsHistory)) patients[idx].vitalsHistory = [];
+                            // Only add if at least one of the values is present
+                            if (height !== null || weight !== null || imc !== null || temperature !== null) {
+                                patients[idx].vitalsHistory.push(entry);
+                            }
+                            patients[idx].lastUpdated = new Date().toISOString();
+                            localStorage.setItem('healthcarePatients', JSON.stringify(patients));
+                        }
+                    } catch { }
+
                     alert('✅ Consultation saved.');
                     window.closeConsultationModal();
                 });
@@ -4624,16 +4932,16 @@
         });
 
         // Logout function
-        window.logout = function() {
+        window.logout = function () {
             if (confirm('Are you sure you want to logout?')) {
                 // Clear session data
                 localStorage.removeItem('medconnect_session');
-                
+
                 // Clear all healthcare data (optional - you might want to keep this)
                 // localStorage.removeItem('healthcareAppointments');
                 // localStorage.removeItem('healthcarePatients');
                 // localStorage.removeItem('healthcareBills');
-                
+
                 // Redirect to login page
                 window.location.href = 'loginForm.html';
             }
@@ -4646,11 +4954,14 @@
             <div class="footer-logo">
                 <svg class="footer-logo-emblem" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <!-- Sailboat and waves -->
-                    <path d="M14 4 L12 11 L16 11 Z" fill="#d4af37" stroke="#b8941f" stroke-width="0.3"/>
-                    <path d="M14 4 L13 11 L15 11 Z" fill="#f4d03f" opacity="0.8"/>
-                    <path d="M9 14 Q12 12 14 14 Q16 12 19 14 Q16 16 14 14 Q12 16 9 14 Z" fill="#d4af37" stroke="#b8941f" stroke-width="0.3"/>
-                    <path d="M7 17 Q12 15 14 17 Q16 15 21 17 Q16 19 14 17 Q12 19 7 17 Z" fill="#d4af37" stroke="#b8941f" stroke-width="0.3"/>
-                    <path d="M5 20 Q12 18 14 20 Q16 18 23 20 Q16 22 14 20 Q12 22 5 20 Z" fill="#d4af37" stroke="#b8941f" stroke-width="0.3"/>
+                    <path d="M14 4 L12 11 L16 11 Z" fill="#d4af37" stroke="#b8941f" stroke-width="0.3" />
+                    <path d="M14 4 L13 11 L15 11 Z" fill="#f4d03f" opacity="0.8" />
+                    <path d="M9 14 Q12 12 14 14 Q16 12 19 14 Q16 16 14 14 Q12 16 9 14 Z" fill="#d4af37" stroke="#b8941f"
+                        stroke-width="0.3" />
+                    <path d="M7 17 Q12 15 14 17 Q16 15 21 17 Q16 19 14 17 Q12 19 7 17 Z" fill="#d4af37" stroke="#b8941f"
+                        stroke-width="0.3" />
+                    <path d="M5 20 Q12 18 14 20 Q16 18 23 20 Q16 22 14 20 Q12 22 5 20 Z" fill="#d4af37" stroke="#b8941f"
+                        stroke-width="0.3" />
                 </svg>
                 <div class="footer-logo-text">
                     <div class="footer-logo-company">CERCINATECK</div>
@@ -4662,4 +4973,5 @@
         </div>
     </footer>
 </body>
+
 </html>
