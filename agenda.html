@@ -1275,6 +1275,20 @@
                     <label class="form-label" for="consultPatient">Select Patient *</label>
                     <select id="consultPatient" class="form-input" required></select>
                 </div>
+                <!-- Selected Patient Info -->
+                <div id="consultPatientInfo" class="card p-3 mb-4 hidden">
+                    <h4 class="font-semibold mb-2">Patient Info</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm mb-2">
+                        <div><strong>Name:</strong> <span id="consultPatientName">-</span></div>
+                        <div><strong>Phone:</strong> <span id="consultPatientPhone">-</span></div>
+                        <div><strong>Age/Gender:</strong> <span id="consultPatientAgeGender">-</span></div>
+                        <div><strong>Address:</strong> <span id="consultPatientAddress">-</span></div>
+                    </div>
+                    <div class="text-sm">
+                        <strong>Medical History:</strong>
+                        <div id="consultPatientHistory" class="mt-1 text-gray-700">No history available.</div>
+                    </div>
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="form-group">
                         <label class="form-label" for="consultHeight">Height (cm)</label>
@@ -1297,6 +1311,26 @@
                 <div class="form-group">
                     <label class="form-label" for="consultTemperature">Temperature (°C)</label>
                     <input type="number" id="consultTemperature" class="form-input" placeholder="e.g., 37.0" min="30" max="45" step="0.1" />
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label class="form-label" for="consultHeartRate">Heart Rate (bpm)</label>
+                        <input type="number" id="consultHeartRate" class="form-input" placeholder="e.g., 72" min="30" max="220" step="1" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="consultBloodSugar">Blood Sugar (mg/dL)</label>
+                        <input type="number" id="consultBloodSugar" class="form-input" placeholder="e.g., 95" min="40" max="600" step="1" />
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label class="form-label" for="consultBPSystolic">BP Systolic (mmHg)</label>
+                        <input type="number" id="consultBPSystolic" class="form-input" placeholder="e.g., 120" min="60" max="250" step="1" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="consultBPDiastolic">BP Diastolic (mmHg)</label>
+                        <input type="number" id="consultBPDiastolic" class="form-input" placeholder="e.g., 80" min="30" max="150" step="1" />
+                    </div>
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="consultDiagnosis">Diagnosis *</label>
@@ -1522,33 +1556,6 @@
                     <!-- Current Files Display -->
                     <div id="editCurrentFiles" class="mb-4">
                         <!-- Current files will be displayed here -->
-                    </div>
-
-                    <!-- Add New Files -->
-                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none"
-                            viewBox="0 0 48 48">
-                            <path
-                                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                        <div class="mt-4">
-                            <label for="editMedicalFiles" class="cursor-pointer">
-                                <span class="mt-2 block text-sm font-medium text-gray-900">
-                                    Add more medical files
-                                </span>
-                                <span class="mt-1 block text-sm text-gray-500">
-                                    PDF, DOC, DOCX, JPG, PNG up to 10MB each
-                                </span>
-                            </label>
-                            <input id="editMedicalFiles" name="editMedicalFiles" type="file" class="sr-only" multiple
-                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onchange="handleEditFileUpload(event)">
-                        </div>
-                    </div>
-
-                    <!-- New Files List Display -->
-                    <div id="editFileList" class="mt-4 space-y-2">
-                        <!-- New uploaded files will be displayed here -->
                     </div>
                 </div>
 
@@ -2805,8 +2812,10 @@
             editModeRemovedFiles = [];
 
             // Clear file displays
-            document.getElementById('editCurrentFiles').innerHTML = '';
-            document.getElementById('editFileList').innerHTML = '';
+            const curFilesEl = document.getElementById('editCurrentFiles');
+            if (curFilesEl) curFilesEl.innerHTML = '';
+            const newFilesEl = document.getElementById('editFileList');
+            if (newFilesEl) newFilesEl.innerHTML = '';
         }
 
         // Close modal when clicking outside
@@ -3095,7 +3104,23 @@
             // Show success message
             showPatientSuccess(newPatient);
 
-            // Reset form
+            // Switch to 'View All Patients' to show the updated list
+            switchPatientTab('view');
+
+            // After the list renders, scroll to the new card and highlight it briefly
+            setTimeout(() => {
+                const newCard = document.getElementById(`patient-card-${newPatient.id}`);
+                if (newCard) {
+                    newCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Add a temporary highlight using ring and bg utility classes
+                    newCard.classList.add('ring-2', 'ring-blue-500', 'bg-yellow-50');
+                    setTimeout(() => {
+                        newCard.classList.remove('ring-2', 'ring-blue-500', 'bg-yellow-50');
+                    }, 2500);
+                }
+            }, 100);
+
+            // Reset form (for next time)
             document.getElementById('patientForm').reset();
         });
 
@@ -3413,6 +3438,7 @@
         function createPatientCard(patient) {
             const card = document.createElement('div');
             card.className = 'patient-card';
+            card.id = `patient-card-${patient.id}`;
 
             const age = patient.dateOfBirth ? calculateAge(patient.dateOfBirth) : 'N/A';
             const filesCount = patient.medicalFiles ? patient.medicalFiles.length : 0;
@@ -3610,8 +3636,9 @@
             // Display current files
             displayCurrentFiles(patient.medicalFiles || []);
 
-            // Clear new files list
-            document.getElementById('editFileList').innerHTML = '';
+            // Clear new files list (guarded; upload UI removed)
+            const editFileListEl = document.getElementById('editFileList');
+            if (editFileListEl) editFileListEl.innerHTML = '';
 
             // Show modal
             const modal = document.getElementById('editPatientModal');
@@ -3658,6 +3685,19 @@
                         const tempStr = (h.temperature ?? '') !== '' && h.temperature != null ? `${h.temperature} °C` : '';
                         const cat = (imcVal != null) ? getCat(imcVal) : '';
                         const catClass = getCatClass(cat);
+                        const hrStr = (h.heartRate ?? '') !== '' && h.heartRate != null ? `HR: ${h.heartRate} bpm` : '';
+                        const sugarStr = (h.bloodSugar ?? '') !== '' && h.bloodSugar != null ? `Sugar: ${h.bloodSugar} mg/dL` : '';
+                        const bpStr = (h.bpSystolic != null || h.bpDiastolic != null)
+                            ? `BP: ${h.bpSystolic ?? ''}${(h.bpSystolic!=null||h.bpDiastolic!=null)?'/':''}${h.bpDiastolic ?? ''} mmHg`
+                            : '';
+                        const sublineParts = [hrStr, sugarStr, bpStr].filter(Boolean);
+                        const sublineHtml = sublineParts.length ? `
+                            <tr>
+                                <td colspan="6" class="p-2 pt-0 border-b text-xs text-gray-500">
+                                    ${sublineParts.join(' • ')}
+                                </td>
+                            </tr>
+                        ` : '';
                         return `
                             <tr>
                                 <td class="p-2 border-b text-sm text-gray-600">${dateStr}</td>
@@ -3667,6 +3707,7 @@
                                 <td class=\"p-2 border-b text-sm\">${tempStr}</td>
                                 <td class="p-2 border-b"><span class="${catClass}">${cat}</span></td>
                             </tr>
+                            ${sublineHtml}
                         `;
                     }).join('');
 
@@ -4778,6 +4819,35 @@
                 patientSelect.innerHTML = '<option value="">Choose a patient...</option>' +
                     patients.map(p => `<option value="${p.id}">${p.fullName} (${p.fileNumber || 'No file#'}) - ${p.phone}</option>`).join('');
 
+                // Setup selected patient info section
+                const infoBox = document.getElementById('consultPatientInfo');
+                const nameEl = document.getElementById('consultPatientName');
+                const phoneEl = document.getElementById('consultPatientPhone');
+                const ageGenEl = document.getElementById('consultPatientAgeGender');
+                const addrEl = document.getElementById('consultPatientAddress');
+                const histEl = document.getElementById('consultPatientHistory');
+
+                const renderPatientInfo = () => {
+                    const id = patientSelect.value;
+                    const p = patients.find(x => x.id === id);
+                    if (!p) {
+                        if (infoBox) infoBox.classList.add('hidden');
+                        return;
+                    }
+                    if (nameEl) nameEl.textContent = p.fullName || '-';
+                    if (phoneEl) phoneEl.textContent = p.phone || '-';
+                    const age = p.dateOfBirth ? calculateAge(p.dateOfBirth) : null;
+                    if (ageGenEl) ageGenEl.textContent = `${age != null ? age + ' yrs' : 'N/A'}${p.gender ? ' • ' + p.gender : ''}`;
+                    if (addrEl) addrEl.textContent = p.address || '-';
+                    if (histEl) histEl.textContent = (p.medicalHistory && p.medicalHistory.trim()) ? p.medicalHistory : 'No history available.';
+                    if (infoBox) infoBox.classList.remove('hidden');
+                };
+
+                patientSelect.removeEventListener('change', renderPatientInfo);
+                patientSelect.addEventListener('change', renderPatientInfo);
+                // Initial state hidden
+                if (infoBox) infoBox.classList.add('hidden');
+
                 // Setup live IMC (BMI) calculation
                 const heightInput = document.getElementById('consultHeight');
                 const weightInput = document.getElementById('consultWeight');
@@ -4851,6 +4921,9 @@
                     bmiCatEl.textContent = '';
                     bmiCatEl.className = 'text-sm text-gray-500';
                 }
+                // Reset patient info box
+                const infoBox = document.getElementById('consultPatientInfo');
+                if (infoBox) infoBox.classList.add('hidden');
             };
 
             if (consultationForm) {
@@ -4864,6 +4937,10 @@
                     const heightVal = document.getElementById('consultHeight')?.value;
                     const weightVal = document.getElementById('consultWeight')?.value;
                     const tempVal = document.getElementById('consultTemperature')?.value;
+                    const heartRateVal = document.getElementById('consultHeartRate')?.value;
+                    const bloodSugarVal = document.getElementById('consultBloodSugar')?.value;
+                    const bpSysVal = document.getElementById('consultBPSystolic')?.value;
+                    const bpDiaVal = document.getElementById('consultBPDiastolic')?.value;
                     const diagnosis = document.getElementById('consultDiagnosis').value.trim();
                     const notes = document.getElementById('consultNotes').value.trim();
                     const prescription = document.getElementById('consultPrescription').value.trim();
@@ -4876,6 +4953,10 @@
                     const height = heightVal ? parseFloat(heightVal) : null;
                     const weight = weightVal ? parseFloat(weightVal) : null;
                     const temperature = tempVal ? parseFloat(tempVal) : null;
+                    const heartRate = heartRateVal ? parseInt(heartRateVal, 10) : null;
+                    const bloodSugar = bloodSugarVal ? parseInt(bloodSugarVal, 10) : null;
+                    const bpSystolic = bpSysVal ? parseInt(bpSysVal, 10) : null;
+                    const bpDiastolic = bpDiaVal ? parseInt(bpDiaVal, 10) : null;
                     let imc = null; let bmiCategory = null;
                     if (height && weight) {
                         const m = height / 100;
@@ -4895,6 +4976,10 @@
                         height,
                         weight,
                         temperature,
+                        heartRate,
+                        bloodSugar,
+                        bpSystolic,
+                        bpDiastolic,
                         imc,
                         bmiCategory,
                         diagnosis,
@@ -4913,15 +4998,21 @@
                             if (height !== null) patients[idx].height = height;
                             if (weight !== null) patients[idx].weight = weight;
                             if (temperature !== null) patients[idx].temperature = temperature;
+                            if (heartRate !== null) patients[idx].heartRate = heartRate;
+                            if (bloodSugar !== null) patients[idx].bloodSugar = bloodSugar;
+                            if (bpSystolic !== null) patients[idx].bpSystolic = bpSystolic;
+                            if (bpDiastolic !== null) patients[idx].bpDiastolic = bpDiastolic;
                             // Append vitals history entry
-                            const entry = { date: new Date().toISOString(), height, weight, imc, temperature };
+                            const entry = { date: new Date().toISOString(), height, weight, imc, temperature, heartRate, bloodSugar, bpSystolic, bpDiastolic };
                             if (!Array.isArray(patients[idx].vitalsHistory)) patients[idx].vitalsHistory = [];
                             // Only add if at least one of the values is present
-                            if (height !== null || weight !== null || imc !== null || temperature !== null) {
+                            if (height !== null || weight !== null || imc !== null || temperature !== null || heartRate !== null || bloodSugar !== null || bpSystolic !== null || bpDiastolic !== null) {
                                 patients[idx].vitalsHistory.push(entry);
                             }
                             patients[idx].lastUpdated = new Date().toISOString();
+                            // Persist to localStorage and sync in-memory list so UI reflects immediately
                             localStorage.setItem('healthcarePatients', JSON.stringify(patients));
+                            storedPatients = patients;
                         }
                     } catch { }
 
