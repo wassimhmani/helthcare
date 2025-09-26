@@ -1090,8 +1090,6 @@
                 <!-- Desktop Menu -->
                 <div class="nav-links">
                     <a href="#" class="nav-link active" data-translate="dashboard">Dashboard</a>
-                    <a href="#" class="nav-link" onclick="showAddAppointmentModal()"
-                        data-translate="add_appointment">Add Appointment</a>
                     <a href="#" class="nav-link" onclick="showPatientManagement()"
                         data-translate="patients">Patients</a>
                     <a href="#" class="nav-link" onclick="showBillingModal()" data-translate="billing">Billing</a>
@@ -1100,7 +1098,6 @@
                         onclick="showConsultationModal()">Consultations</a>
                     <a href="#" class="nav-link" onclick="showLanguageSettings()" data-translate="settings">Settings</a>
                 </div>
-
                 <!-- User Profile -->
                 <div class="user-profile">
                     <div class="user-avatar">JD</div>
@@ -1108,7 +1105,7 @@
                         <p class="user-name">John Doe</p>
                         <p class="user-role" data-translate="secretary">Secretary</p>
                     </div>
-                    <button class="logout-btn" onclick="logout()" title="Logout">
+                    <button class="logout-btn" onclick="logout()" title="Logout" data-translate="logout">
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -1130,8 +1127,6 @@
         <div class="mobile-menu" id="mobile-menu">
             <div class="mobile-nav-links">
                 <a href="#" class="mobile-nav-link active" data-translate="dashboard">Dashboard</a>
-                <a href="#" class="mobile-nav-link" onclick="showAddAppointmentModal()"
-                    data-translate="add_appointment">Add Appointment</a>
                 <a href="#" class="mobile-nav-link" onclick="showPatientManagement()"
                     data-translate="patients">Patients</a>
                 <a href="#" class="mobile-nav-link" onclick="showBillingModal()" data-translate="billing">Billing</a>
@@ -1245,12 +1240,12 @@
                     <input type="hidden" id="doctorName" class="form-input"  value="" placeholder="Enter doctor's name" required>
                 </div>-->
                 <input type="hidden" id="doctorName" class="form-input" value="doctor"
-                    placeholder="Enter doctor's name">
+                    placeholder="Enter doctor's name" data-translate-placeholder="enter_doctor_name">
                 <div class="form-group">
                     <label class="form-label" for="appointmentNotes" data-translate="additional_notes">Additional
                         Notes</label>
                     <textarea id="appointmentNotes" class="form-input form-textarea"
-                        placeholder="Any specific concerns or symptoms..."></textarea>
+                        placeholder="Any specific concerns or symptoms..." data-translate-placeholder="specific_concerns"></textarea>
                 </div>
 
                 <div class="modal-actions">
@@ -1267,88 +1262,82 @@
     <div class="modal" id="consultationModal">
         <div class="modal-content" style="max-width: 700px;">
             <div class="modal-header">
-                <h2 class="modal-title">New Consultation</h2>
+                <h2 class="modal-title" data-translate="new_consultation">New Consultation</h2>
                 <button class="modal-close" onclick="closeConsultationModal()">&times;</button>
             </div>
             <form id="consultationForm">
                 <div class="form-group">
-                    <label class="form-label" for="consultPatient">Select Patient *</label>
+                    <label class="form-label" for="consultPatient" data-translate="select_patient">Select Patient *</label>
                     <select id="consultPatient" class="form-input" required></select>
                 </div>
                 <!-- Selected Patient Info -->
                 <div id="consultPatientInfo" class="card p-3 mb-4 hidden">
-                    <h4 class="font-semibold mb-2">Patient Info</h4>
+                    <h4 class="font-semibold mb-2" data-translate="patient_info">Patient Info</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm mb-2">
-                        <div><strong>Name:</strong> <span id="consultPatientName">-</span></div>
-                        <div><strong>Phone:</strong> <span id="consultPatientPhone">-</span></div>
-                        <div><strong>Age/Gender:</strong> <span id="consultPatientAgeGender">-</span></div>
-                        <div><strong>Address:</strong> <span id="consultPatientAddress">-</span></div>
+                        <div><strong data-translate="name">Name:</strong> <span id="consultPatientName">-</span></div>
+                        <div><strong data-translate="phone">Phone:</strong> <span id="consultPatientPhone">-</span></div>
+                        <div><strong data-translate="age_gender">Age/Gender:</strong> <span id="consultPatientAgeGender">-</span></div>
+                        <div><strong data-translate="address">Address:</strong> <span id="consultPatientAddress">-</span></div>
                     </div>
                     <div class="text-sm">
-                        <strong>Medical History:</strong>
-                        <div id="consultPatientHistory" class="mt-1 text-gray-700">No history available.</div>
+                        <strong data-translate="medical_history">Medical History:</strong>
+                        <div id="consultPatientHistory" class="mt-1 text-gray-700" data-translate="no_history_available">No history available.</div>
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="form-group">
-                        <label class="form-label" for="consultHeight">Height (cm)</label>
-                        <input type="number" id="consultHeight" class="form-input" placeholder="e.g., 175" min="50"
+                        <label class="form-label" for="consultHeight" data-translate="height_cm">Height (cm)</label>
+                        <input type="number" id="consultHeight" class="form-input" placeholder="e.g., 175" data-translate-placeholder="height_example" min="50"
                             max="250" step="0.1" />
                     </div>
                     <div class="form-group">
-                        <label class="form-label" for="consultWeight">Weight (kg)</label>
-                        <input type="number" id="consultWeight" class="form-input" placeholder="e.g., 70.5" min="10"
+                        <label class="form-label" for="consultWeight" data-translate="weight_kg">Weight (kg)</label>
+                        <input type="number" id="consultWeight" class="form-input" placeholder="e.g., 70.5" data-translate-placeholder="weight_example" min="10"
                             max="300" step="0.1" />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">IMC (BMI)</label>
+                    <label class="form-label" data-translate="bmi">IMC (BMI)</label>
                     <div class="form-input bg-gray-50 flex items-center gap-2">
                         <span id="consultIMCValue">—</span>
                         <span id="consultBMICategory" class="text-sm text-gray-500">&nbsp;</span>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="consultTemperature">Temperature (°C)</label>
-                    <input type="number" id="consultTemperature" class="form-input" placeholder="e.g., 37.0" min="30" max="45" step="0.1" />
+                    <label class="form-label" for="consultTemperature" data-translate="temperature_c">Temperature (°C)</label>
+                    <input type="number" id="consultTemperature" class="form-input" placeholder="e.g., 37.0" data-translate-placeholder="temperature_example" min="30" max="45" step="0.1" />
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="form-group">
-                        <label class="form-label" for="consultHeartRate">Heart Rate (bpm)</label>
-                        <input type="number" id="consultHeartRate" class="form-input" placeholder="e.g., 72" min="30" max="220" step="1" />
+                        <label class="form-label" for="consultHeartRate" data-translate="heart_rate_bpm">Heart Rate (bpm)</label>
+                        <input type="number" id="consultHeartRate" class="form-input" placeholder="e.g., 72" data-translate-placeholder="heart_rate_example" min="30" max="220" step="1" />
                     </div>
                     <div class="form-group">
-                        <label class="form-label" for="consultBloodSugar">Blood Sugar (mg/dL)</label>
-                        <input type="number" id="consultBloodSugar" class="form-input" placeholder="e.g., 95" min="40" max="600" step="1" />
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="form-group">
-                        <label class="form-label" for="consultBPSystolic">BP Systolic (mmHg)</label>
-                        <input type="number" id="consultBPSystolic" class="form-input" placeholder="e.g., 120" min="60" max="250" step="1" />
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="consultBPDiastolic">BP Diastolic (mmHg)</label>
-                        <input type="number" id="consultBPDiastolic" class="form-input" placeholder="e.g., 80" min="30" max="150" step="1" />
+                        <label class="form-label" for="consultBloodSugar" data-translate="blood_sugar_mgdl">Blood Sugar (mg/dL)</label>
+                        <input type="number" id="consultBloodSugar" class="form-input" placeholder="e.g., 95" data-translate-placeholder="blood_sugar_example" min="40" max="600" step="1" />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="consultDiagnosis">Diagnosis *</label>
-                    <input id="consultDiagnosis" class="form-input" placeholder="Enter diagnosis" required />
+                    <label class="form-label" for="consultBloodPressure" data-translate="blood_pressure_mmhg">Blood Pressure (mmHg)</label>
+                    <input type="text" id="consultBloodPressure" class="form-input" placeholder="e.g., 120/80" data-translate-placeholder="blood_pressure_example" />
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="consultNotes">Clinical Notes *</label>
-                    <textarea id="consultNotes" class="form-input form-textarea" placeholder="Enter notes"
+                    <label class="form-label" for="consultDiagnosis" data-translate="diagnosis">Diagnosis *</label>
+                    <input id="consultDiagnosis" class="form-input" placeholder="Enter diagnosis" data-translate-placeholder="enter_diagnosis" required />
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="consultNotes" data-translate="clinical_notes">Clinical Notes *</label>
+                    <textarea id="consultNotes" class="form-input form-textarea" placeholder="Enter notes" data-translate-placeholder="enter_notes"
                         required></textarea>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="consultPrescription">Prescription</label>
+                    <label class="form-label" for="consultPrescription" data-translate="prescription">Prescription</label>
                     <textarea id="consultPrescription" class="form-input form-textarea"
-                        placeholder="Drugs, dosage, duration"></textarea>
+                        placeholder="Drugs, dosage, duration" data-translate-placeholder="drugs_dosage"></textarea>
                 </div>
                 <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeConsultationModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Consultation</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeConsultationModal()" data-translate="cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary" data-translate="save_consultation">Save Consultation</button>
                 </div>
             </form>
         </div>
@@ -1696,8 +1685,6 @@
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeBillingModal()"
                         data-translate="cancel">Cancel</button>
-                    <button type="button" class="btn btn-outline" onclick="testPrintFunction()"
-                        data-translate="test_print">Test Print</button>
                     <button type="submit" class="btn btn-primary" data-translate="create_bill">Create Bill</button>
                 </div>
             </form>
@@ -1761,7 +1748,6 @@
                         </h1>
                         <p class="text-gray-600" data-translate="manage_appointments">Manage daily appointments and
                             schedule</p>
-
                     </div>
 
                     <div class="flex items-center gap-2">
@@ -1940,7 +1926,86 @@
                 price: 'Price ($)',
                 notes: 'Notes',
                 remove_item: 'Remove Item',
-                add_item: 'Add Item'
+                add_item: 'Add Item',
+
+                // Consultation form
+                new_consultation: 'New Consultation',
+                patient_info: 'Patient Info',
+                name: 'Name',
+                phone: 'Phone',
+                age_gender: 'Age/Gender',
+                height_cm: 'Height (cm)',
+                weight_kg: 'Weight (kg)',
+                bmi: 'IMC (BMI)',
+                temperature_c: 'Temperature (°C)',
+                heart_rate_bpm: 'Heart Rate (bpm)',
+                blood_sugar_mgdl: 'Blood Sugar (mg/dL)',
+                blood_pressure_mmhg: 'Blood Pressure (mmHg)',
+                diagnosis: 'Diagnosis',
+                clinical_notes: 'Clinical Notes',
+                prescription: 'Prescription',
+                save_consultation: 'Save Consultation',
+                no_history_available: 'No history available.',
+
+                // Dynamic modals
+                printable_bill: 'Printable Bill',
+
+                // Placeholders
+                enter_doctor_name: 'Enter doctor\'s name',
+                specific_concerns: 'Any specific concerns or symptoms...',
+                height_example: 'e.g., 175',
+                weight_example: 'e.g., 70.5',
+                temperature_example: 'e.g., 37.0',
+                heart_rate_example: 'e.g., 72',
+                blood_sugar_example: 'e.g., 95',
+                blood_pressure_example: 'e.g., 120/80',
+                enter_diagnosis: 'Enter diagnosis',
+                enter_notes: 'Enter notes',
+                drugs_dosage: 'Drugs, dosage, duration',
+                file_number_example: 'Enter patient file number (e.g., P-2024-001)',
+                cin_passport_example: 'Enter CIN or Passport number',
+                full_name_example: 'Enter patient\'s full name',
+                email_example: 'patient@example.com',
+                phone_example: '+1 (555) 123-4567',
+                address_example: 'Street address, City, State',
+                medical_history_example: 'Any relevant medical history, allergies, or notes...',
+                search_patients: 'Search patients by name, CIN/Passport, file number, email, phone, or date of birth...',
+                consultation_fee_example: 'e.g., Consultation fee',
+
+                // Alert messages
+                no_medical_files: 'No medical files found for this patient.',
+                files_selected: 'file(s) selected for upload.',
+                select_patient_appointment: 'Please select a patient for the appointment.',
+                fill_required_fields: 'Please fill in all required fields.',
+                valid_email: 'Please enter a valid email address.',
+                future_date: 'Please select a future date for your appointment.',
+                appointment_not_found: 'Appointment not found. Please refresh the page and try again.',
+                fill_required_patient_fields: 'Please fill in all required fields (File Number, CIN/Passport, Name, Phone, Date of Birth).',
+                email_exists: 'A patient with this email address already exists.',
+                file_number_exists: 'A patient with this file number already exists.',
+                cin_passport_exists: 'A patient with this CIN/Passport number already exists.',
+                no_patient_selected: 'No patient selected for editing.',
+                patient_not_found_storage: 'Patient not found in storage.',
+                patient_not_found: 'Patient not found.',
+                delete_patient_confirm: 'Are you sure you want to delete',
+                patient_deleted: 'Patient deleted successfully.',
+                at_least_one_item: 'At least one item is required for the bill.',
+                popup_blocked: 'Popup blocked! Please allow popups for this site and try again, or use the alternative method below.',
+                print_error: 'Error opening print window. Using alternative method.',
+                select_patient_bill: 'Please select a patient for the bill.',
+                bill_created_success: '✅ Bill created successfully!\n\nBill ID: {0}\nPatient: {1}\nTotal: ${2}\n\nWould you like to print the bill now?',
+                bill_id: 'Bill ID:',
+                patient: 'Patient:',
+                total: 'Total:',
+                print_bill_now: 'Would you like to print the bill now?',
+                error_creating_bill: 'Error creating bill: {0}',
+                consultations_doctors_only: 'Consultations are available to doctors only.',
+                fill_required_consultation: 'Please fill required fields.',
+                consultation_saved: 'Consultation saved.',
+                logout_confirm: 'Are you sure you want to logout?',
+
+                // Titles
+                logout: 'Logout'
             },
             fr: {
                 // Navigation
@@ -2019,7 +2084,86 @@
                 price: 'Prix ($)',
                 notes: 'Notes',
                 remove_item: 'Supprimer l\'élément',
-                add_item: 'Ajouter un élément'
+                add_item: 'Ajouter un élément',
+
+                // Consultation form
+                new_consultation: 'Nouvelle Consultation',
+                patient_info: 'Informations Patient',
+                name: 'Nom',
+                phone: 'Téléphone',
+                age_gender: 'Âge/Genre',
+                height_cm: 'Taille (cm)',
+                weight_kg: 'Poids (kg)',
+                bmi: 'IMC (BMI)',
+                temperature_c: 'Température (°C)',
+                heart_rate_bpm: 'Fréquence Cardiaque (bpm)',
+                blood_sugar_mgdl: 'Glycémie (mg/dL)',
+                blood_pressure_mmhg: 'Pression Artérielle (mmHg)',
+                diagnosis: 'Diagnostic',
+                clinical_notes: 'Notes Cliniques',
+                prescription: 'Prescription',
+                save_consultation: 'Enregistrer Consultation',
+                no_history_available: 'Aucun historique disponible.',
+
+                // Dynamic modals
+                printable_bill: 'Facture Imprimable',
+
+                // Placeholders
+                enter_doctor_name: 'Entrez le nom du médecin',
+                specific_concerns: 'Toute préoccupation ou symptôme spécifique...',
+                height_example: 'ex., 175',
+                weight_example: 'ex., 70.5',
+                temperature_example: 'ex., 37.0',
+                heart_rate_example: 'ex., 72',
+                blood_sugar_example: 'ex., 95',
+                blood_pressure_example: 'ex., 120/80',
+                enter_diagnosis: 'Entrez le diagnostic',
+                enter_notes: 'Entrez les notes',
+                drugs_dosage: 'Médicaments, posologie, durée',
+                file_number_example: 'Entrez le numéro de dossier patient (ex., P-2024-001)',
+                cin_passport_example: 'Entrez le CIN ou numéro de passeport',
+                full_name_example: 'Entrez le nom complet du patient',
+                email_example: 'patient@exemple.com',
+                phone_example: '+1 (555) 123-4567',
+                address_example: 'Adresse, Ville, État',
+                medical_history_example: 'Tout historique médical pertinent, allergies ou notes...',
+                search_patients: 'Rechercher des patients par nom, CIN/Passeport, numéro de dossier, email, téléphone ou date de naissance...',
+                consultation_fee_example: 'ex., Frais de consultation',
+
+                // Alert messages
+                no_medical_files: 'Aucun fichier médical trouvé pour ce patient.',
+                files_selected: 'fichier(s) sélectionné(s) pour téléchargement.',
+                select_patient_appointment: 'Veuillez sélectionner un patient pour le rendez-vous.',
+                fill_required_fields: 'Veuillez remplir tous les champs obligatoires.',
+                valid_email: 'Veuillez entrer une adresse email valide.',
+                future_date: 'Veuillez sélectionner une date future pour votre rendez-vous.',
+                appointment_not_found: 'Rendez-vous non trouvé. Veuillez actualiser la page et réessayer.',
+                fill_required_patient_fields: 'Veuillez remplir tous les champs obligatoires (Numéro de dossier, CIN/Passeport, Nom, Téléphone, Date de naissance).',
+                email_exists: 'Un patient avec cette adresse email existe déjà.',
+                file_number_exists: 'Un patient avec ce numéro de dossier existe déjà.',
+                cin_passport_exists: 'Un patient avec ce CIN/numéro de passeport existe déjà.',
+                no_patient_selected: 'Aucun patient sélectionné pour modification.',
+                patient_not_found_storage: 'Patient non trouvé dans le stockage.',
+                patient_not_found: 'Patient non trouvé.',
+                delete_patient_confirm: 'Êtes-vous sûr de vouloir supprimer',
+                patient_deleted: 'Patient supprimé avec succès.',
+                at_least_one_item: 'Au moins un élément est requis pour la facture.',
+                popup_blocked: 'Popup bloqué! Veuillez autoriser les popups pour ce site et réessayer, ou utilisez la méthode alternative ci-dessous.',
+                print_error: 'Erreur lors de l\'ouverture de la fenêtre d\'impression. Utilisation de la méthode alternative.',
+                select_patient_bill: 'Veuillez sélectionner un patient pour la facture.',
+                bill_created_success: '✅ Facture créée avec succès!\n\nID de facture: {0}\nPatient: {1}\nTotal: ${2}\n\nVoulez-vous imprimer la facture maintenant?',
+                bill_id: 'ID de facture:',
+                patient: 'Patient:',
+                total: 'Total:',
+                print_bill_now: 'Voulez-vous imprimer la facture maintenant?',
+                error_creating_bill: 'Erreur lors de la création de la facture: {0}',
+                consultations_doctors_only: 'Les consultations sont disponibles uniquement pour les médecins.',
+                fill_required_consultation: 'Veuillez remplir les champs obligatoires.',
+                consultation_saved: 'Consultation enregistrée.',
+                logout_confirm: 'Êtes-vous sûr de vouloir vous déconnecter?',
+
+                // Titles
+                logout: 'Déconnexion'
             },
             ar: {
                 // Navigation
@@ -2098,7 +2242,86 @@
                 price: 'السعر ($)',
                 notes: 'ملاحظات',
                 remove_item: 'إزالة العنصر',
-                add_item: 'إضافة عنصر'
+                add_item: 'إضافة عنصر',
+
+                // Consultation form
+                new_consultation: 'استشارة جديدة',
+                patient_info: 'معلومات المريض',
+                name: 'الاسم',
+                phone: 'الهاتف',
+                age_gender: 'العمر/الجنس',
+                height_cm: 'الطول (سم)',
+                weight_kg: 'الوزن (كغ)',
+                bmi: 'مؤشر كتلة الجسم (BMI)',
+                temperature_c: 'درجة الحرارة (°C)',
+                heart_rate_bpm: 'معدل النبض (نبضة/دقيقة)',
+                blood_sugar_mgdl: 'سكر الدم (ملغ/دل)',
+                blood_pressure_mmhg: 'ضغط الدم (ملم زئبق)',
+                diagnosis: 'التشخيص',
+                clinical_notes: 'الملاحظات السريرية',
+                prescription: 'الوصفة الطبية',
+                save_consultation: 'حفظ الاستشارة',
+                no_history_available: 'لا يوجد تاريخ متاح.',
+
+                // Dynamic modals
+                printable_bill: 'فاتورة قابلة للطباعة',
+
+                // Placeholders
+                enter_doctor_name: 'أدخل اسم الطبيب',
+                specific_concerns: 'أي مخاوف أو أعراض محددة...',
+                height_example: 'مثال: 175',
+                weight_example: 'مثال: 70.5',
+                temperature_example: 'مثال: 37.0',
+                heart_rate_example: 'مثال: 72',
+                blood_sugar_example: 'مثال: 95',
+                blood_pressure_example: 'مثال: 120/80',
+                enter_diagnosis: 'أدخل التشخيص',
+                enter_notes: 'أدخل الملاحظات',
+                drugs_dosage: 'الأدوية، الجرعة، المدة',
+                file_number_example: 'أدخل رقم ملف المريض (مثال: P-2024-001)',
+                cin_passport_example: 'أدخل رقم الهوية أو جواز السفر',
+                full_name_example: 'أدخل الاسم الكامل للمريض',
+                email_example: 'patient@example.com',
+                phone_example: '+1 (555) 123-4567',
+                address_example: 'عنوان الشارع، المدينة، الولاية',
+                medical_history_example: 'أي تاريخ طبي ذي صلة، حساسيات أو ملاحظات...',
+                search_patients: 'البحث عن المرضى بالاسم، الهوية/جواز السفر، رقم الملف، البريد الإلكتروني، الهاتف أو تاريخ الميلاد...',
+                consultation_fee_example: 'مثال: رسوم الاستشارة',
+
+                // Alert messages
+                no_medical_files: 'لم يتم العثور على ملفات طبية لهذا المريض.',
+                files_selected: 'ملف(ات) محدد(ة) للرفع.',
+                select_patient_appointment: 'يرجى اختيار مريض للموعد.',
+                fill_required_fields: 'يرجى ملء جميع الحقول المطلوبة.',
+                valid_email: 'يرجى إدخال عنوان بريد إلكتروني صحيح.',
+                future_date: 'يرجى اختيار تاريخ مستقبلي لموعدك.',
+                appointment_not_found: 'لم يتم العثور على الموعد. يرجى تحديث الصفحة والمحاولة مرة أخرى.',
+                fill_required_patient_fields: 'يرجى ملء جميع الحقول المطلوبة (رقم الملف، الهوية/جواز السفر، الاسم، الهاتف، تاريخ الميلاد).',
+                email_exists: 'يوجد مريض بهذا العنوان البريدي بالفعل.',
+                file_number_exists: 'يوجد مريض برقم الملف هذا بالفعل.',
+                cin_passport_exists: 'يوجد مريض برقم الهوية/جواز السفر هذا بالفعل.',
+                no_patient_selected: 'لم يتم اختيار مريض للتعديل.',
+                patient_not_found_storage: 'لم يتم العثور على المريض في التخزين.',
+                patient_not_found: 'لم يتم العثور على المريض.',
+                delete_patient_confirm: 'هل أنت متأكد من أنك تريد حذف',
+                patient_deleted: 'تم حذف المريض بنجاح.',
+                at_least_one_item: 'عنصر واحد على الأقل مطلوب للفاتورة.',
+                popup_blocked: 'تم حظر النافذة المنبثقة! يرجى السماح بالنوافذ المنبثقة لهذا الموقع والمحاولة مرة أخرى، أو استخدم الطريقة البديلة أدناه.',
+                print_error: 'خطأ في فتح نافذة الطباعة. استخدام الطريقة البديلة.',
+                select_patient_bill: 'يرجى اختيار مريض للفاتورة.',
+                bill_created_success: '✅ تم إنشاء الفاتورة بنجاح!\n\nرقم الفاتورة: {0}\nالمريض: {1}\nالمجموع: ${2}\n\nهل تريد طباعة الفاتورة الآن؟',
+                bill_id: 'رقم الفاتورة:',
+                patient: 'المريض:',
+                total: 'المجموع:',
+                print_bill_now: 'هل تريد طباعة الفاتورة الآن؟',
+                error_creating_bill: 'خطأ في إنشاء الفاتورة: {0}',
+                consultations_doctors_only: 'الاستشارات متاحة للأطباء فقط.',
+                fill_required_consultation: 'يرجى ملء الحقول المطلوبة.',
+                consultation_saved: 'تم حفظ الاستشارة.',
+                logout_confirm: 'هل أنت متأكد من أنك تريد تسجيل الخروج؟',
+
+                // Titles
+                logout: 'تسجيل الخروج'
             }
         };
 
@@ -2429,14 +2652,22 @@
             let agendaHTML = `
                 <div class="space-y-4">
                     <div class="card p-6">
-                        <div class="flex items-center gap-2 mb-2">
-                            <svg class="icon-lg" viewBox="0 0 24 24">
-                                <path d="M8 2v4"/>
-                                <path d="M16 2v4"/>
-                                <rect width="18" height="18" x="3" y="4" rx="2"/>
-                                <path d="M3 10h18"/>
-                            </svg>
-                            <h2 class="text-xl font-semibold">${formatDate(selectedDate)}</h2>
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <svg class="icon-lg" viewBox="0 0 24 24">
+                                    <path d="M8 2v4"/>
+                                    <path d="M16 2v4"/>
+                                    <rect width="18" height="18" x="3" y="4" rx="2"/>
+                                    <path d="M3 10h18"/>
+                                </svg>
+                                <h2 class="text-xl font-semibold">${formatDate(selectedDate)}</h2>
+                            </div>
+                            <button class="btn btn-primary inline-flex items-center" onclick="showAddAppointmentModal()" title="Add Appointment">
+                                <svg class="icon mr-2" viewBox="0 0 24 24">
+                                    <path d="M12 4v16M20 12H4" />
+                                </svg>
+                                Add Appointment
+                            </button>
                         </div>
                         <div class="flex gap-2 mt-2">
                             <span class="badge badge-secondary">${appointmentCount} Total</span>
@@ -2713,7 +2944,7 @@
         function viewPatientFiles(patientId) {
             const patient = storedPatients.find(p => p.id === patientId);
             if (!patient || !patient.medicalFiles || patient.medicalFiles.length === 0) {
-                alert('No medical files found for this patient.');
+                showTranslatedAlert('no_medical_files');
                 return;
             }
 
@@ -2723,7 +2954,7 @@
             modal.innerHTML = `
                 <div class="modal-content" style="max-width: 600px;">
                     <div class="modal-header">
-                        <h2 class="modal-title">Medical Files - ${patient.fullName}</h2>
+                        <h2 class="modal-title" data-translate="medical_files">Medical Files - ${patient.fullName}</h2>
                         <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
                     </div>
                     <div class="space-y-4">
@@ -2743,6 +2974,9 @@
             `;
 
             document.body.appendChild(modal);
+
+            // Update translations for the new modal
+            updateModalTranslations();
 
             // Close modal when clicking outside
             modal.addEventListener('click', function (event) {
@@ -2793,7 +3027,7 @@
 
             // Clear the input
             event.target.value = '';
-            alert(`${files.length} file(s) selected for upload.`);
+            showTranslatedAlert('files_selected', files.length);
         }
 
 
@@ -2868,14 +3102,14 @@
             // Check if patient is selected
             const patientSelect = document.getElementById('patientSelection');
             if (!patientSelect.value) {
-                alert('Please select a patient for the appointment.');
+                showTranslatedAlert('select_patient_appointment');
                 return false;
             }
 
             // Basic validation
             if (!data.patientName || !data.patientPhone ||
                 !data.appointmentDate || !data.appointmentTime || !data.appointmentType) {
-                alert('Please fill in all required fields.');
+                showTranslatedAlert('fill_required_fields');
                 return false;
             }
 
@@ -2883,7 +3117,7 @@
             if (data.patientEmail) {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(data.patientEmail)) {
-                    alert('Please enter a valid email address.');
+                    showTranslatedAlert('valid_email');
                     return false;
                 }
             }
@@ -2894,7 +3128,7 @@
             today.setHours(0, 0, 0, 0);
 
             if (selectedDate < today) {
-                alert('Please select a future date for your appointment.');
+                showTranslatedAlert('future_date');
                 return false;
             }
 
@@ -2971,7 +3205,7 @@
                 renderDailyAgenda();
             } else {
                 console.error('Appointment not found:', appointmentId);
-                alert('Appointment not found. Please refresh the page and try again.');
+                showTranslatedAlert('appointment_not_found');
             }
         }
 
@@ -3042,6 +3276,13 @@
 
             // Update modal translations
             updateModalTranslations();
+
+            // Auto-generate file number on open (Add tab)
+            const fileNumEl = document.getElementById('patientFileNumber');
+            if (fileNumEl) {
+                fileNumEl.value = generatePatientFileNumber();
+                fileNumEl.readOnly = true;
+            }
         }
 
         function closePatientManagement() {
@@ -3067,6 +3308,12 @@
                 viewContent.style.display = 'none';
                 addTab.className = 'btn btn-primary';
                 viewTab.className = 'btn btn-secondary';
+                // Ensure file number is generated when switching back to Add tab
+                const fileNumEl = document.getElementById('patientFileNumber');
+                if (fileNumEl) {
+                    fileNumEl.value = generatePatientFileNumber();
+                    fileNumEl.readOnly = true;
+                }
             } else {
                 addContent.style.display = 'none';
                 viewContent.style.display = 'block';
@@ -3122,6 +3369,12 @@
 
             // Reset form (for next time)
             document.getElementById('patientForm').reset();
+            // Pre-fill a fresh generated file number for the next entry
+            const fileNumEl = document.getElementById('patientFileNumber');
+            if (fileNumEl) {
+                fileNumEl.value = generatePatientFileNumber();
+                fileNumEl.readOnly = true;
+            }
         });
 
         // Handle edit patient form submission
@@ -3153,7 +3406,7 @@
         function validatePatientForm(data) {
             // Basic validation
             if (!data.fileNumber || !data.cinPassport || !data.fullName || !data.phone || !data.dateOfBirth) {
-                alert('Please fill in all required fields (File Number, CIN/Passport, Name, Phone, Date of Birth).');
+                showTranslatedAlert('fill_required_patient_fields');
                 return false;
             }
 
@@ -3161,14 +3414,14 @@
             if (data.email && data.email.trim()) {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(data.email)) {
-                    alert('Please enter a valid email address.');
+                    showTranslatedAlert('valid_email');
                     return false;
                 }
 
                 // Check for duplicate email (only if email is provided)
                 const existingPatient = storedPatients.find(patient => patient.email === data.email);
                 if (existingPatient) {
-                    alert('A patient with this email address already exists.');
+                    showTranslatedAlert('email_exists');
                     return false;
                 }
             }
@@ -3176,14 +3429,14 @@
             // Check for duplicate file number
             const existingFileNumber = storedPatients.find(patient => patient.fileNumber === data.fileNumber);
             if (existingFileNumber) {
-                alert('A patient with this file number already exists.');
+                showTranslatedAlert('file_number_exists');
                 return false;
             }
 
             // Check for duplicate CIN/Passport
             const existingCinPassport = storedPatients.find(patient => patient.cinPassport === data.cinPassport);
             if (existingCinPassport) {
-                alert('A patient with this CIN/Passport number already exists.');
+                showTranslatedAlert('cin_passport_exists');
                 return false;
             }
 
@@ -3193,7 +3446,7 @@
         function validateEditPatientForm(data) {
             // Basic validation
             if (!data.fileNumber || !data.cinPassport || !data.fullName || !data.phone || !data.dateOfBirth) {
-                alert('Please fill in all required fields (File Number, CIN/Passport, Name, Phone, Date of Birth).');
+                showTranslatedAlert('fill_required_patient_fields');
                 return false;
             }
 
@@ -3201,14 +3454,14 @@
             if (data.email && data.email.trim()) {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(data.email)) {
-                    alert('Please enter a valid email address.');
+                    showTranslatedAlert('valid_email');
                     return false;
                 }
 
                 // Check for duplicate email (excluding current patient and only if email is provided)
                 const existingPatient = storedPatients.find(patient => patient.email === data.email && patient.id !== editingPatient.id);
                 if (existingPatient) {
-                    alert('A patient with this email address already exists.');
+                    showTranslatedAlert('email_exists');
                     return false;
                 }
             }
@@ -3216,14 +3469,14 @@
             // Check for duplicate file number (excluding current patient)
             const existingFileNumber = storedPatients.find(patient => patient.fileNumber === data.fileNumber && patient.id !== editingPatient.id);
             if (existingFileNumber) {
-                alert('A patient with this file number already exists.');
+                showTranslatedAlert('file_number_exists');
                 return false;
             }
 
             // Check for duplicate CIN/Passport (excluding current patient)
             const existingCinPassport = storedPatients.find(patient => patient.cinPassport === data.cinPassport && patient.id !== editingPatient.id);
             if (existingCinPassport) {
-                alert('A patient with this CIN/Passport number already exists.');
+                showTranslatedAlert('cin_passport_exists');
                 return false;
             }
 
@@ -3232,7 +3485,7 @@
 
         function updatePatient(formData) {
             if (!editingPatient) {
-                alert('No patient selected for editing.');
+                showTranslatedAlert('no_patient_selected');
                 return;
             }
 
@@ -3297,7 +3550,7 @@
                     // Refresh patient list
                     loadPatientsList();
                 } else {
-                    alert('Patient not found in storage.');
+                    showTranslatedAlert('patient_not_found_storage');
                 }
             });
         }
@@ -3492,6 +3745,24 @@
             return age;
         }
 
+        // Generate a unique patient file number for the current year, format: P-YYYY-XXX
+        function generatePatientFileNumber() {
+            const year = new Date().getFullYear();
+            let maxSeq = 0;
+            try {
+                const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
+                patients.forEach(p => {
+                    const m = /^P-(\d{4})-(\d{3,})$/i.exec(p.fileNumber || '');
+                    if (m && parseInt(m[1], 10) === year) {
+                        const seq = parseInt(m[2], 10);
+                        if (!Number.isNaN(seq)) maxSeq = Math.max(maxSeq, seq);
+                    }
+                });
+            } catch {}
+            const next = (maxSeq + 1).toString().padStart(3, '0');
+            return `P-${year}-${next}`;
+        }
+
         function searchPatients() {
             const searchTerm = document.getElementById('patientSearch').value.toLowerCase().trim();
             const patientsList = document.getElementById('patientsList');
@@ -3610,7 +3881,7 @@
         function editPatient(patientId) {
             const patient = storedPatients.find(p => p.id === patientId);
             if (!patient) {
-                alert('Patient not found.');
+                showTranslatedAlert('patient_not_found');
                 return;
             }
 
@@ -3736,18 +4007,18 @@
 
         function deletePatient(patientId) {
             const patient = storedPatients.find(p => p.id === patientId);
-            if (patient && confirm(`Are you sure you want to delete ${patient.fullName}?`)) {
+            if (patient && showTranslatedConfirm('delete_patient_confirm', patient.fullName)) {
                 storedPatients = storedPatients.filter(p => p.id !== patientId);
                 saveStoredPatients();
                 loadPatientsList();
-                alert('Patient deleted successfully.');
+                showTranslatedAlert('patient_deleted');
             }
         }
 
         function viewPatientFiles(patientId) {
             const patient = storedPatients.find(p => p.id === patientId);
             if (!patient || !patient.medicalFiles || patient.medicalFiles.length === 0) {
-                alert('No medical files found for this patient.');
+                showTranslatedAlert('no_medical_files');
                 return;
             }
 
@@ -3757,7 +4028,7 @@
             modal.innerHTML = `
                 <div class="modal-content" style="max-width: 600px;">
                     <div class="modal-header">
-                        <h2 class="modal-title">Medical Files - ${patient.fullName}</h2>
+                        <h2 class="modal-title" data-translate="medical_files">Medical Files - ${patient.fullName}</h2>
                         <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
                     </div>
                     <div class="space-y-4">
@@ -3790,6 +4061,9 @@
             `;
 
             document.body.appendChild(modal);
+
+            // Update translations for the new modal
+            updateModalTranslations();
 
             // Close modal when clicking outside
             modal.addEventListener('click', function (event) {
@@ -3860,6 +4134,9 @@
             `;
 
             document.body.appendChild(modal);
+
+            // Update translations for the new modal
+            updateModalTranslations();
 
             // Close modal when clicking outside
             modal.addEventListener('click', function (event) {
@@ -3982,6 +4259,15 @@
                     element.textContent = translations[currentLanguage][key];
                 }
             });
+
+            // Update placeholder translations
+            const placeholderElements = document.querySelectorAll('.modal [data-translate-placeholder]');
+            placeholderElements.forEach(element => {
+                const key = element.getAttribute('data-translate-placeholder');
+                if (translations[currentLanguage] && translations[currentLanguage][key]) {
+                    element.placeholder = translations[currentLanguage][key];
+                }
+            });
         }
 
         function closeLanguageSettings() {
@@ -4033,6 +4319,33 @@
                     element.textContent = translations[currentLanguage][key];
                 }
             });
+
+            // Update placeholder translations
+            const placeholderElements = document.querySelectorAll('[data-translate-placeholder]');
+            placeholderElements.forEach(element => {
+                const key = element.getAttribute('data-translate-placeholder');
+                if (translations[currentLanguage] && translations[currentLanguage][key]) {
+                    element.placeholder = translations[currentLanguage][key];
+                }
+            });
+        }
+
+        // Helper function for translated alerts
+        function showTranslatedAlert(key, ...args) {
+            let message = translations[currentLanguage] && translations[currentLanguage][key] ? translations[currentLanguage][key] : key;
+            if (args.length > 0) {
+                message = message.replace(/\{(\d+)\}/g, (match, index) => args[index] || match);
+            }
+            alert(message);
+        }
+
+        // Helper function for translated confirm dialogs
+        function showTranslatedConfirm(key, ...args) {
+            let message = translations[currentLanguage] && translations[currentLanguage][key] ? translations[currentLanguage][key] : key;
+            if (args.length > 0) {
+                message = message.replace(/\{(\d+)\}/g, (match, index) => args[index] || match);
+            }
+            return confirm(message);
         }
 
         // Initialize language on page load
@@ -4140,7 +4453,7 @@
                 button.closest('.bill-item').remove();
                 calculateBillTotal();
             } else {
-                alert('At least one item is required for the bill.');
+                showTranslatedAlert('at_least_one_item');
             }
         }
 
@@ -4556,7 +4869,7 @@
                 if (!printWindow || printWindow.closed || typeof printWindow.closed == 'undefined') {
                     // Popup blocked, show alternative
                     console.log('Popup blocked, using alternative method');
-                    alert('Popup blocked! Please allow popups for this site and try again, or use the alternative method below.');
+                    showTranslatedAlert('popup_blocked');
                     showAlternativePrint(bill);
                     return;
                 }
@@ -4576,7 +4889,7 @@
 
             } catch (error) {
                 console.error('Error opening print window:', error);
-                alert('Error opening print window. Using alternative method.');
+                showTranslatedAlert('print_error');
                 showAlternativePrint(bill);
             }
         }
@@ -4589,7 +4902,7 @@
             modal.innerHTML = `
                 <div class="modal-content" style="max-width: 90%; max-height: 90%; overflow-y: auto;">
                     <div class="modal-header">
-                        <h2 class="modal-title">Printable Bill - ${bill.id}</h2>
+                        <h2 class="modal-title" data-translate="printable_bill">Printable Bill - ${bill.id}</h2>
                         <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
                     </div>
                     <div style="padding: 1rem;">
@@ -4741,7 +5054,7 @@
             };
 
             if (!formData.patientId) {
-                alert('Please select a patient for the bill.');
+                showTranslatedAlert('select_patient_bill');
                 return;
             }
 
@@ -4750,7 +5063,7 @@
                 console.log('Bill created successfully:', newBill);
 
                 // Show success message with print option
-                const printBill = confirm(`✅ Bill created successfully!\n\nBill ID: ${newBill.id}\nPatient: ${newBill.patientName}\nTotal: $${newBill.total.toFixed(2)}\n\nWould you like to print the bill now?`);
+                const printBill = showTranslatedConfirm('bill_created_success', newBill.id, newBill.patientName, newBill.total.toFixed(2));
 
                 if (printBill) {
                     console.log('Attempting to show printable bill:', newBill);
@@ -4761,7 +5074,7 @@
                 }
             } catch (error) {
                 console.error('Error creating bill:', error);
-                alert(`Error creating bill: ${error.message}`);
+                showTranslatedAlert('error_creating_bill', error.message);
                 return;
             }
 
@@ -4810,7 +5123,7 @@
 
             window.showConsultationModal = function () {
                 if (!isDoctor) {
-                    alert('Consultations are available to doctors only.');
+                    showTranslatedAlert('consultations_doctors_only');
                     return;
                 }
                 // Populate patients
@@ -4908,6 +5221,9 @@
                     updateIMC();
                 }
 
+                // Update modal translations
+                updateModalTranslations();
+                
                 consultationModal.classList.add('active');
             };
 
@@ -4930,7 +5246,7 @@
                 consultationForm.addEventListener('submit', (e) => {
                     e.preventDefault();
                     if (!isDoctor) {
-                        alert('Consultations are available to doctors only.');
+                        showTranslatedAlert('consultations_doctors_only');
                         return;
                     }
                     const patientId = document.getElementById('consultPatient').value;
@@ -4939,14 +5255,13 @@
                     const tempVal = document.getElementById('consultTemperature')?.value;
                     const heartRateVal = document.getElementById('consultHeartRate')?.value;
                     const bloodSugarVal = document.getElementById('consultBloodSugar')?.value;
-                    const bpSysVal = document.getElementById('consultBPSystolic')?.value;
-                    const bpDiaVal = document.getElementById('consultBPDiastolic')?.value;
+                    const bpInputVal = document.getElementById('consultBloodPressure')?.value;
                     const diagnosis = document.getElementById('consultDiagnosis').value.trim();
                     const notes = document.getElementById('consultNotes').value.trim();
                     const prescription = document.getElementById('consultPrescription').value.trim();
 
                     if (!patientId || !diagnosis || !notes) {
-                        alert('Please fill required fields.');
+                        showTranslatedAlert('fill_required_consultation');
                         return;
                     }
 
@@ -4955,8 +5270,15 @@
                     const temperature = tempVal ? parseFloat(tempVal) : null;
                     const heartRate = heartRateVal ? parseInt(heartRateVal, 10) : null;
                     const bloodSugar = bloodSugarVal ? parseInt(bloodSugarVal, 10) : null;
-                    const bpSystolic = bpSysVal ? parseInt(bpSysVal, 10) : null;
-                    const bpDiastolic = bpDiaVal ? parseInt(bpDiaVal, 10) : null;
+                    // Parse blood pressure in the form "120/80" into systolic/diastolic
+                    let bpSystolic = null, bpDiastolic = null;
+                    if (bpInputVal && typeof bpInputVal === 'string') {
+                        const bpMatch = bpInputVal.trim().match(/(\d{2,3})\s*\/\s*(\d{2,3})/);
+                        if (bpMatch) {
+                            bpSystolic = parseInt(bpMatch[1], 10);
+                            bpDiastolic = parseInt(bpMatch[2], 10);
+                        }
+                    }
                     let imc = null; let bmiCategory = null;
                     if (height && weight) {
                         const m = height / 100;
@@ -5016,7 +5338,7 @@
                         }
                     } catch { }
 
-                    alert('✅ Consultation saved.');
+                    showTranslatedAlert('consultation_saved');
                     window.closeConsultationModal();
                 });
             }
@@ -5024,7 +5346,7 @@
 
         // Logout function
         window.logout = function () {
-            if (confirm('Are you sure you want to logout?')) {
+            if (showTranslatedConfirm('logout_confirm')) {
                 // Clear session data
                 localStorage.removeItem('medconnect_session');
 
