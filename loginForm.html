@@ -68,7 +68,7 @@
 
         .logo-section {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 3rem; /* more space under logo */
         }
 
         .logo {
@@ -87,20 +87,17 @@
             font-size: 1.5rem;
         }
 
-        /* Footer styles */
+        /* Footer styles (light, minimal, like agenda) */
         .footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+            position: static; /* non-fixed like agenda */
+            background: var(--medical-card);
             padding: 1rem 0;
-            border-top: 1px solid #d4af37;
-            z-index: 1000;
+            border-top: 1px solid var(--medical-border);
         }
 
         .footer-content {
-            max-width: 1200px;
+            max-width: 1200px; /* match content container style */
+            width: 100%;
             margin: 0 auto;
             padding: 0 1rem;
             display: flex;
@@ -130,7 +127,7 @@
         .footer-logo-company {
             font-size: 1rem;
             font-weight: 700;
-            color: #d4af37;
+            color: var(--medical-text);
             margin: 0;
             letter-spacing: 0.5px;
             line-height: 1;
@@ -138,29 +135,29 @@
 
         .footer-logo-tagline {
             font-size: 0.6rem;
-            color: #d4af37;
+            color: var(--medical-text-light);
             margin: 0;
             letter-spacing: 0.3px;
-            opacity: 0.8;
+            opacity: 0.9;
             line-height: 1;
         }
 
         .footer-separator {
             width: 1px;
             height: 30px;
-            background-color: #d4af37;
-            opacity: 0.5;
+            background-color: var(--medical-border);
+            opacity: 1;
         }
 
         .footer-copyright {
             font-size: 0.7rem;
-            color: #d4af37;
-            opacity: 0.7;
+            color: var(--medical-text-light);
+            opacity: 1;
         }
 
-        /* Adjust body padding for footer */
+        /* No extra padding needed since footer is not fixed */
         body {
-            padding-bottom: 80px;
+            padding-bottom: 0;
         }
 
         /* Mobile responsive footer */
@@ -205,6 +202,23 @@
 
         .header {
             margin-bottom: 2rem;
+            text-align: left; /* prevent inheriting center alignment */
+        }
+
+        /* Center the inline SVG logo robustly */
+        .login-logo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 0.5rem; /* ensure a bit of spacing even if wrapper shrinks */
+        }
+        .login-logo svg {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            height: auto;
         }
 
         .title {
@@ -212,14 +226,19 @@
             font-weight: 600;
             color: var(--medical-text);
             margin-bottom: 0.5rem;
-            text-align: center;
+            text-align: left;
         }
 
         .subtitle {
             color: var(--medical-text-light);
-            text-align: center;
+            text-align: left;
             font-size: 0.875rem;
             line-height: 1.5;
+        }
+
+        /* Ensure form elements are left-aligned */
+        .form-group, .form-label, .form-input, .remember-section, .footer-links {
+            text-align: left;
         }
 
         .form-group {
@@ -460,24 +479,41 @@
 <body>
     <div class="login-container">
         <div class="logo-section">
-            <div class="logo"></div>
+            <div class="login-logo" style="display:flex; justify-content:center; align-items:center; width:100%; text-align:center;">
+                <svg width="420" height="64" viewBox="0 0 520 80" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CERCINATECK - VOTRE PARTENAIRE POUR UNE GESTION OPTIMALE" style="display:block; margin:0 auto;">
+                    <!-- All-black monochrome logo -->
+                    <!-- Emblem: sailboat and waves -->
+                    <g transform="translate(0,0)">
+                        <!-- Sail -->
+                        <path d="M28 10 L22 40 L40 40 Z" fill="var(--medical-primary)" stroke="var(--medical-primary)" stroke-width="0.8"/>
+                        <path d="M28 10 L26 40 L34 40 Z" fill="var(--medical-primary)" opacity="0.85"/>
+                        <!-- Waves -->
+                        <path d="M12 50 Q22 44 28 50 Q34 44 44 50 Q34 56 28 50 Q22 56 12 50 Z" fill="var(--medical-primary)" stroke="var(--medical-primary)" stroke-width="0.6"/>
+                        <path d="M6 60 Q22 54 28 60 Q34 54 50 60 Q34 66 28 60 Q22 66 6 60 Z" fill="var(--medical-primary)" stroke="var(--medical-primary)" stroke-width="0.6"/>
+                    </g>
+                    <!-- Separator line -->
+                    <line x1="70" y1="8" x2="70" y2="72" stroke="var(--medical-primary)" stroke-width="3"/>
+                    <!-- Brand text -->
+                    <g transform="translate(90,20)">
+                        <text x="0" y="28" font-family="Segoe UI, Roboto, Arial, sans-serif" font-size="34" font-weight="700" fill="var(--medical-primary)">CERCINATECK</text>
+                        <text x="0" y="52" font-family="Segoe UI, Roboto, Arial, sans-serif" font-size="14" font-weight="600" fill="var(--medical-primary)">VOTRE PARTENAIRE POUR UNE GESTION OPTIMALE</text>
+                    </g>
+                </svg>
+            </div>
         </div>
         
         <div class="header">
-            <h1 class="title">MedConnect Portal</h1>
-            <p class="subtitle">Secure access to your healthcare dashboard</p>
-        </div>
-
-        <form id="medicalLoginForm">
-            <div class="form-group">
-                <label class="form-label">User Role</label>
-                <div class="role-selector">
-                    <div class="role-option" data-role="doctor">👨‍⚕️ Doctor</div>
-                    <div class="role-option" data-role="secretary">👩‍⚕️ Secretary</div>
+           
+            <form id="medicalLoginForm">
+                <div class="form-group">
+                    <label class="form-label">User Role</label>
+                    <div class="role-selector">
+                        <div class="role-option" data-role="doctor">👨‍⚕️ Doctor</div>
+                        <div class="role-option" data-role="secretary">👩‍⚕️ Secretary</div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="form-group">
+                <div class="form-group">
                 <label for="employeeId" class="form-label">Employee ID</label>
                 <input
                     type="text"
@@ -517,19 +553,14 @@
             </button>
         </form>
 
-        <div class="divider">
-            <span>or</span>
-        </div>
+        
 
         <div class="footer-links">
-            <a href="#" id="registerLink">Register New Account</a>
+           
             <a href="#" id="supportLink">Technical Support</a>
         </div>
 
-        <div class="compliance-footer">
-            <p>🔒 This system complies with HIPAA regulations</p>
-            <p>Protected by 256-bit SSL encryption</p>
-        </div>
+        
     </div>
 
     <script>

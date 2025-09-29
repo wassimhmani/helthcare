@@ -1743,11 +1743,26 @@
             <!-- Header -->
             <div class="mb-6">
                 <div class="flex items-center justify-between mb-4">
-                    <div>
-                        <h1 class="text-3xl font-bold text-gray-900" data-translate="secretary_agenda">Secretary Agenda
-                        </h1>
-                        <p class="text-gray-600" data-translate="manage_appointments">Manage daily appointments and
-                            schedule</p>
+                    <div class="flex items-center">
+                        <svg class="h-12 md:h-14 w-auto" viewBox="0 0 520 80" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CERCINATECK - VOTRE PARTENAIRE POUR UNE GESTION OPTIMALE">
+                            <!-- All-black monochrome logo -->
+                            <!-- Emblem: sailboat and waves -->
+                            <g transform="translate(0,0)">
+                                <!-- Sail -->
+                                <path d="M28 10 L22 40 L40 40 Z" fill="#000000" stroke="#000000" stroke-width="0.8"/>
+                                <path d="M28 10 L26 40 L34 40 Z" fill="#000000" opacity="0.85"/>
+                                <!-- Waves -->
+                                <path d="M12 50 Q22 44 28 50 Q34 44 44 50 Q34 56 28 50 Q22 56 12 50 Z" fill="#000000" stroke="#000000" stroke-width="0.6"/>
+                                <path d="M6 60 Q22 54 28 60 Q34 54 50 60 Q34 66 28 60 Q22 66 6 60 Z" fill="#000000" stroke="#000000" stroke-width="0.6"/>
+                            </g>
+                            <!-- Separator line -->
+                            <line x1="70" y1="8" x2="70" y2="72" stroke="#000000" stroke-width="3"/>
+                            <!-- Brand text -->
+                            <g transform="translate(90,20)">
+                                <text x="0" y="28" font-family="Segoe UI, Roboto, Arial, sans-serif" font-size="34" font-weight="700" fill="#000000">CERCINATECK</text>
+                                <text x="0" y="52" font-family="Segoe UI, Roboto, Arial, sans-serif" font-size="14" font-weight="600" fill="#000000">VOTRE PARTENAIRE POUR UNE GESTION OPTIMALE</text>
+                            </g>
+                        </svg>
                     </div>
 
                     <div class="flex items-center gap-2">
@@ -1818,6 +1833,10 @@
                             <div class="flex justify-between">
                                 <span>Completed</span>
                                 <span id="pendingAppointments" class="font-semibold text-blue-600">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span data-translate="cancelled">Cancelled</span>
+                                <span id="cancelledAppointments" class="font-semibold text-red-600">0</span>
                             </div>
                         </div>
                     </div>
@@ -2005,7 +2024,8 @@
                 logout_confirm: 'Are you sure you want to logout?',
 
                 // Titles
-                logout: 'Logout'
+                logout: 'Logout',
+                cancelled: 'Cancelled'
             },
             fr: {
                 // Navigation
@@ -2163,7 +2183,8 @@
                 logout_confirm: 'Êtes-vous sûr de vouloir vous déconnecter?',
 
                 // Titles
-                logout: 'Déconnexion'
+                logout: 'Déconnexion',
+                cancelled: 'Annulé'
             },
             ar: {
                 // Navigation
@@ -2321,7 +2342,8 @@
                 logout_confirm: 'هل أنت متأكد من أنك تريد تسجيل الخروج؟',
 
                 // Titles
-                logout: 'تسجيل الخروج'
+                logout: 'تسجيل الخروج',
+                cancelled: 'ملغي'
             }
         };
 
@@ -2648,6 +2670,7 @@
             const appointmentCount = appointments.length;
             const confirmedCount = appointments.filter(apt => apt.status === 'confirmed').length;
             const completedCount = appointments.filter(apt => apt.status === 'completed').length;
+            const cancelledCount = appointments.filter(apt => apt.status === 'cancelled').length;
 
             let agendaHTML = `
                 <div class="space-y-4">
@@ -2673,6 +2696,7 @@
                             <span class="badge badge-secondary">${appointmentCount} Total</span>
                             <span class="badge bg-green-100 text-green-800">${confirmedCount} Confirmed</span>
                             <span class="badge bg-blue-100 text-blue-800">${completedCount} Completed</span>
+                            <span class="badge bg-red-100 text-red-800">${cancelledCount} ${translations[currentLanguage]?.cancelled || 'Cancelled'}</span>
                         </div>
                     </div>
             `;
@@ -2735,6 +2759,8 @@
             document.getElementById('totalAppointments').textContent = appointmentCount;
             document.getElementById('confirmedAppointments').textContent = confirmedCount;
             document.getElementById('pendingAppointments').textContent = completedCount;
+            const cancelledEl = document.getElementById('cancelledAppointments');
+            if (cancelledEl) cancelledEl.textContent = cancelledCount;
         };
 
         // Calendar functions
