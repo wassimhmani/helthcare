@@ -503,6 +503,84 @@
             color: #111827;
         }
 
+        /* Doctor Dashboard Styles */
+        .card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            border: 1px solid #e5e7eb;
+        }
+
+        .card-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            line-height: 1;
+        }
+
+        .badge-primary {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .consultation-item, .appointment-item {
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            background: #f9fafb;
+        }
+
+        .consultation-item:hover, .appointment-item:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+
+        .patient-name {
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 0.25rem;
+        }
+
+        .consultation-time, .appointment-time {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+
+        .consultation-diagnosis {
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.25rem;
+        }
+
+        .consultation-notes {
+            font-size: 0.875rem;
+            color: #6b7280;
+            line-height: 1.4;
+        }
+
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+            line-height: 1.25rem;
+            border-radius: 0.375rem;
+        }
+
         @media (max-width: 768px) {
             .nav-links {
                 display: none;
@@ -1094,8 +1172,8 @@
                         data-translate="patients">Patients</a>
                     <a href="#" class="nav-link" onclick="showBillingModal()" data-translate="billing">Billing</a>
                     <a href="#" class="nav-link" data-translate="reports">Reports</a>
-                    <a href="#" id="consultationsLink" class="nav-link" style="display:none"
-                        onclick="showConsultationModal()">Consultations</a>
+                    <a href="#" id="doctorDashboardLink" class="nav-link" style="display:none"
+                        onclick="showDoctorDashboard()" data-translate="consultation">Consultation</a>
                     <a href="#" class="nav-link" onclick="showLanguageSettings()" data-translate="settings">Settings</a>
                 </div>
                 <!-- User Profile -->
@@ -1131,8 +1209,8 @@
                     data-translate="patients">Patients</a>
                 <a href="#" class="mobile-nav-link" onclick="showBillingModal()" data-translate="billing">Billing</a>
                 <a href="#" class="mobile-nav-link" data-translate="reports">Reports</a>
-                <a href="#" id="consultationsLinkMobile" class="mobile-nav-link" style="display:none"
-                    onclick="showConsultationModal()">Consultations</a>
+                <a href="#" id="doctorDashboardLinkMobile" class="mobile-nav-link" style="display:none"
+                    onclick="showDoctorDashboard()" data-translate="consultation">Consultation</a>
                 <a href="#" class="mobile-nav-link" onclick="showLanguageSettings()"
                     data-translate="settings">Settings</a>
                 <a href="#" class="mobile-nav-link logout-mobile" onclick="logout()">
@@ -1321,10 +1399,32 @@
                     <label class="form-label" for="consultBloodPressure" data-translate="blood_pressure_mmhg">Blood Pressure (mmHg)</label>
                     <input type="text" id="consultBloodPressure" class="form-input" placeholder="e.g., 120/80" data-translate-placeholder="blood_pressure_example" />
                 </div>
+                
+                <!-- Action Buttons -->
                 <div class="form-group">
-                    <label class="form-label" for="consultDiagnosis" data-translate="diagnosis">Diagnosis *</label>
-                    <input id="consultDiagnosis" class="form-input" placeholder="Enter diagnosis" data-translate-placeholder="enter_diagnosis" required />
+                    <label class="form-label">Consultation Actions</label>
+                    <div class="flex gap-2 flex-wrap">
+                        <button type="button" class="btn btn-outline" onclick="openReasonModal()" data-translate="reason">
+                            <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Reason
+                        </button>
+                        <button type="button" class="btn btn-outline" onclick="openDiagnosisModal()" data-translate="diagnosis">
+                            <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                            </svg>
+                            Diagnosis
+                        </button>
+                        <button type="button" class="btn btn-outline" onclick="openClinicalExamModal()" data-translate="clinical_examination">
+                            <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Clinical Examination
+                        </button>
+                    </div>
                 </div>
+                
                 <div class="form-group">
                     <label class="form-label" for="consultNotes" data-translate="clinical_notes">Clinical Notes *</label>
                     <textarea id="consultNotes" class="form-input form-textarea" placeholder="Enter notes" data-translate-placeholder="enter_notes"
@@ -1852,6 +1952,99 @@
         </div>
     </div>
 
+    <!-- Reason Modal -->
+    <div class="modal" id="reasonModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2 class="modal-title" data-translate="reason">Reason for Visit</h2>
+                <button class="modal-close" onclick="closeReasonModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="text-gray-600 mb-4">Document the patient's reason for consultation.</p>
+                <textarea id="reasonText" class="form-input form-textarea" rows="6" placeholder="Enter reason for visit..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeReasonModal()">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveReason()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Diagnosis Modal -->
+    <div class="modal" id="diagnosisModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2 class="modal-title" data-translate="diagnosis">Diagnosis</h2>
+                <button class="modal-close" onclick="closeDiagnosisModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="text-gray-600 mb-4">Document the medical diagnosis.</p>
+                <textarea id="diagnosisText" class="form-input form-textarea" rows="6" placeholder="Enter diagnosis..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeDiagnosisModal()">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveDiagnosis()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clinical Examination Modal -->
+    <div class="modal" id="clinicalExamModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2 class="modal-title" data-translate="clinical_examination">Clinical Examination</h2>
+                <button class="modal-close" onclick="closeClinicalExamModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="text-gray-600 mb-4">Document clinical examination findings.</p>
+                <textarea id="clinicalExamText" class="form-input form-textarea" rows="8" placeholder="Enter clinical examination findings..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeClinicalExamModal()">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveClinicalExam()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Doctor Dashboard Modal -->
+    <div class="modal" id="doctorDashboardModal">
+        <div class="modal-content" style="max-width: 1000px;">
+            <div class="modal-header">
+                <h2 class="modal-title" data-translate="doctor_dashboard">Doctor Dashboard</h2>
+                <button class="modal-close" onclick="closeDoctorDashboard()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Today's Appointments -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="text-lg font-semibold text-gray-900" data-translate="today_appointments">Today's Appointments</h3>
+                            <span id="appointmentCount" class="badge badge-primary">0</span>
+                        </div>
+                        <div class="card-body">
+                            <div id="todayAppointmentsList" class="space-y-3">
+                                <!-- Appointments will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Today's Consultations -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="text-lg font-semibold text-gray-900" data-translate="today_consultations">Today's Consultations</h3>
+                            <span id="consultationCount" class="badge badge-primary">0</span>
+                        </div>
+                        <div class="card-body">
+                            <div id="todayConsultationsList" class="space-y-3">
+                                <!-- Consultations will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Global state
         let selectedDate = new Date();
@@ -1875,6 +2068,7 @@
                 patients: 'Patients',
                 billing: 'Billing',
                 reports: 'Reports',
+                consultation: 'Consultation',
                 settings: 'Settings',
 
                 // Language Settings
@@ -1960,8 +2154,10 @@
                 heart_rate_bpm: 'Heart Rate (bpm)',
                 blood_sugar_mgdl: 'Blood Sugar (mg/dL)',
                 blood_pressure_mmhg: 'Blood Pressure (mmHg)',
+                reason: 'Reason for Visit',
                 diagnosis: 'Diagnosis',
-                clinical_notes: 'Clinical Notes',
+                clinical_examination: 'Clinical Examination',
+                clinical_notes: 'Additional Clinical Notes',
                 prescription: 'Prescription',
                 save_consultation: 'Save Consultation',
                 no_history_available: 'No history available.',
@@ -1978,8 +2174,10 @@
                 heart_rate_example: 'e.g., 72',
                 blood_sugar_example: 'e.g., 95',
                 blood_pressure_example: 'e.g., 120/80',
+                enter_reason: 'Enter reason for consultation',
                 enter_diagnosis: 'Enter diagnosis',
-                enter_notes: 'Enter notes',
+                enter_clinical_exam: 'Enter clinical examination findings',
+                enter_notes: 'Enter additional notes',
                 drugs_dosage: 'Drugs, dosage, duration',
                 file_number_example: 'Enter patient file number (e.g., P-2024-001)',
                 cin_passport_example: 'Enter CIN or Passport number',
@@ -2025,7 +2223,16 @@
 
                 // Titles
                 logout: 'Logout',
-                cancelled: 'Cancelled'
+                cancelled: 'Cancelled',
+
+                // Doctor Dashboard
+                doctor_dashboard: 'Doctor Dashboard',
+                today_appointments: 'Today\'s Appointments',
+                today_consultations: 'Today\'s Consultations',
+                no_appointments_today: 'No appointments scheduled for today.',
+                no_consultations_today: 'No consultations conducted today.',
+                consult: 'Consult',
+                reject: 'Reject'
             },
             fr: {
                 // Navigation
@@ -2034,6 +2241,7 @@
                 patients: 'Patients',
                 billing: 'Facturation',
                 reports: 'Rapports',
+                consultation: 'Consultation',
                 settings: 'Paramètres',
 
                 // Language Settings
@@ -2119,8 +2327,10 @@
                 heart_rate_bpm: 'Fréquence Cardiaque (bpm)',
                 blood_sugar_mgdl: 'Glycémie (mg/dL)',
                 blood_pressure_mmhg: 'Pression Artérielle (mmHg)',
+                reason: 'Motif de la visite',
                 diagnosis: 'Diagnostic',
-                clinical_notes: 'Notes Cliniques',
+                clinical_examination: 'Examen Clinique',
+                clinical_notes: 'Notes Cliniques Supplémentaires',
                 prescription: 'Prescription',
                 save_consultation: 'Enregistrer Consultation',
                 no_history_available: 'Aucun historique disponible.',
@@ -2137,8 +2347,10 @@
                 heart_rate_example: 'ex., 72',
                 blood_sugar_example: 'ex., 95',
                 blood_pressure_example: 'ex., 120/80',
+                enter_reason: 'Entrez le motif de la consultation',
                 enter_diagnosis: 'Entrez le diagnostic',
-                enter_notes: 'Entrez les notes',
+                enter_clinical_exam: 'Entrez les résultats de l\'examen clinique',
+                enter_notes: 'Entrez des notes supplémentaires',
                 drugs_dosage: 'Médicaments, posologie, durée',
                 file_number_example: 'Entrez le numéro de dossier patient (ex., P-2024-001)',
                 cin_passport_example: 'Entrez le CIN ou numéro de passeport',
@@ -2184,7 +2396,16 @@
 
                 // Titles
                 logout: 'Déconnexion',
-                cancelled: 'Annulé'
+                cancelled: 'Annulé',
+
+                // Doctor Dashboard
+                doctor_dashboard: 'Tableau de bord médecin',
+                today_appointments: 'Rendez-vous d\'aujourd\'hui',
+                today_consultations: 'Consultations d\'aujourd\'hui',
+                no_appointments_today: 'Aucun rendez-vous programmé pour aujourd\'hui.',
+                no_consultations_today: 'Aucune consultation effectuée aujourd\'hui.',
+                consult: 'Consulter',
+                reject: 'Rejeter'
             },
             ar: {
                 // Navigation
@@ -2193,6 +2414,7 @@
                 patients: 'المرضى',
                 billing: 'الفوترة',
                 reports: 'التقارير',
+                consultation: 'الاستشارة',
                 settings: 'الإعدادات',
 
                 // Language Settings
@@ -2278,8 +2500,10 @@
                 heart_rate_bpm: 'معدل النبض (نبضة/دقيقة)',
                 blood_sugar_mgdl: 'سكر الدم (ملغ/دل)',
                 blood_pressure_mmhg: 'ضغط الدم (ملم زئبق)',
+                reason: 'سبب الزيارة',
                 diagnosis: 'التشخيص',
-                clinical_notes: 'الملاحظات السريرية',
+                clinical_examination: 'الفحص السريري',
+                clinical_notes: 'ملاحظات سريرية إضافية',
                 prescription: 'الوصفة الطبية',
                 save_consultation: 'حفظ الاستشارة',
                 no_history_available: 'لا يوجد تاريخ متاح.',
@@ -2296,8 +2520,10 @@
                 heart_rate_example: 'مثال: 72',
                 blood_sugar_example: 'مثال: 95',
                 blood_pressure_example: 'مثال: 120/80',
+                enter_reason: 'أدخل سبب الاستشارة',
                 enter_diagnosis: 'أدخل التشخيص',
-                enter_notes: 'أدخل الملاحظات',
+                enter_clinical_exam: 'أدخل نتائج الفحص السريري',
+                enter_notes: 'أدخل ملاحظات إضافية',
                 drugs_dosage: 'الأدوية، الجرعة، المدة',
                 file_number_example: 'أدخل رقم ملف المريض (مثال: P-2024-001)',
                 cin_passport_example: 'أدخل رقم الهوية أو جواز السفر',
@@ -2343,7 +2569,16 @@
 
                 // Titles
                 logout: 'تسجيل الخروج',
-                cancelled: 'ملغي'
+                cancelled: 'ملغي',
+
+                // Doctor Dashboard
+                doctor_dashboard: 'لوحة تحكم الطبيب',
+                today_appointments: 'مواعيد اليوم',
+                today_consultations: 'استشارات اليوم',
+                no_appointments_today: 'لا توجد مواعيد مجدولة لليوم.',
+                no_consultations_today: 'لم يتم إجراء أي استشارات اليوم.',
+                consult: 'استشارة',
+                reject: 'رفض'
             }
         };
 
@@ -5116,17 +5351,14 @@
             renderCalendar();
             renderDailyAgenda();
             initializeLanguage();
+            loadDoctorDashboard();
 
             // Role-based UI
             let session = null;
             try { session = JSON.parse(localStorage.getItem('medconnect_session')); } catch { }
             const isDoctor = session && session.role === 'doctor';
 
-            const consultLink = document.getElementById('consultationsLink');
-            const consultLinkMobile = document.getElementById('consultationsLinkMobile');
             if (isDoctor) {
-                if (consultLink) consultLink.style.display = '';
-                if (consultLinkMobile) consultLinkMobile.style.display = '';
                 // Update profile UI
                 const nameEl = document.querySelector('.user-name');
                 const roleEl = document.querySelector('.user-role');
@@ -5218,8 +5450,10 @@
 
                 const updateIMC = () => {
                     if (!imcEl) return;
-                    const h = parseFloat(heightInput?.value || '');
-                    const w = parseFloat(weightInput?.value || '');
+                    const heightValue = heightInput?.value?.trim() || '';
+                    const weightValue = weightInput?.value?.trim() || '';
+                    const h = parseFloat(heightValue.replace(',', '.'));
+                    const w = parseFloat(weightValue.replace(',', '.'));
                     if (!isFinite(h) || !isFinite(w) || h <= 0 || w <= 0) {
                         imcEl.textContent = '—';
                         if (bmiCatEl) {
@@ -5240,17 +5474,88 @@
                 };
 
                 if (heightInput && weightInput) {
+                    // Remove any existing listeners to avoid duplicates
                     heightInput.removeEventListener('input', updateIMC);
                     weightInput.removeEventListener('input', updateIMC);
+                    // Attach fresh listeners
                     heightInput.addEventListener('input', updateIMC);
                     weightInput.addEventListener('input', updateIMC);
-                    updateIMC();
+                    // Trigger initial calculation
+                    setTimeout(() => updateIMC(), 50);
+                } else {
+                    console.warn('Height or Weight input not found in consultation modal');
                 }
 
+                // Enable the patient dropdown for normal consultation
+                patientSelect.disabled = false;
+                
                 // Update modal translations
                 updateModalTranslations();
                 
+                // Show modal first
                 consultationModal.classList.add('active');
+                
+                // Re-attach IMC listeners after modal is visible (ensures DOM is ready)
+                setTimeout(() => {
+                    const h = document.getElementById('consultHeight');
+                    const w = document.getElementById('consultWeight');
+                    const imc = document.getElementById('consultIMCValue');
+                    const cat = document.getElementById('consultBMICategory');
+                    
+                    console.log('IMC Setup Check:', { h: !!h, w: !!w, imc: !!imc, cat: !!cat });
+                    
+                    if (h && w && imc) {
+                        const calcIMC = () => {
+                            const heightVal = h.value?.trim() || '';
+                            const weightVal = w.value?.trim() || '';
+                            const height = parseFloat(heightVal.replace(',', '.'));
+                            const weight = parseFloat(weightVal.replace(',', '.'));
+                            
+                            console.log('IMC Calculation:', { height, weight });
+                            
+                            if (!isFinite(height) || !isFinite(weight) || height <= 0 || weight <= 0) {
+                                imc.textContent = '—';
+                                if (cat) {
+                                    cat.textContent = '';
+                                    cat.className = 'text-sm text-gray-500';
+                                }
+                                return;
+                            }
+                            
+                            const meters = height / 100;
+                            const bmi = weight / (meters * meters);
+                            imc.textContent = bmi.toFixed(1);
+                            
+                            if (cat) {
+                                let category = '';
+                                let style = 'text-sm text-gray-500';
+                                if (bmi < 18.5) {
+                                    category = 'Underweight';
+                                    style = 'badge bg-yellow-100 text-yellow-800';
+                                } else if (bmi < 25) {
+                                    category = 'Normal';
+                                    style = 'badge bg-green-100 text-green-800';
+                                } else if (bmi < 30) {
+                                    category = 'Overweight';
+                                    style = 'badge bg-orange-100 text-orange-800';
+                                } else {
+                                    category = 'Obesity';
+                                    style = 'badge bg-red-100 text-red-800';
+                                }
+                                cat.textContent = category;
+                                cat.className = style;
+                            }
+                            
+                            console.log('IMC Result:', bmi.toFixed(1));
+                        };
+                        
+                        h.addEventListener('input', calcIMC);
+                        w.addEventListener('input', calcIMC);
+                        calcIMC(); // Initial calculation
+                    } else {
+                        console.error('IMC elements not found!');
+                    }
+                }, 100);
             };
 
             window.closeConsultationModal = function () {
@@ -5282,11 +5587,10 @@
                     const heartRateVal = document.getElementById('consultHeartRate')?.value;
                     const bloodSugarVal = document.getElementById('consultBloodSugar')?.value;
                     const bpInputVal = document.getElementById('consultBloodPressure')?.value;
-                    const diagnosis = document.getElementById('consultDiagnosis').value.trim();
                     const notes = document.getElementById('consultNotes').value.trim();
                     const prescription = document.getElementById('consultPrescription').value.trim();
 
-                    if (!patientId || !diagnosis || !notes) {
+                    if (!patientId || !notes) {
                         showTranslatedAlert('fill_required_consultation');
                         return;
                     }
@@ -5330,7 +5634,6 @@
                         bpDiastolic,
                         imc,
                         bmiCategory,
-                        diagnosis,
                         notes,
                         prescription,
                         doctor: session?.name || 'Doctor',
@@ -5369,6 +5672,316 @@
                 });
             }
         });
+
+        // Doctor Dashboard Functions
+        function loadDoctorDashboard() {
+            const session = JSON.parse(localStorage.getItem('medconnect_session') || '{}');
+            const isDoctor = session && session.role === 'doctor';
+            
+            if (isDoctor) {
+                // Show doctor dashboard menu links
+                const dashboardLink = document.getElementById('doctorDashboardLink');
+                const dashboardLinkMobile = document.getElementById('doctorDashboardLinkMobile');
+                if (dashboardLink) dashboardLink.style.display = '';
+                if (dashboardLinkMobile) dashboardLinkMobile.style.display = '';
+            } else {
+                // Hide doctor dashboard menu links
+                const dashboardLink = document.getElementById('doctorDashboardLink');
+                const dashboardLinkMobile = document.getElementById('doctorDashboardLinkMobile');
+                if (dashboardLink) dashboardLink.style.display = 'none';
+                if (dashboardLinkMobile) dashboardLinkMobile.style.display = 'none';
+            }
+        }
+
+        window.showDoctorDashboard = function() {
+            const session = JSON.parse(localStorage.getItem('medconnect_session') || '{}');
+            const isDoctor = session && session.role === 'doctor';
+            
+            if (!isDoctor) {
+                showTranslatedAlert('consultations_doctors_only');
+                return;
+            }
+            
+            loadTodayAppointments();
+            loadTodayConsultations();
+            updateModalTranslations();
+            
+            const modal = document.getElementById('doctorDashboardModal');
+            if (modal) modal.classList.add('active');
+        };
+
+        window.closeDoctorDashboard = function() {
+            const modal = document.getElementById('doctorDashboardModal');
+            if (modal) modal.classList.remove('active');
+        };
+
+        window.startConsultation = function(appointmentId, patientName) {
+            // Check if user is doctor
+            const session = JSON.parse(localStorage.getItem('medconnect_session') || '{}');
+            const isDoctor = session && session.role === 'doctor';
+            
+            if (!isDoctor) {
+                showTranslatedAlert('consultations_doctors_only');
+                return;
+            }
+            
+            // Close the doctor dashboard modal
+            closeDoctorDashboard();
+            
+            // Find the patient by name in storedPatients
+            const patient = storedPatients.find(p => p.fullName === patientName);
+            if (!patient) {
+                showTranslatedAlert('Patient not found in system. Please add patient first.');
+                return;
+            }
+            
+            // Open consultation modal directly
+            const consultationModal = document.getElementById('consultationModal');
+            if (consultationModal) {
+                // Populate patients dropdown
+                const patientSelect = document.getElementById('consultPatient');
+                const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
+                patientSelect.innerHTML = '<option value="">Choose a patient...</option>' +
+                    patients.map(p => `<option value="${p.id}">${p.fullName} (${p.fileNumber || 'No file#'}) - ${p.phone}</option>`).join('');
+                
+                // Pre-select the patient
+                patientSelect.value = patient.id;
+                
+                // Disable the patient dropdown since patient is pre-selected
+                patientSelect.disabled = true;
+                
+                // Update modal translations
+                updateModalTranslations();
+                
+                // Show the modal
+                consultationModal.classList.add('active');
+                
+                // Setup IMC calculation for this modal
+                setTimeout(() => {
+                    const heightInput = document.getElementById('consultHeight');
+                    const weightInput = document.getElementById('consultWeight');
+                    const imcEl = document.getElementById('consultIMCValue');
+                    const bmiCatEl = document.getElementById('consultBMICategory');
+
+                    if (heightInput && weightInput && imcEl) {
+                        const calculateBMI = () => {
+                            const heightValue = heightInput.value?.trim() || '';
+                            const weightValue = weightInput.value?.trim() || '';
+                            
+                            const height = parseFloat(heightValue.replace(',', '.'));
+                            const weight = parseFloat(weightValue.replace(',', '.'));
+                            
+                            if (!isFinite(height) || !isFinite(weight) || height <= 0 || weight <= 0) {
+                                imcEl.textContent = '—';
+                                if (bmiCatEl) {
+                                    bmiCatEl.textContent = '';
+                                    bmiCatEl.className = 'text-sm text-gray-500';
+                                }
+                                return;
+                            }
+                            
+                            const meters = height / 100;
+                            const bmi = weight / (meters * meters);
+                            imcEl.textContent = bmi.toFixed(1);
+                            
+                            if (bmiCatEl) {
+                                let category = '';
+                                let style = 'text-sm text-gray-500';
+                                
+                                if (bmi < 18.5) {
+                                    category = 'Underweight';
+                                    style = 'badge bg-yellow-100 text-yellow-800';
+                                } else if (bmi < 25) {
+                                    category = 'Normal';
+                                    style = 'badge bg-green-100 text-green-800';
+                                } else if (bmi < 30) {
+                                    category = 'Overweight';
+                                    style = 'badge bg-orange-100 text-orange-800';
+                                } else {
+                                    category = 'Obesity';
+                                    style = 'badge bg-red-100 text-red-800';
+                                }
+                                
+                                bmiCatEl.textContent = category;
+                                bmiCatEl.className = style;
+                            }
+                        };
+
+                        // Remove existing listeners
+                        heightInput.removeEventListener('input', calculateBMI);
+                        weightInput.removeEventListener('input', calculateBMI);
+                        
+                        // Add new listeners
+                        heightInput.addEventListener('input', calculateBMI);
+                        weightInput.addEventListener('input', calculateBMI);
+                        
+                        // Initial calculation
+                        calculateBMI();
+                    }
+                }, 200);
+                
+                // Trigger change event to load patient info
+                setTimeout(() => {
+                    const event = new Event('change', { bubbles: true });
+                    patientSelect.dispatchEvent(event);
+                }, 100);
+            }
+        };
+
+        window.rejectConsultation = function(appointmentId) {
+            if (showTranslatedConfirm('Are you sure you want to reject this consultation?')) {
+                // Update appointment status to rejected
+                const appointments = JSON.parse(localStorage.getItem('healthcareAppointments') || '[]');
+                const appointmentIndex = appointments.findIndex(apt => apt.id === appointmentId);
+                
+                if (appointmentIndex !== -1) {
+                    appointments[appointmentIndex].status = 'rejected';
+                    localStorage.setItem('healthcareAppointments', JSON.stringify(appointments));
+                    
+                    // Update stored appointments in memory
+                    storedAppointments = appointments;
+                    
+                    // Refresh the dashboard
+                    loadTodayAppointments();
+                    
+                    showTranslatedAlert('Consultation rejected successfully.');
+                } else {
+                    showTranslatedAlert('Appointment not found.');
+                }
+            }
+        };
+
+        function loadTodayAppointments() {
+            const today = new Date();
+            const todayStr = formatDateForStorage(today);
+            const appointments = getAppointmentsForDate(today);
+            
+            const appointmentCountEl = document.getElementById('appointmentCount');
+            const appointmentsListEl = document.getElementById('todayAppointmentsList');
+            
+            appointmentCountEl.textContent = appointments.length;
+            
+            if (appointments.length === 0) {
+                appointmentsListEl.innerHTML = '<p class="text-gray-500 text-center py-4" data-translate="no_appointments_today">No appointments scheduled for today.</p>';
+                return;
+            }
+            
+            appointmentsListEl.innerHTML = appointments.map(appointment => {
+                const patientName = appointment.clientName || 'Unknown Patient';
+                const statusColor = getStatusColor(appointment.status);
+                
+                return `
+                    <div class="appointment-item">
+                        <div class="patient-name">${patientName}</div>
+                        <div class="appointment-time">${appointment.time} (${appointment.duration} min)</div>
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="badge ${statusColor}">${appointment.status}</span>
+                            ${appointment.notes ? `<span class="text-sm text-gray-600">${appointment.notes}</span>` : ''}
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-sm btn-primary" onclick="startConsultation('${appointment.id}', '${patientName}')" data-translate="consult">Consult</button>
+                            <button class="btn btn-sm btn-secondary" onclick="rejectConsultation('${appointment.id}')" data-translate="reject">Reject</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function loadTodayConsultations() {
+            const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+            
+            // Filter consultations for today
+            const todayConsultations = consultations.filter(consultation => {
+                const consultationDate = new Date(consultation.createdAt).toISOString().split('T')[0];
+                return consultationDate === todayStr;
+            });
+            
+            const consultationCountEl = document.getElementById('consultationCount');
+            const consultationsListEl = document.getElementById('todayConsultationsList');
+            
+            consultationCountEl.textContent = todayConsultations.length;
+            
+            if (todayConsultations.length === 0) {
+                consultationsListEl.innerHTML = '<p class="text-gray-500 text-center py-4" data-translate="no_consultations_today">No consultations conducted today.</p>';
+                return;
+            }
+            
+            consultationsListEl.innerHTML = todayConsultations.map(consultation => {
+                const patient = storedPatients.find(p => p.id === consultation.patientId);
+                const patientName = patient ? patient.name : 'Unknown Patient';
+                const consultationTime = new Date(consultation.createdAt).toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                return `
+                    <div class="consultation-item">
+                        <div class="patient-name">${patientName}</div>
+                        <div class="consultation-time">${consultationTime}</div>
+                        <div class="consultation-diagnosis">${consultation.diagnosis}</div>
+                        <div class="consultation-notes">${consultation.notes}</div>
+                        ${consultation.prescription ? `<div class="text-sm text-blue-600 mt-2"><strong>Prescription:</strong> ${consultation.prescription}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Reason, Diagnosis, Clinical Exam Modal Functions
+        window.openReasonModal = function() {
+            const modal = document.getElementById('reasonModal');
+            if (modal) modal.classList.add('active');
+        };
+
+        window.closeReasonModal = function() {
+            const modal = document.getElementById('reasonModal');
+            if (modal) modal.classList.remove('active');
+        };
+
+        window.saveReason = function() {
+            const text = document.getElementById('reasonText').value;
+            // Store or process the reason text
+            console.log('Reason saved:', text);
+            showTranslatedAlert('Reason documented successfully');
+            closeReasonModal();
+        };
+
+        window.openDiagnosisModal = function() {
+            const modal = document.getElementById('diagnosisModal');
+            if (modal) modal.classList.add('active');
+        };
+
+        window.closeDiagnosisModal = function() {
+            const modal = document.getElementById('diagnosisModal');
+            if (modal) modal.classList.remove('active');
+        };
+
+        window.saveDiagnosis = function() {
+            const text = document.getElementById('diagnosisText').value;
+            // Store or process the diagnosis text
+            console.log('Diagnosis saved:', text);
+            showTranslatedAlert('Diagnosis documented successfully');
+            closeDiagnosisModal();
+        };
+
+        window.openClinicalExamModal = function() {
+            const modal = document.getElementById('clinicalExamModal');
+            if (modal) modal.classList.add('active');
+        };
+
+        window.closeClinicalExamModal = function() {
+            const modal = document.getElementById('clinicalExamModal');
+            if (modal) modal.classList.remove('active');
+        };
+
+        window.saveClinicalExam = function() {
+            const text = document.getElementById('clinicalExamText').value;
+            // Store or process the clinical exam text
+            console.log('Clinical Exam saved:', text);
+            showTranslatedAlert('Clinical examination documented successfully');
+            closeClinicalExamModal();
+        };
 
         // Logout function
         window.logout = function () {

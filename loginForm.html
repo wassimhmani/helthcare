@@ -694,7 +694,7 @@
 
                 // Redirect
                 alert(`✅ Welcome ${user.name}!\nRole: ${user.role.charAt(0).toUpperCase() + user.role.slice(1)}`);
-                window.location.href = host + 'agenda.html';
+                window.location.href ='agenda.html';
             } catch (error) {
                 console.error('Login failed:', error);
                 alert('❌ Login failed. Please verify your credentials and try again.');
