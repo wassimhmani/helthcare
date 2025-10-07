@@ -1,0 +1,59 @@
+{
+  "title": {
+    "login": "MedConnect - Connexion au Portail de Santé",
+    "agenda": "Agenda Secrétaire"
+  },
+  "role": {
+    "label": "Rôle utilisateur",
+    "doctor": "Médecin",
+    "secretary": "Secrétaire"
+  },
+  "employeeId": {
+    "label": "ID Employé",
+    "placeholder": "Entrez votre ID employé"
+  },
+  "password": {
+    "label": "Mot de passe",
+    "placeholder": "Entrez votre mot de passe"
+  },
+  "rememberMe": "Se souvenir de moi",
+  "forgotPassword": "Mot de passe oublié ?",
+  "button": {
+    "signIn": "Se connecter au portail"
+  },
+  "footer": {
+    "support": "Support technique"
+  },
+  "alerts": {
+    "selectRole": "Veuillez sélectionner votre rôle",
+    "roleNotAllowed": "Seuls les médecins et les secrétaires sont autorisés à accéder à ce système",
+    "invalidCredentials": "Identifiants invalides. Vérifiez votre rôle, votre ID employé ou votre mot de passe.",
+    "loginFailed": "Échec de la connexion. Veuillez vérifier vos identifiants et réessayer.",
+    "welcomePrefix": "Bienvenue",
+    "roleLabel": "Rôle"
+  },
+  "errors": {
+    "employeeId": {
+      "required": "L'ID employé est requis",
+      "format": "L'ID employé doit comporter 4 à 20 caractères alphanumériques"
+    },
+    "password": {
+      "required": "Le mot de passe est requis",
+      "length": "Le mot de passe doit comporter au moins 8 caractères"
+    }
+  },
+  "support": {
+    "dialog": "Support technique : 1-800-MED-HELP\nDisponible 24/7 pour les professionnels de santé"
+  },
+  "forgot": {
+    "dialog": "La réinitialisation du mot de passe redirigera vers un processus sécurisé"
+  },
+  "register": {
+    "dialog": "L'inscription d'un nouvel utilisateur nécessite l'approbation de l'administrateur"
+  },
+  "switcher": {
+    "label": "Langue",
+    "en": "Anglais",
+    "fr": "Français"
+  }
+}

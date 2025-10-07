@@ -4,8 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secretary Agenda</title>
+    <title data-i18n="title.agenda">Secretary Agenda</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="i18n/i18n.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.I18n && I18n.initI18n) I18n.initI18n();
+        });
+    </script>
     <script>
         tailwind.config = {
             theme: {
@@ -1170,7 +1176,7 @@
                     <a href="#" class="nav-link active" data-translate="dashboard">Dashboard</a>
                     <a href="#" class="nav-link" onclick="showPatientManagement()"
                         data-translate="patients">Patients</a>
-                    <a href="#" class="nav-link" onclick="showBillingModal()" data-translate="billing">Billing</a>
+                    <a href="#" class="nav-link" onclick="showBillingOrReadyBills()" data-translate="billing">Billing</a>
                     <a href="#" class="nav-link" data-translate="reports">Reports</a>
                     <a href="#" id="doctorDashboardLink" class="nav-link" style="display:none"
                         onclick="showDoctorDashboard()" data-translate="consultation">Consultation</a>
@@ -1207,7 +1213,7 @@
                 <a href="#" class="mobile-nav-link active" data-translate="dashboard">Dashboard</a>
                 <a href="#" class="mobile-nav-link" onclick="showPatientManagement()"
                     data-translate="patients">Patients</a>
-                <a href="#" class="mobile-nav-link" onclick="showBillingModal()" data-translate="billing">Billing</a>
+                <a href="#" class="mobile-nav-link" onclick="showBillingOrReadyBills()" data-translate="billing">Billing</a>
                 <a href="#" class="mobile-nav-link" data-translate="reports">Reports</a>
                 <a href="#" id="doctorDashboardLinkMobile" class="mobile-nav-link" style="display:none"
                     onclick="showDoctorDashboard()" data-translate="consultation">Consultation</a>
@@ -1719,10 +1725,6 @@
                 <input type="hidden" id="billPatientEmailAddress" name="patientEmail">
                 <input type="hidden" id="billPatientPhoneNumber" name="patientPhone">
 
-                <div class="form-group">
-                    <label class="form-label" for="billDate" data-translate="bill_date">Bill Date</label>
-                    <input type="date" id="billDate" class="form-input" required>
-                </div>
 
                 <div class="form-group">
                     <label class="form-label" for="billDueDate" data-translate="due_date">Due Date</label>
@@ -1738,8 +1740,26 @@
                                 <div>
                                     <label class="form-label" for="itemDescription1"
                                         data-translate="description">Description</label>
-                                    <input type="text" id="itemDescription1" class="form-input"
-                                        placeholder="e.g., Consultation fee" required>
+                                    <select id="itemDescription1" class="form-input" required onchange="autoFillPrice(this)">
+                                        <option value="">Select service...</option>
+                                        <option value="General Consultation" data-price="50">General Consultation</option>
+                                        <option value="Follow-up Consultation" data-price="30">Follow-up Consultation</option>
+                                        <option value="Emergency Consultation" data-price="100">Emergency Consultation</option>
+                                        <option value="Blood Test" data-price="25">Blood Test</option>
+                                        <option value="X-Ray" data-price="80">X-Ray</option>
+                                        <option value="MRI Scan" data-price="300">MRI Scan</option>
+                                        <option value="CT Scan" data-price="250">CT Scan</option>
+                                        <option value="Ultrasound" data-price="120">Ultrasound</option>
+                                        <option value="ECG" data-price="40">ECG</option>
+                                        <option value="Vaccination" data-price="35">Vaccination</option>
+                                        <option value="Prescription Medication" data-price="15">Prescription Medication</option>
+                                        <option value="Physical Therapy Session" data-price="60">Physical Therapy Session</option>
+                                        <option value="Laboratory Analysis" data-price="45">Laboratory Analysis</option>
+                                        <option value="Minor Surgery" data-price="200">Minor Surgery</option>
+                                        <option value="Dressing Change" data-price="20">Dressing Change</option>
+                                        <option value="Injection" data-price="25">Injection</option>
+                                        <option value="Other" data-price="0">Other</option>
+                                    </select>
                                 </div>
                                 <div>
                                     <label class="form-label" for="itemQuantity1"
@@ -1804,6 +1824,22 @@
                     <button type="submit" class="btn btn-primary" data-translate="create_bill">Create Bill</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Ready Bills Modal (Secretary) -->
+    <div class="modal" id="readyBillsModal">
+        <div class="modal-content" style="max-width: 1000px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Ready Bills</h2>
+                <button class="modal-close" onclick="closeReadyBillsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="readyBillsContainer" class="space-y-3"></div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeReadyBillsModal()" data-translate="close">Close</button>
+            </div>
         </div>
     </div>
 
@@ -4525,16 +4561,19 @@
             // Update modal translations
             updateModalTranslations();
 
-            // Set default dates
+            // Set default due date
             const today = new Date();
             const dueDate = new Date(today);
             dueDate.setDate(today.getDate() + 30); // 30 days from today
 
-            document.getElementById('billDate').value = today.toISOString().split('T')[0];
             document.getElementById('billDueDate').value = dueDate.toISOString().split('T')[0];
 
             // Reset form
             resetBillingForm();
+
+            // Ensure patient selection is enabled for fresh forms
+            const patientSelectInit = document.getElementById('billPatientSelection');
+            if (patientSelectInit) patientSelectInit.disabled = false;
 
             // Initialize bill total calculation
             calculateBillTotal();
@@ -4543,6 +4582,163 @@
         function closeBillingModal() {
             const modal = document.getElementById('billingModal');
             modal.classList.remove('active');
+        }
+
+        function autoFillPrice(selectElement) {
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            const price = selectedOption.getAttribute('data-price');
+            
+            if (price && price !== '0') {
+                // Find the price input in the same bill item (third input field)
+                const billItem = selectElement.closest('.bill-item');
+                const numberInputs = billItem.querySelectorAll('input[type="number"]');
+                const priceInput = numberInputs[1]; // Second number input (index 1) is the price field
+                if (priceInput) {
+                    priceInput.value = price;
+                    // Trigger calculation
+                    if (typeof calculateBillTotal === 'function') {
+                        calculateBillTotal();
+                    }
+                }
+            }
+        }
+
+        // Ready Bills (Secretary)
+        function showBillingOrReadyBills() {
+            try {
+                const session = JSON.parse(localStorage.getItem('medconnect_session') || '{}');
+                if (session && (session.role === 'secretary' || session.role === 'doctor')) {
+                    showReadyBillsModal();
+                    return;
+                }
+            } catch {}
+            showBillingModal();
+        }
+
+        function showReadyBillsModal() {
+            const modal = document.getElementById('readyBillsModal');
+            modal.classList.add('active');
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenu) mobileMenu.classList.add('hidden');
+            renderReadyBills();
+        }
+
+        function closeReadyBillsModal() {
+            const modal = document.getElementById('readyBillsModal');
+            modal.classList.remove('active');
+        }
+
+        function renderReadyBills() {
+            const container = document.getElementById('readyBillsContainer');
+            if (!container) return;
+
+            const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+            const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
+
+            // Filter out consultations where patient no longer exists
+            const validConsultations = consultations.filter(c => {
+                return patients.some(p => p.id === c.patientId);
+            });
+
+            // Show most recent first
+            const sorted = validConsultations.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            if (sorted.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-6" data-translate="no_consultations_today">No consultations conducted today.</p>';
+                return;
+            }
+
+            container.innerHTML = sorted.map(c => {
+                const patient = patients.find(p => p.id === c.patientId);
+                const patientName = patient ? patient.fullName : 'Unknown Patient';
+                const created = new Date(c.createdAt);
+                const dateStr = isNaN(created) ? '' : created.toLocaleString();
+                const imcStr = (typeof c.imc === 'number' && !isNaN(c.imc)) ? c.imc.toFixed(1) : '-';
+                const doctorName = c.doctor || 'Doctor';
+                return `
+                    <div class="card p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="font-semibold">${patientName}</div>
+                                <div class="text-sm text-gray-600">Consultation • ${dateStr}</div>
+                                <div class="text-xs text-gray-500">Doctor: ${doctorName} • BMI: ${imcStr}</div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="btn btn-secondary" onclick="viewConsultationDetails('${c.id}')">View</button>
+                                <button class="btn btn-primary" onclick="createBillFromConsultation('${c.id}')">Create Bill</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function viewConsultationDetails(consultationId) {
+            try {
+                const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+                const c = consultations.find(x => x.id === consultationId);
+                if (!c) return;
+                // Reuse existing detail modal when available
+                const modal = document.getElementById('consultationDetailModal');
+                const content = document.getElementById('consultationDetailContent');
+                if (modal && content) {
+                    const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
+                    const patient = patients.find(p => p.id === c.patientId);
+                    const patientName = patient ? patient.fullName : 'Unknown Patient';
+                    content.innerHTML = `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><strong>Patient:</strong> ${patientName}</div>
+                            <div><strong>Doctor:</strong> ${c.doctor || ''}</div>
+                            <div><strong>Date:</strong> ${new Date(c.createdAt).toLocaleString()}</div>
+                            <div><strong>BMI:</strong> ${(typeof c.imc === 'number' && !isNaN(c.imc)) ? c.imc.toFixed(1) : '-'}</div>
+                        </div>
+                        <div class="mt-3">
+                            <strong>Notes:</strong>
+                            <div class="text-sm whitespace-pre-wrap">${(c.notes || '').toString()}</div>
+                        </div>
+                    `;
+                    modal.classList.add('active');
+                }
+            } catch {}
+        }
+
+        function createBillFromConsultation(consultationId) {
+            try {
+                const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+                const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
+                const c = consultations.find(x => x.id === consultationId);
+                if (!c) return;
+
+                // Prefill billing with patient and one item (Consultation)
+                closeReadyBillsModal();
+                showBillingModal();
+
+                const patient = patients.find(p => p.id === c.patientId);
+                if (patient) {
+                    const select = document.getElementById('billPatientSelection');
+                    if (select) {
+                        // Ensure patients are loaded first
+                        setTimeout(() => {
+                            const opt = Array.from(select.options).find(o => o.value === patient.id);
+                            if (opt) {
+                                select.value = patient.id;
+                                if (typeof handleBillPatientSelection === 'function') handleBillPatientSelection();
+                                // Lock patient selection for consultation-derived bills
+                                select.disabled = true;
+                            }
+                        }, 0);
+                    }
+                }
+
+                // Fill first item description and an example price if missing
+                const desc = document.getElementById('itemDescription1');
+                const qty = document.getElementById('itemQuantity1');
+                const price = document.getElementById('itemPrice1');
+                if (desc) desc.value = 'General Consultation';
+                if (qty) qty.value = 1;
+                if (price && !price.value) price.value = 50;
+                if (typeof calculateBillTotal === 'function') calculateBillTotal();
+            } catch {}
         }
 
         // Language Settings Functions
@@ -4733,7 +4929,26 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="form-label" for="itemDescription${itemCount}" data-translate="description">Description</label>
-                        <input type="text" id="itemDescription${itemCount}" class="form-input" placeholder="e.g., Consultation fee" required>
+                        <select id="itemDescription${itemCount}" class="form-input" required onchange="autoFillPrice(this)">
+                            <option value="">Select service...</option>
+                            <option value="General Consultation" data-price="50">General Consultation</option>
+                            <option value="Follow-up Consultation" data-price="30">Follow-up Consultation</option>
+                            <option value="Emergency Consultation" data-price="100">Emergency Consultation</option>
+                            <option value="Blood Test" data-price="25">Blood Test</option>
+                            <option value="X-Ray" data-price="80">X-Ray</option>
+                            <option value="MRI Scan" data-price="300">MRI Scan</option>
+                            <option value="CT Scan" data-price="250">CT Scan</option>
+                            <option value="Ultrasound" data-price="120">Ultrasound</option>
+                            <option value="ECG" data-price="40">ECG</option>
+                            <option value="Vaccination" data-price="35">Vaccination</option>
+                            <option value="Prescription Medication" data-price="15">Prescription Medication</option>
+                            <option value="Physical Therapy Session" data-price="60">Physical Therapy Session</option>
+                            <option value="Laboratory Analysis" data-price="45">Laboratory Analysis</option>
+                            <option value="Minor Surgery" data-price="200">Minor Surgery</option>
+                            <option value="Dressing Change" data-price="20">Dressing Change</option>
+                            <option value="Injection" data-price="25">Injection</option>
+                            <option value="Other" data-price="0">Other</option>
+                        </select>
                     </div>
                     <div>
                         <label class="form-label" for="itemQuantity${itemCount}" data-translate="quantity">Quantity</label>
@@ -4818,6 +5033,8 @@
         function resetBillingForm() {
             document.getElementById('billingForm').reset();
             document.getElementById('billPatientDetails').classList.add('hidden');
+            const patientSelect = document.getElementById('billPatientSelection');
+            if (patientSelect) patientSelect.disabled = false;
 
             // Reset bill items to just one
             const billItems = document.getElementById('billItems');
@@ -4826,7 +5043,26 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="form-label" for="itemDescription1">Description</label>
-                            <input type="text" id="itemDescription1" class="form-input" placeholder="e.g., Consultation fee" required>
+                            <select id="itemDescription1" class="form-input" required onchange="autoFillPrice(this)">
+                                <option value="">Select service...</option>
+                                <option value="General Consultation" data-price="50">General Consultation</option>
+                                <option value="Follow-up Consultation" data-price="30">Follow-up Consultation</option>
+                                <option value="Emergency Consultation" data-price="100">Emergency Consultation</option>
+                                <option value="Blood Test" data-price="25">Blood Test</option>
+                                <option value="X-Ray" data-price="80">X-Ray</option>
+                                <option value="MRI Scan" data-price="300">MRI Scan</option>
+                                <option value="CT Scan" data-price="250">CT Scan</option>
+                                <option value="Ultrasound" data-price="120">Ultrasound</option>
+                                <option value="ECG" data-price="40">ECG</option>
+                                <option value="Vaccination" data-price="35">Vaccination</option>
+                                <option value="Prescription Medication" data-price="15">Prescription Medication</option>
+                                <option value="Physical Therapy Session" data-price="60">Physical Therapy Session</option>
+                                <option value="Laboratory Analysis" data-price="45">Laboratory Analysis</option>
+                                <option value="Minor Surgery" data-price="200">Minor Surgery</option>
+                                <option value="Dressing Change" data-price="20">Dressing Change</option>
+                                <option value="Injection" data-price="25">Injection</option>
+                                <option value="Other" data-price="0">Other</option>
+                            </select>
                         </div>
                         <div>
                             <label class="form-label" for="itemQuantity1">Quantity</label>
@@ -4861,7 +5097,7 @@
                 const quantityInput = item.querySelector('input[type="number"]');
                 // Find price input (second number input)
                 const priceInput = item.querySelectorAll('input[type="number"]')[1];
-                const descriptionInput = item.querySelector('input[type="text"]');
+                const descriptionInput = item.querySelector('select');
 
                 if (descriptionInput && quantityInput && priceInput) {
                     const description = descriptionInput.value.trim();
@@ -4894,7 +5130,7 @@
                 patientName: formData.patientName,
                 patientEmail: formData.patientEmail,
                 patientPhone: formData.patientPhone,
-                billDate: formData.billDate,
+                billDate: new Date().toISOString().split('T')[0],
                 dueDate: formData.dueDate,
                 items: billItems,
                 subtotal: subtotal,
@@ -5363,7 +5599,7 @@
                 patientName: document.getElementById('billPatientFullName').value,
                 patientEmail: document.getElementById('billPatientEmailAddress').value,
                 patientPhone: document.getElementById('billPatientPhoneNumber').value,
-                billDate: document.getElementById('billDate').value,
+                billDate: new Date().toISOString().split('T')[0],
                 dueDate: document.getElementById('billDueDate').value,
                 notes: document.getElementById('billNotes').value
             };

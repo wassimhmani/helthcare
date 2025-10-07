@@ -1,0 +1,59 @@
+{
+  "title": {
+    "login": "MedConnect - Healthcare Portal Login",
+    "agenda": "Secretary Agenda"
+  },
+  "role": {
+    "label": "User Role",
+    "doctor": "Doctor",
+    "secretary": "Secretary"
+  },
+  "employeeId": {
+    "label": "Employee ID",
+    "placeholder": "Enter your employee ID"
+  },
+  "password": {
+    "label": "Password",
+    "placeholder": "Enter your password"
+  },
+  "rememberMe": "Remember me",
+  "forgotPassword": "Forgot password?",
+  "button": {
+    "signIn": "Sign In to Portal"
+  },
+  "footer": {
+    "support": "Technical Support"
+  },
+  "alerts": {
+    "selectRole": "Please select your role",
+    "roleNotAllowed": "Only doctors and secretaries are allowed to access this system",
+    "invalidCredentials": "Invalid credentials. Please check your role, employee ID, or password.",
+    "loginFailed": "Login failed. Please verify your credentials and try again.",
+    "welcomePrefix": "Welcome",
+    "roleLabel": "Role"
+  },
+  "errors": {
+    "employeeId": {
+      "required": "Employee ID is required",
+      "format": "Employee ID must be 4-20 alphanumeric characters"
+    },
+    "password": {
+      "required": "Password is required",
+      "length": "Password must be at least 8 characters"
+    }
+  },
+  "support": {
+    "dialog": "Technical Support: 1-800-MED-HELP\nAvailable 24/7 for healthcare professionals"
+  },
+  "forgot": {
+    "dialog": "Password reset functionality would redirect to secure recovery process"
+  },
+  "register": {
+    "dialog": "New user registration requires administrator approval"
+  },
+  "switcher": {
+    "label": "Language",
+    "en": "English",
+    "fr": "French"
+  }
+}
