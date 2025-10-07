@@ -1435,6 +1435,22 @@
                     <textarea id="consultPrescription" class="form-input form-textarea"
                         placeholder="Drugs, dosage, duration" data-translate-placeholder="drugs_dosage"></textarea>
                 </div>
+                
+                <!-- Payment Status -->
+                <div class="form-group">
+                    <label class="form-label" data-translate="payment_status">Payment Status</label>
+                    <div class="flex items-center gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="paymentStatus" value="paying" id="payingPatient" class="form-radio" checked>
+                            <span data-translate="paying_patient">Paying Patient</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="paymentStatus" value="non-paying" id="nonPayingPatient" class="form-radio">
+                            <span data-translate="non_paying_patient">Non-Paying Patient</span>
+                        </label>
+                    </div>
+                </div>
+                
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeConsultationModal()" data-translate="cancel">Cancel</button>
                     <button type="submit" class="btn btn-primary" data-translate="save_consultation">Save Consultation</button>
@@ -2006,6 +2022,24 @@
         </div>
     </div>
 
+    <!-- Consultation Detail Modal -->
+    <div class="modal" id="consultationDetailModal">
+        <div class="modal-content" id="consultationDetailModalContent" style="max-width: 800px;" role="dialog" aria-modal="true" tabindex="-1">
+            <div class="modal-header">
+                <h2 class="modal-title" data-translate="consultation_details">Consultation Details</h2>
+                <button class="modal-close" onclick="closeConsultationDetail()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="consultationDetailContent" class="space-y-4">
+                    <!-- Consultation details will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeConsultationDetail()" data-translate="close">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Doctor Dashboard Modal -->
     <div class="modal" id="doctorDashboardModal">
         <div class="modal-content" style="max-width: 1000px;">
@@ -2049,6 +2083,8 @@
         // Global state
         let selectedDate = new Date();
         let currentCalendarDate = new Date();
+        // Track the appointment used to open the consultation (if any)
+        let currentConsultationAppointmentId = null;
 
         // Appointment storage system
         let storedAppointments = [];
@@ -2159,6 +2195,9 @@
                 clinical_examination: 'Clinical Examination',
                 clinical_notes: 'Additional Clinical Notes',
                 prescription: 'Prescription',
+                payment_status: 'Payment Status',
+                paying_patient: 'Paying Patient',
+                non_paying_patient: 'Non-Paying Patient',
                 save_consultation: 'Save Consultation',
                 no_history_available: 'No history available.',
 
@@ -2232,7 +2271,10 @@
                 no_appointments_today: 'No appointments scheduled for today.',
                 no_consultations_today: 'No consultations conducted today.',
                 consult: 'Consult',
-                reject: 'Reject'
+                reject: 'Reject',
+                view_details: 'View Details',
+                consultation_details: 'Consultation Details',
+                close: 'Close'
             },
             fr: {
                 // Navigation
@@ -2332,6 +2374,9 @@
                 clinical_examination: 'Examen Clinique',
                 clinical_notes: 'Notes Cliniques Supplémentaires',
                 prescription: 'Prescription',
+                payment_status: 'Statut de Paiement',
+                paying_patient: 'Patient Payant',
+                non_paying_patient: 'Patient Non-Payant',
                 save_consultation: 'Enregistrer Consultation',
                 no_history_available: 'Aucun historique disponible.',
 
@@ -2405,7 +2450,10 @@
                 no_appointments_today: 'Aucun rendez-vous programmé pour aujourd\'hui.',
                 no_consultations_today: 'Aucune consultation effectuée aujourd\'hui.',
                 consult: 'Consulter',
-                reject: 'Rejeter'
+                reject: 'Rejeter',
+                view_details: 'Voir les détails',
+                consultation_details: 'Détails de la consultation',
+                close: 'Fermer'
             },
             ar: {
                 // Navigation
@@ -2505,6 +2553,9 @@
                 clinical_examination: 'الفحص السريري',
                 clinical_notes: 'ملاحظات سريرية إضافية',
                 prescription: 'الوصفة الطبية',
+                payment_status: 'حالة الدفع',
+                paying_patient: 'مريض يدفع',
+                non_paying_patient: 'مريض غير يدفع',
                 save_consultation: 'حفظ الاستشارة',
                 no_history_available: 'لا يوجد تاريخ متاح.',
 
@@ -2578,7 +2629,10 @@
                 no_appointments_today: 'لا توجد مواعيد مجدولة لليوم.',
                 no_consultations_today: 'لم يتم إجراء أي استشارات اليوم.',
                 consult: 'استشارة',
-                reject: 'رفض'
+                reject: 'رفض',
+                view_details: 'عرض التفاصيل',
+                consultation_details: 'تفاصيل الاستشارة',
+                close: 'إغلاق'
             }
         };
 
@@ -5589,6 +5643,7 @@
                     const bpInputVal = document.getElementById('consultBloodPressure')?.value;
                     const notes = document.getElementById('consultNotes').value.trim();
                     const prescription = document.getElementById('consultPrescription').value.trim();
+                    const paymentStatus = document.querySelector('input[name="paymentStatus"]:checked')?.value || 'paying';
 
                     if (!patientId || !notes) {
                         showTranslatedAlert('fill_required_consultation');
@@ -5636,6 +5691,7 @@
                         bmiCategory,
                         notes,
                         prescription,
+                        paymentStatus,
                         doctor: session?.name || 'Doctor',
                         createdAt: new Date().toISOString()
                     });
@@ -5668,6 +5724,36 @@
                     } catch { }
 
                     showTranslatedAlert('consultation_saved');
+
+                    // If this consultation came from an appointment, mark/remove it
+                    try {
+                        if (currentConsultationAppointmentId) {
+                            const appointments = JSON.parse(localStorage.getItem('healthcareAppointments') || '[]');
+                            const idx = appointments.findIndex(a => a.id === currentConsultationAppointmentId);
+                            if (idx !== -1) {
+                                // Mark as completed and remove from today's pending list
+                                appointments[idx].status = 'completed';
+                                appointments[idx].completedAt = new Date().toISOString();
+                                // Remove from the array to ensure it disappears from today's list
+                                appointments.splice(idx, 1);
+                                localStorage.setItem('healthcareAppointments', JSON.stringify(appointments));
+                                // Sync in-memory cache if present
+                                if (typeof storedAppointments !== 'undefined') {
+                                    storedAppointments = appointments;
+                                }
+                            }
+                            // Reset tracker
+                            currentConsultationAppointmentId = null;
+                        }
+                    } catch {}
+
+                    // Refresh today's lists in doctor dashboard if it's open
+                    const dashboardModal = document.getElementById('doctorDashboardModal');
+                    if (dashboardModal && dashboardModal.classList.contains('active')) {
+                        if (typeof loadTodayAppointments === 'function') loadTodayAppointments();
+                        if (typeof loadTodayConsultations === 'function') loadTodayConsultations();
+                    }
+
                     window.closeConsultationModal();
                 });
             }
@@ -5725,6 +5811,9 @@
                 return;
             }
             
+            // Remember which appointment initiated this consultation
+            currentConsultationAppointmentId = appointmentId || null;
+
             // Close the doctor dashboard modal
             closeDoctorDashboard();
             
@@ -5910,7 +5999,7 @@
             
             consultationsListEl.innerHTML = todayConsultations.map(consultation => {
                 const patient = storedPatients.find(p => p.id === consultation.patientId);
-                const patientName = patient ? patient.name : 'Unknown Patient';
+                const patientName = patient ? patient.fullName : 'Unknown Patient';
                 const consultationTime = new Date(consultation.createdAt).toLocaleTimeString('en-US', {
                     hour: '2-digit',
                     minute: '2-digit'
@@ -5920,13 +6009,95 @@
                     <div class="consultation-item">
                         <div class="patient-name">${patientName}</div>
                         <div class="consultation-time">${consultationTime}</div>
-                        <div class="consultation-diagnosis">${consultation.diagnosis}</div>
-                        <div class="consultation-notes">${consultation.notes}</div>
-                        ${consultation.prescription ? `<div class="text-sm text-blue-600 mt-2"><strong>Prescription:</strong> ${consultation.prescription}</div>` : ''}
+                        <div class="consultation-notes">${consultation.notes.substring(0, 100)}${consultation.notes.length > 100 ? '...' : ''}</div>
+                        <div class="flex gap-2 mt-3">
+                            <button class="btn btn-sm btn-primary" onclick="viewConsultationDetail('${consultation.id}')" data-translate="view_details">View Details</button>
+                        </div>
                     </div>
                 `;
             }).join('');
         }
+
+        // Consultation Detail Modal Functions
+        window.viewConsultationDetail = function(consultationId) {
+            const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+            const consultation = consultations.find(c => c.id === consultationId);
+            
+            if (!consultation) {
+                showTranslatedAlert('Consultation not found.');
+                return;
+            }
+            
+            const patient = storedPatients.find(p => p.id === consultation.patientId);
+            const patientName = patient ? patient.fullName : 'Unknown Patient';
+            const consultationTime = new Date(consultation.createdAt).toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            const detailContent = document.getElementById('consultationDetailContent');
+            detailContent.innerHTML = `
+                <div class="card p-4">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-900">Patient Information</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                        <div><strong>Patient Name:</strong> ${patientName}</div>
+                        <div><strong>Date & Time:</strong> ${consultationTime}</div>
+                        <div><strong>Doctor:</strong> ${consultation.doctor || 'N/A'}</div>
+                        <div><strong>Payment Status:</strong> ${consultation.paymentStatus === 'paying' ? 'Paying Patient' : 'Non-Paying Patient'}</div>
+                    </div>
+                </div>
+                
+                <div class="card p-4">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-900">Vital Signs</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                        ${consultation.height ? `<div><strong>Height:</strong> ${consultation.height} cm</div>` : ''}
+                        ${consultation.weight ? `<div><strong>Weight:</strong> ${consultation.weight} kg</div>` : ''}
+                        ${consultation.imc ? `<div><strong>IMC/BMI:</strong> ${consultation.imc} (${consultation.bmiCategory || 'N/A'})</div>` : ''}
+                        ${consultation.temperature ? `<div><strong>Temperature:</strong> ${consultation.temperature} °C</div>` : ''}
+                        ${consultation.heartRate ? `<div><strong>Heart Rate:</strong> ${consultation.heartRate} bpm</div>` : ''}
+                        ${consultation.bloodSugar ? `<div><strong>Blood Sugar:</strong> ${consultation.bloodSugar} mg/dL</div>` : ''}
+                        ${consultation.bpSystolic && consultation.bpDiastolic ? `<div><strong>Blood Pressure:</strong> ${consultation.bpSystolic}/${consultation.bpDiastolic} mmHg</div>` : ''}
+                    </div>
+                </div>
+                
+                <div class="card p-4">
+                    <h3 class="text-lg font-semibold mb-3 text-gray-900">Clinical Notes</h3>
+                    <div class="text-sm text-gray-700 whitespace-pre-wrap">${consultation.notes || 'No notes provided.'}</div>
+                </div>
+                
+                ${consultation.prescription ? `
+                    <div class="card p-4">
+                        <h3 class="text-lg font-semibold mb-3 text-gray-900">Prescription</h3>
+                        <div class="text-sm text-gray-700 whitespace-pre-wrap">${consultation.prescription}</div>
+                    </div>
+                ` : ''}
+            `;
+            
+            updateModalTranslations();
+            
+            const modal = document.getElementById('consultationDetailModal');
+            if (modal) {
+                // Ensure it appears above other modals
+                modal.style.zIndex = '10000';
+                modal.classList.add('active');
+                // Focus content for accessibility
+                const content = document.getElementById('consultationDetailModalContent') || modal.querySelector('.modal-content');
+                if (content && typeof content.focus === 'function') {
+                    setTimeout(() => content.focus(), 0);
+                }
+            }
+        };
+        
+        window.closeConsultationDetail = function() {
+            const modal = document.getElementById('consultationDetailModal');
+            if (modal) {
+                modal.classList.remove('active');
+                modal.style.zIndex = '';
+            }
+        };
 
         // Reason, Diagnosis, Clinical Exam Modal Functions
         window.openReasonModal = function() {
