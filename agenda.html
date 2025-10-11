@@ -1174,13 +1174,16 @@
                 <!-- Desktop Menu -->
                 <div class="nav-links">
                     <a href="#" class="nav-link active" data-translate="dashboard">Dashboard</a>
-                    <a href="#" class="nav-link" onclick="showPatientManagement()"
-                        data-translate="patients">Patients</a>
-                    <a href="#" class="nav-link" onclick="showBillingOrReadyBills()" data-translate="billing">Billing</a>
-                    <a href="#" class="nav-link" onclick="showReportsModal()" data-translate="reports">Reports</a>
+                    <a href="#" class="nav-link" id="nav-patients" onclick="showPatientManagement()"
+                        data-translate="patients" data-permission="view_patients">Patients</a>
+                    <a href="#" class="nav-link" id="nav-billing" onclick="showBillingOrReadyBills()" 
+                        data-translate="billing" data-permission="view_bills">Billing</a>
+                    <a href="#" class="nav-link" id="nav-reports" onclick="showReportsModal()" 
+                        data-translate="reports" data-permission="view_reports">Reports</a>
                     <a href="#" id="doctorDashboardLink" class="nav-link" style="display:none"
-                        onclick="showDoctorDashboard()" data-translate="consultation">Consultation</a>
-                    <a href="#" class="nav-link" onclick="showSettingsMenu()" data-translate="settings">Settings</a>
+                        onclick="showDoctorDashboard()" data-translate="consultation" data-permission="view_consultations">Consultation</a>
+                    <a href="#" class="nav-link" id="nav-settings" onclick="showSettingsMenu()" 
+                        data-translate="settings" data-permission="access_settings">Settings</a>
                 </div>
                 <!-- User Profile -->
                 <div class="user-profile">
@@ -1211,14 +1214,16 @@
         <div class="mobile-menu" id="mobile-menu">
             <div class="mobile-nav-links">
                 <a href="#" class="mobile-nav-link active" data-translate="dashboard">Dashboard</a>
-                <a href="#" class="mobile-nav-link" onclick="showPatientManagement()"
-                    data-translate="patients">Patients</a>
-                <a href="#" class="mobile-nav-link" onclick="showBillingOrReadyBills()" data-translate="billing">Billing</a>
-                <a href="#" class="mobile-nav-link" onclick="showReportsModal()" data-translate="reports">Reports</a>
+                <a href="#" class="mobile-nav-link" id="nav-patients-mobile" onclick="showPatientManagement()"
+                    data-translate="patients" data-permission="view_patients">Patients</a>
+                <a href="#" class="mobile-nav-link" id="nav-billing-mobile" onclick="showBillingOrReadyBills()" 
+                    data-translate="billing" data-permission="view_bills">Billing</a>
+                <a href="#" class="mobile-nav-link" id="nav-reports-mobile" onclick="showReportsModal()" 
+                    data-translate="reports" data-permission="view_reports">Reports</a>
                 <a href="#" id="doctorDashboardLinkMobile" class="mobile-nav-link" style="display:none"
-                    onclick="showDoctorDashboard()" data-translate="consultation">Consultation</a>
-                <a href="#" class="mobile-nav-link" onclick="showSettingsMenu()"
-                    data-translate="settings">Settings</a>
+                    onclick="showDoctorDashboard()" data-translate="consultation" data-permission="view_consultations">Consultation</a>
+                <a href="#" class="mobile-nav-link" id="nav-settings-mobile" onclick="showSettingsMenu()"
+                    data-translate="settings" data-permission="access_settings">Settings</a>
                 <a href="#" class="mobile-nav-link logout-mobile" onclick="logout()">
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                         style="margin-right: 8px;">
@@ -1487,7 +1492,7 @@
 
             <div class="flex gap-4 mb-6">
                 <button id="addPatientTab" class="btn btn-primary" onclick="switchPatientTab('add')"
-                    data-translate="add_new_patient">Add New Patient</button>
+                    data-translate="add_new_patient" data-permission="add_patients">Add New Patient</button>
                 <button id="viewPatientsTab" class="btn btn-secondary" onclick="switchPatientTab('view')"
                     data-translate="view_all_patients">View All Patients</button>
             </div>
@@ -1985,7 +1990,8 @@
                         </svg>
                     </button>
 
-                    <button class="w-full btn btn-outline text-left flex items-center justify-between p-4 hover:bg-gray-50" onclick="openUserManagement()">
+                    <button class="w-full btn btn-outline text-left flex items-center justify-between p-4 hover:bg-gray-50" 
+                        id="settings-user-management" data-permission="manage_users" onclick="openUserManagement()">
                         <div class="flex items-center gap-3">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
@@ -5049,6 +5055,12 @@
 
         // Patient Management Functions
         function showPatientManagement() {
+            // Check permission
+            if (!hasPermission('view_patients')) {
+                alert('You do not have permission to access patient management.');
+                return;
+            }
+            
             const modal = document.getElementById('patientManagementModal');
             modal.classList.add('active');
 
@@ -5765,6 +5777,12 @@
         }
 
         function addPatient(patientData) {
+            // Check permission
+            if (!hasPermission('add_patients')) {
+                alert('You do not have permission to add patients.');
+                return;
+            }
+            
             const newPatient = {
                 id: `patient-${Date.now()}`,
                 fileNumber: patientData.fileNumber,
@@ -5864,6 +5882,10 @@
 
             const age = patient.dateOfBirth ? calculateAge(patient.dateOfBirth) : 'N/A';
             const filesCount = patient.medicalFiles ? patient.medicalFiles.length : 0;
+            
+            // Check permissions for action buttons
+            const canEdit = hasPermission('add_patients');
+            const canDelete = hasPermission('delete_patients');
 
             card.innerHTML = `
                 <div class="patient-info">
@@ -5895,12 +5917,16 @@
                                 Files
                             </button>
                         ` : ''}
-                        <button onclick="editPatient('${patient.id}')" class="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white">
-                            Edit
-                        </button>
-                        <button onclick="deletePatient('${patient.id}')" class="btn btn-sm bg-red-600 hover:bg-red-700 text-white">
-                            Delete
-                        </button>
+                        ${canEdit ? `
+                            <button onclick="editPatient('${patient.id}')" class="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white">
+                                Edit
+                            </button>
+                        ` : ''}
+                        ${canDelete ? `
+                            <button onclick="deletePatient('${patient.id}')" class="btn btn-sm bg-red-600 hover:bg-red-700 text-white">
+                                Delete
+                            </button>
+                        ` : ''}
                     </div>
                 </div>
             `;
@@ -6182,6 +6208,12 @@
         }
 
         function deletePatient(patientId) {
+            // Check permission
+            if (!hasPermission('delete_patients')) {
+                alert('You do not have permission to delete patients.');
+                return;
+            }
+            
             const patient = storedPatients.find(p => p.id === patientId);
             if (patient && showTranslatedConfirm('delete_patient_confirm', patient.fullName)) {
                 storedPatients = storedPatients.filter(p => p.id !== patientId);
@@ -6388,6 +6420,12 @@
         }
 
         function showBillingModal() {
+            // Check permission
+            if (!hasPermission('create_bills')) {
+                alert('You do not have permission to create bills.');
+                return;
+            }
+            
             const modal = document.getElementById('billingModal');
             modal.classList.add('active');
 
@@ -6867,6 +6905,13 @@
         }
 
         function openUserManagement() {
+            // Check permission
+            if (!hasPermission('manage_users')) {
+                alert('You do not have permission to manage users.');
+                closeSettingsMenu();
+                return;
+            }
+            
             closeSettingsMenu();
             setTimeout(() => showUserManagementModal(), 200);
         }
@@ -7331,15 +7376,9 @@
         let currentReportData = null;
 
         function showReportsModal() {
-            // Check if user is a doctor
-            try {
-                const session = JSON.parse(localStorage.getItem('medconnect_session') || '{}');
-                if (session.role !== 'doctor') {
-                    alert('Reports are only available for doctors.');
-                    return;
-                }
-            } catch {
-                alert('Please log in as a doctor to view reports.');
+            // Check permission
+            if (!hasPermission('view_reports')) {
+                alert('You do not have permission to view reports.');
                 return;
             }
 
@@ -8946,6 +8985,87 @@
         });
 
 
+        // ========================================
+        // Permission-based UI Functions
+        // ========================================
+
+        function getUserPermissions() {
+            let session = null;
+            try { 
+                session = JSON.parse(localStorage.getItem('medconnect_session')); 
+            } catch (error) {
+                console.error('Error loading session:', error);
+                return {};
+            }
+
+            if (!session) {
+                return {};
+            }
+
+            const permissions = session.permissions || {};
+            const isDoctor = session.role === 'doctor';
+            const isAdmin = session.role === 'admin';
+
+            // For doctors and admins, grant all permissions by default if not set
+            if (isDoctor || isAdmin) {
+                const defaultPermissions = {
+                    view_patients: true,
+                    add_patients: true,
+                    delete_patients: true,
+                    view_appointments: true,
+                    add_appointments: true,
+                    delete_appointments: true,
+                    view_bills: true,
+                    create_bills: true,
+                    manage_bills: true,
+                    view_consultations: true,
+                    add_consultations: true,
+                    delete_consultations: true,
+                    view_reports: true,
+                    export_reports: true,
+                    access_settings: true,
+                    manage_users: true
+                };
+                
+                // Merge with existing permissions
+                Object.keys(defaultPermissions).forEach(key => {
+                    if (!(key in permissions)) {
+                        permissions[key] = defaultPermissions[key];
+                    }
+                });
+            }
+
+            return permissions;
+        }
+
+        function hasPermission(permission) {
+            const permissions = getUserPermissions();
+            return permissions[permission] === true;
+        }
+
+        function applyPermissionBasedUI() {
+            const permissions = getUserPermissions();
+
+            // Apply permissions to menu items
+            const menuItems = document.querySelectorAll('[data-permission]');
+            menuItems.forEach(item => {
+                const requiredPermission = item.getAttribute('data-permission');
+                
+                if (requiredPermission && !permissions[requiredPermission]) {
+                    // User doesn't have this permission - hide the menu item
+                    item.style.display = 'none';
+                } else {
+                    // User has permission - show the menu item
+                    // Don't change display for doctor dashboard link - it has its own logic
+                    if (item.id !== 'doctorDashboardLink' && item.id !== 'doctorDashboardLinkMobile') {
+                        item.style.display = '';
+                    }
+                }
+            });
+
+            console.log('Permissions applied:', permissions);
+        }
+
         // Initialize the application
         document.addEventListener('DOMContentLoaded', () => {
             loadStoredAppointments();
@@ -8955,6 +9075,9 @@
             renderDailyAgenda();
             initializeLanguage();
             loadDoctorDashboard();
+            
+            // Apply permission-based UI
+            applyPermissionBasedUI();
 
             // Role-based UI
             let session = null;

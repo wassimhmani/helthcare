@@ -528,12 +528,13 @@
                 </div>
 
                 <div class="form-group">
-                <label for="employeeId" class="form-label" data-i18n="employeeId.label">Employee ID</label>
+                <label for="employeeId" class="form-label" data-i18n="employeeId.label">Username or Email</label>
                 <input
                     type="text"
                     id="employeeId"
                     name="employeeId"
                     class="form-input"
+                    placeholder="Enter your username or email"
                     data-i18n-attr="placeholder:employeeId.placeholder"
                     required
                 />
@@ -585,12 +586,24 @@
         const submitButton = document.getElementById('submitButton');
         const buttonText = document.getElementById('buttonText');
         const loadingSpinner = document.getElementById('loadingSpinner');
-                const roleOptions = document.querySelectorAll('.role-option');
+        const roleOptions = document.querySelectorAll('.role-option');
         
-        const mockUsers = [
-            { role: 'doctor', employeeId: 'DOC2001', password: 'doctor1234', name: 'Dr. John Smith' },
-            { role: 'secretary', employeeId: 'SEC1001', password: 'secretary123', name: 'Alice Johnson' }
-        ];
+        // Get system users from localStorage
+        function getSystemUsers() {
+            try {
+                const stored = localStorage.getItem('system_users');
+                if (stored) {
+                    return JSON.parse(stored);
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+            // Return default users if none exist
+            return [
+                { role: 'doctor', username: 'doctor', password: 'doctor123', name: 'Dr. John Smith', email: 'doctor@clinic.com', status: 'active', id: 'user_default_1' },
+                { role: 'secretary', username: 'secretary', password: 'secretary123', name: 'Alice Johnson', email: 'secretary@clinic.com', status: 'active', id: 'user_default_2' }
+            ];
+        }
         
         let selectedRole = '';
         
@@ -603,17 +616,24 @@
                 
                 // Ensure label/placeholder reflect current language
                 const employeeLabel = document.querySelector('label[for="employeeId"]');
-                if (window.t) {
-                    employeeLabel.textContent = t('employeeId.label');
-                    employeeIdInput.setAttribute('placeholder', t('employeeId.placeholder'));
+                if (window.t && employeeLabel) {
+                    // Keep the label as "Username or Email"
+                    if (t('employeeId.label')) {
+                        employeeLabel.textContent = t('employeeId.label');
+                    }
+                    if (t('employeeId.placeholder')) {
+                        employeeIdInput.setAttribute('placeholder', t('employeeId.placeholder'));
+                    }
                 }
             });
         });
 
-        function validateEmployeeId(id) {
-            // Basic validation - should be alphanumeric and 4-20 characters
-            const idRegex = /^[A-Za-z0-9]{4,20}$/;
-            return idRegex.test(id);
+        function validateUsername(username) {
+            // Allow username or email format
+            if (!username || username.length < 3) {
+                return false;
+            }
+            return true;
         }
 
         function showError(input, errorElement, message) {
@@ -644,7 +664,7 @@
             clearAllErrors();
             let isValid = true;
 
-            // Validate role selection - only allow doctor or secretary
+            // Validate role selection - allow doctor, secretary, or admin
             if (!selectedRole) {
                 alert(t('alerts.selectRole'));
                 return false;
@@ -655,13 +675,13 @@
                 return false;
             }
 
-            // Validate employee ID
-            const employeeId = employeeIdInput.value.trim();
-            if (!employeeId) {
+            // Validate username/email
+            const username = employeeIdInput.value.trim();
+            if (!username) {
                 showError(employeeIdInput, document.getElementById('employeeIdError'), t('errors.employeeId.required'));
                 isValid = false;
-            } else if (!validateEmployeeId(employeeId)) {
-                showError(employeeIdInput, document.getElementById('employeeIdError'), t('errors.employeeId.format'));
+            } else if (!validateUsername(username)) {
+                showError(employeeIdInput, document.getElementById('employeeIdError'), 'Username must be at least 3 characters');
                 isValid = false;
             }
 
@@ -669,9 +689,6 @@
             const password = passwordInput.value;
             if (!password) {
                 showError(passwordInput, document.getElementById('passwordError'), t('errors.password.required'));
-                isValid = false;
-            } else if (password.length < 8) {
-                showError(passwordInput, document.getElementById('passwordError'), t('errors.password.length'));
                 isValid = false;
             }
 
@@ -694,19 +711,46 @@
                 // Simulate network delay
                 await new Promise(resolve => setTimeout(resolve, 800));
 
-                const employeeId = employeeIdInput.value.trim();
+                const username = employeeIdInput.value.trim();
                 const password = passwordInput.value;
 
-                const user = mockUsers.find(u => u.role === selectedRole && u.employeeId === employeeId && u.password === password);
+                // Get system users from localStorage
+                const systemUsers = getSystemUsers();
+                
+                // Find user by username (or email) and password
+                const user = systemUsers.find(u => 
+                    (u.username === username || u.email === username) && 
+                    u.password === password &&
+                    u.role === selectedRole
+                );
 
                 if (!user) {
                     alert('❌ ' + t('alerts.invalidCredentials'));
                     return;
                 }
 
-                // Store simple session
-                const session = { role: user.role, employeeId: user.employeeId, name: user.name, loggedInAt: Date.now() };
-                try { localStorage.setItem('medconnect_session', JSON.stringify(session)); } catch {}
+                // Check if user account is active
+                if (user.status === 'inactive') {
+                    alert('❌ Account is inactive. Please contact the administrator.');
+                    return;
+                }
+
+                // Store session with user details and permissions
+                const session = { 
+                    role: user.role, 
+                    userId: user.id,
+                    username: user.username,
+                    email: user.email,
+                    name: user.name, 
+                    permissions: user.permissions || {},
+                    loggedInAt: Date.now() 
+                };
+                
+                try { 
+                    localStorage.setItem('medconnect_session', JSON.stringify(session)); 
+                } catch (error) {
+                    console.error('Error saving session:', error);
+                }
 
                 // Redirect
                 const roleName = user.role === 'doctor' ? t('role.doctor') : t('role.secretary');
@@ -745,15 +789,13 @@
             alert('🔐 ' + t('forgot.dialog'));
         });
 
-        document.getElementById('registerLink').addEventListener('click', (e) => {
-            e.preventDefault();
-            alert('📝 ' + t('register.dialog'));
-        });
-
-        document.getElementById('supportLink').addEventListener('click', (e) => {
-            e.preventDefault();
-            alert('📞 ' + t('support.dialog'));
-        });
+        const supportLink = document.getElementById('supportLink');
+        if (supportLink) {
+            supportLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                alert('📞 ' + t('support.dialog'));
+            });
+        }
     </script>
 
     <!-- Footer -->
