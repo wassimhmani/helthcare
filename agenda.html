@@ -1428,6 +1428,18 @@
                             </svg>
                             Clinical Examination
                         </button>
+                        <button type="button" class="btn btn-outline" onclick="openLabAssessmentFromConsultation()" data-translate="add_lab_assessment">
+                            <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                            </svg>
+                            Lab Assessment
+                        </button>
+                        <button type="button" class="btn btn-outline" onclick="openMedicalCertificateFromConsultation()" data-translate="medical_certificate">
+                            <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Medical Certificate
+                        </button>
                     </div>
                 </div>
                 
@@ -2914,6 +2926,189 @@
         </div>
     </div>
 
+    <!-- Laboratory Assessment Modal -->
+    <div class="modal" id="laboratoryAssessmentModal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2 class="modal-title" data-translate="laboratory_assessment">Laboratory Assessment Examination</h2>
+                <button class="modal-close" onclick="closeLaboratoryAssessmentModal()">&times;</button>
+            </div>
+            <form id="laboratoryAssessmentForm">
+                <input type="hidden" id="labAssessmentConsultationId">
+                
+                <div class="modal-body">
+                    <p class="text-gray-600 mb-4" data-translate="lab_assessment_desc">Upload laboratory assessment documents and add notes about the examination results.</p>
+                    
+                    <!-- Patient Info Display -->
+                    <div class="card p-4 mb-4 bg-blue-50 border-blue-200">
+                        <div class="flex items-center gap-2 mb-2">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            <span class="font-semibold text-gray-700" data-translate="patient">Patient:</span>
+                            <span id="labAssessmentPatientName" class="text-gray-900 font-medium">-</span>
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            <span data-translate="consultation_date">Consultation Date:</span>
+                            <span id="labAssessmentConsultationDate">-</span>
+                        </div>
+                    </div>
+                    
+                    <!-- File Upload Section -->
+                    <div class="form-group">
+                        <label class="form-label font-semibold" data-translate="upload_documents">Upload Laboratory Documents</label>
+                        <p class="text-sm text-gray-500 mb-2" data-translate="upload_documents_hint">You can upload multiple files (PDF, images, etc.)</p>
+                        <input type="file" id="labAssessmentFiles" class="form-input" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                        <div id="uploadedFilesList" class="mt-3 space-y-2">
+                            <!-- Uploaded files will be listed here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Notes/Comments Section -->
+                    <div class="form-group">
+                        <label class="form-label font-semibold" for="labAssessmentNotes" data-translate="lab_notes">Laboratory Assessment Notes</label>
+                        <p class="text-sm text-gray-500 mb-2" data-translate="lab_notes_hint">Add notes, observations, or interpretations of the laboratory results</p>
+                        <textarea id="labAssessmentNotes" class="form-input form-textarea" rows="6" placeholder="Enter laboratory assessment notes, observations, and interpretations..."></textarea>
+                    </div>
+                    
+                    <!-- Existing Assessments Display -->
+                    <div id="existingAssessmentsSection" class="hidden">
+                        <hr class="my-4">
+                        <h4 class="font-semibold text-gray-700 mb-3" data-translate="previous_assessments">Previous Assessments</h4>
+                        <div id="existingAssessmentsList" class="space-y-3">
+                            <!-- Previous assessments will be listed here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeLaboratoryAssessmentModal()" data-translate="cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary" data-translate="save_assessment">Save Assessment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Medical Certificate Modal -->
+    <div class="modal" id="medicalCertificateModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 class="modal-title" data-translate="medical_certificate">Medical Certificate</h2>
+                <button class="modal-close" onclick="closeMedicalCertificateModal()">&times;</button>
+            </div>
+            <form id="medicalCertificateForm">
+                <input type="hidden" id="certConsultationId">
+                
+                <div class="modal-body">
+                    <!-- Patient & Doctor Info Display -->
+                    <div class="card p-4 mb-4 bg-blue-50 border-blue-200">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                <div>
+                                    <span class="font-semibold text-gray-700" data-translate="patient">Patient:</span>
+                                    <span id="certPatientName" class="text-gray-900 font-medium ml-1">-</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <div>
+                                    <span class="font-semibold text-gray-700" data-translate="date">Date:</span>
+                                    <span id="certDate" class="text-gray-900 font-medium ml-1">-</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div>
+                                    <span class="font-semibold text-gray-700" data-translate="doctor_name">Doctor:</span>
+                                    <span id="certDoctorName" class="text-gray-900 font-medium ml-1">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Certificate Type -->
+                    <div class="form-group">
+                        <label class="form-label font-semibold" for="certType" data-translate="certificate_type">Certificate Type *</label>
+                        <select id="certType" class="form-input" required>
+                            <option value="">Select type...</option>
+                            <option value="sick_leave">Sick Leave Certificate</option>
+                            <option value="fitness">Fitness Certificate</option>
+                            <option value="medical_report">Medical Report Certificate</option>
+                            <option value="disability">Disability Certificate</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Rest Period (for sick leave) -->
+                    <div class="form-group">
+                        <label class="form-label font-semibold" data-translate="rest_period">Rest Period (Days)</label>
+                        <input type="number" id="certRestPeriod" class="form-input" min="1" max="365" placeholder="e.g., 7">
+                    </div>
+                    
+                    <!-- Start Date -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label class="form-label font-semibold" for="certStartDate" data-translate="start_date">Start Date *</label>
+                            <input type="date" id="certStartDate" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label font-semibold" for="certEndDate" data-translate="end_date">End Date</label>
+                            <input type="date" id="certEndDate" class="form-input">
+                        </div>
+                    </div>
+                    
+                    <!-- Diagnosis/Condition -->
+                    <div class="form-group">
+                        <label class="form-label font-semibold" for="certDiagnosis" data-translate="diagnosis_condition">Diagnosis / Medical Condition *</label>
+                        <textarea id="certDiagnosis" class="form-input form-textarea" rows="3" placeholder="Brief description of the medical condition" required></textarea>
+                    </div>
+                    
+                    <!-- Recommendations -->
+                    <div class="form-group">
+                        <label class="form-label font-semibold" for="certRecommendations" data-translate="recommendations">Recommendations</label>
+                        <textarea id="certRecommendations" class="form-input form-textarea" rows="3" placeholder="Medical recommendations and restrictions (optional)"></textarea>
+                    </div>
+                    
+                    <!-- Additional Notes -->
+                    <div class="form-group">
+                        <label class="form-label font-semibold" for="certNotes" data-translate="additional_notes">Additional Notes</label>
+                        <textarea id="certNotes" class="form-input form-textarea" rows="2" placeholder="Any additional information"></textarea>
+                    </div>
+                    
+                    <!-- Preview/Print Option -->
+                    <div class="card p-3 bg-yellow-50 border-yellow-200">
+                        <div class="flex items-start gap-2">
+                            <svg class="w-5 h-5 text-yellow-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <div class="text-sm text-yellow-800">
+                                <p class="font-semibold mb-1" data-translate="certificate_info">Certificate Information</p>
+                                <p data-translate="certificate_info_text">After saving, you can view and print the certificate from the consultation details.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeMedicalCertificateModal()" data-translate="cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <svg class="icon-sm mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+                        </svg>
+                        <span data-translate="save_certificate">Save Certificate</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Consultation Detail Modal -->
     <div class="modal" id="consultationDetailModal">
         <div class="modal-content" id="consultationDetailModalContent" style="max-width: 800px;" role="dialog" aria-modal="true" tabindex="-1">
@@ -2977,6 +3172,8 @@
         let currentCalendarDate = new Date();
         // Track the appointment used to open the consultation (if any)
         let currentConsultationAppointmentId = null;
+        // Track current consultation being worked on (for lab assessments from consultation form)
+        let currentConsultationPatientId = null;
 
         // Appointment storage system
         let storedAppointments = [];
@@ -3261,7 +3458,39 @@
                 reject: 'Reject',
                 view_details: 'View Details',
                 consultation_details: 'Consultation Details',
-                close: 'Close'
+                close: 'Close',
+                
+                // Laboratory Assessment
+                laboratory_assessment: 'Laboratory Assessment Examination',
+                add_lab_assessment: 'Add Lab Assessment',
+                lab_assessment_desc: 'Upload laboratory assessment documents and add notes about the examination results.',
+                patient: 'Patient',
+                consultation_date: 'Consultation Date',
+                upload_documents: 'Upload Laboratory Documents',
+                upload_documents_hint: 'You can upload multiple files (PDF, images, etc.)',
+                lab_notes: 'Laboratory Assessment Notes',
+                lab_notes_hint: 'Add notes, observations, or interpretations of the laboratory results',
+                previous_assessments: 'Previous Assessments',
+                save_assessment: 'Save Assessment',
+                assessment_saved: 'Laboratory assessment saved successfully!',
+                no_files_selected: 'No files selected',
+                file_uploaded: 'File uploaded',
+                remove_file: 'Remove file',
+                
+                // Medical Certificate
+                medical_certificate: 'Medical Certificate',
+                certificate_type: 'Certificate Type',
+                rest_period: 'Rest Period (Days)',
+                start_date: 'Start Date',
+                end_date: 'End Date',
+                diagnosis_condition: 'Diagnosis / Medical Condition',
+                recommendations: 'Recommendations',
+                additional_notes: 'Additional Notes',
+                certificate_info: 'Certificate Information',
+                certificate_info_text: 'After saving, you can view and print the certificate from the consultation details.',
+                save_certificate: 'Save Certificate',
+                certificate_saved: 'Medical certificate saved successfully!',
+                date: 'Date'
             },
             fr: {
                 // Navigation
@@ -3535,7 +3764,39 @@
                 reject: 'Rejeter',
                 view_details: 'Voir les détails',
                 consultation_details: 'Détails de la consultation',
-                close: 'Fermer'
+                close: 'Fermer',
+                
+                // Laboratory Assessment
+                laboratory_assessment: 'Examen d\'évaluation de laboratoire',
+                add_lab_assessment: 'Ajouter une évaluation de laboratoire',
+                lab_assessment_desc: 'Téléchargez les documents d\'évaluation de laboratoire et ajoutez des notes sur les résultats de l\'examen.',
+                patient: 'Patient',
+                consultation_date: 'Date de consultation',
+                upload_documents: 'Télécharger les documents de laboratoire',
+                upload_documents_hint: 'Vous pouvez télécharger plusieurs fichiers (PDF, images, etc.)',
+                lab_notes: 'Notes d\'évaluation de laboratoire',
+                lab_notes_hint: 'Ajoutez des notes, observations ou interprétations des résultats de laboratoire',
+                previous_assessments: 'Évaluations précédentes',
+                save_assessment: 'Enregistrer l\'évaluation',
+                assessment_saved: 'Évaluation de laboratoire enregistrée avec succès!',
+                no_files_selected: 'Aucun fichier sélectionné',
+                file_uploaded: 'Fichier téléchargé',
+                remove_file: 'Supprimer le fichier',
+                
+                // Medical Certificate
+                medical_certificate: 'Certificat médical',
+                certificate_type: 'Type de certificat',
+                rest_period: 'Période de repos (jours)',
+                start_date: 'Date de début',
+                end_date: 'Date de fin',
+                diagnosis_condition: 'Diagnostic / Condition médicale',
+                recommendations: 'Recommandations',
+                additional_notes: 'Notes supplémentaires',
+                certificate_info: 'Informations sur le certificat',
+                certificate_info_text: 'Après l\'enregistrement, vous pouvez consulter et imprimer le certificat à partir des détails de la consultation.',
+                save_certificate: 'Enregistrer le certificat',
+                certificate_saved: 'Certificat médical enregistré avec succès!',
+                date: 'Date'
             },
             ar: {
                 // Navigation
@@ -3809,7 +4070,39 @@
                 reject: 'رفض',
                 view_details: 'عرض التفاصيل',
                 consultation_details: 'تفاصيل الاستشارة',
-                close: 'إغلاق'
+                close: 'إغلاق',
+                
+                // Laboratory Assessment
+                laboratory_assessment: 'فحص التقييم المخبري',
+                add_lab_assessment: 'إضافة تقييم مخبري',
+                lab_assessment_desc: 'قم بتحميل مستندات التقييم المخبري وإضافة ملاحظات حول نتائج الفحص.',
+                patient: 'المريض',
+                consultation_date: 'تاريخ الاستشارة',
+                upload_documents: 'تحميل المستندات المخبرية',
+                upload_documents_hint: 'يمكنك تحميل ملفات متعددة (PDF، صور، إلخ.)',
+                lab_notes: 'ملاحظات التقييم المخبري',
+                lab_notes_hint: 'أضف ملاحظات أو ملاحظات أو تفسيرات لنتائج المختبر',
+                previous_assessments: 'التقييمات السابقة',
+                save_assessment: 'حفظ التقييم',
+                assessment_saved: 'تم حفظ التقييم المخبري بنجاح!',
+                no_files_selected: 'لم يتم تحديد ملفات',
+                file_uploaded: 'تم رفع الملف',
+                remove_file: 'إزالة الملف',
+                
+                // Medical Certificate
+                medical_certificate: 'الشهادة الطبية',
+                certificate_type: 'نوع الشهادة',
+                rest_period: 'فترة الراحة (أيام)',
+                start_date: 'تاريخ البدء',
+                end_date: 'تاريخ الانتهاء',
+                diagnosis_condition: 'التشخيص / الحالة الطبية',
+                recommendations: 'التوصيات',
+                additional_notes: 'ملاحظات إضافية',
+                certificate_info: 'معلومات الشهادة',
+                certificate_info_text: 'بعد الحفظ، يمكنك عرض وطباعة الشهادة من تفاصيل الاستشارة.',
+                save_certificate: 'حفظ الشهادة',
+                certificate_saved: 'تم حفظ الشهادة الطبية بنجاح!',
+                date: 'التاريخ'
             }
         };
 
@@ -8952,6 +9245,37 @@
                         createdAt: new Date().toISOString()
                     });
                     localStorage.setItem('consultations', JSON.stringify(consultations));
+                    
+                    // Link any temporary lab assessments to this consultation
+                    try {
+                        const labAssessments = JSON.parse(localStorage.getItem('lab_assessments') || '[]');
+                        const updatedAssessments = labAssessments.map(assessment => {
+                            // If this assessment was created for a temporary consultation with the same patient
+                            if (assessment.consultationId.startsWith('temp_consult_') && currentConsultationPatientId === patientId) {
+                                return { ...assessment, consultationId: id };
+                            }
+                            return assessment;
+                        });
+                        localStorage.setItem('lab_assessments', JSON.stringify(updatedAssessments));
+                    } catch (error) {
+                        console.error('Error linking lab assessments:', error);
+                    }
+                    
+                    // Link any temporary medical certificates to this consultation
+                    try {
+                        const certificates = JSON.parse(localStorage.getItem('medical_certificates') || '[]');
+                        const updatedCertificates = certificates.map(cert => {
+                            // If this certificate was created for a temporary consultation with the same patient
+                            if (cert.consultationId.startsWith('temp_cert_consult_') && currentConsultationPatientId === patientId) {
+                                return { ...cert, consultationId: id };
+                            }
+                            return cert;
+                        });
+                        localStorage.setItem('medical_certificates', JSON.stringify(updatedCertificates));
+                        currentConsultationPatientId = null; // Reset
+                    } catch (error) {
+                        console.error('Error linking medical certificates:', error);
+                    }
 
                     // Optionally update the patient's latest height/weight
                     try {
@@ -9266,8 +9590,10 @@
                         <div class="patient-name">${patientName}</div>
                         <div class="consultation-time">${consultationTime}</div>
                         <div class="consultation-notes">${consultation.notes.substring(0, 100)}${consultation.notes.length > 100 ? '...' : ''}</div>
-                        <div class="flex gap-2 mt-3">
+                        <div class="flex gap-2 mt-3 flex-wrap">
                             <button class="btn btn-sm btn-primary" onclick="viewConsultationDetail('${consultation.id}')" data-translate="view_details">View Details</button>
+                            <button class="btn btn-sm btn-outline" onclick="openLaboratoryAssessmentModal('${consultation.id}')" data-translate="add_lab_assessment">Lab Assessment</button>
+                            <button class="btn btn-sm btn-outline" onclick="openMedicalCertificateModal('${consultation.id}')" data-translate="medical_certificate">Medical Certificate</button>
                         </div>
                     </div>
                 `;
@@ -9331,6 +9657,149 @@
                     </div>
                 ` : ''}
             `;
+            
+            // Add laboratory assessments section if any exist
+            const labAssessments = JSON.parse(localStorage.getItem('lab_assessments') || '[]');
+            const consultationAssessments = labAssessments.filter(a => a.consultationId === consultationId);
+            
+            if (consultationAssessments.length > 0) {
+                detailContent.innerHTML += `
+                    <div class="card p-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">Laboratory Assessments</h3>
+                            <button class="btn btn-sm btn-outline" onclick="openLaboratoryAssessmentModal('${consultationId}')">
+                                <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                <span data-translate="add_lab_assessment">Add New</span>
+                            </button>
+                        </div>
+                        <div class="space-y-3">
+                            ${consultationAssessments.map((assessment, index) => `
+                                <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="font-semibold text-sm text-gray-700">Assessment #${index + 1}</span>
+                                        <span class="text-xs text-gray-500">${new Date(assessment.createdAt).toLocaleString()}</span>
+                                    </div>
+                                    ${assessment.notes ? `
+                                        <div class="text-sm text-gray-600 mb-2">
+                                            <strong>Notes:</strong> ${assessment.notes}
+                                        </div>
+                                    ` : ''}
+                                    ${assessment.files && assessment.files.length > 0 ? `
+                                        <div class="text-sm">
+                                            <strong>Uploaded Files (${assessment.files.length}):</strong>
+                                            <div class="mt-2 space-y-1">
+                                                ${assessment.files.map(file => `
+                                                    <div class="flex items-center justify-between p-2 bg-white rounded border border-gray-200">
+                                                        <div class="flex items-center gap-2">
+                                                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                            </svg>
+                                                            <span class="text-gray-700">${file.name}</span>
+                                                        </div>
+                                                        <button onclick="downloadLabFile('${assessment.id}', '${file.name}')" class="text-blue-600 hover:text-blue-800 text-xs">
+                                                            Download
+                                                        </button>
+                                                    </div>
+                                                `).join('')}
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Show button to add first assessment
+                detailContent.innerHTML += `
+                    <div class="card p-4 border-dashed border-2 border-gray-300 bg-gray-50">
+                        <div class="text-center py-3">
+                            <svg class="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <p class="text-gray-600 mb-3">No laboratory assessments yet</p>
+                            <button class="btn btn-primary btn-sm" onclick="openLaboratoryAssessmentModal('${consultationId}')">
+                                <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                <span data-translate="add_lab_assessment">Add Laboratory Assessment</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Add medical certificates section if any exist
+            const medicalCertificates = JSON.parse(localStorage.getItem('medical_certificates') || '[]');
+            const consultationCertificates = medicalCertificates.filter(c => c.consultationId === consultationId);
+            
+            if (consultationCertificates.length > 0) {
+                detailContent.innerHTML += `
+                    <div class="card p-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">Medical Certificates</h3>
+                            <button class="btn btn-sm btn-outline" onclick="openMedicalCertificateModal('${consultationId}')">
+                                <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                <span data-translate="medical_certificate">Create New</span>
+                            </button>
+                        </div>
+                        <div class="space-y-3">
+                            ${consultationCertificates.map((cert, index) => `
+                                <div class="border border-green-200 rounded-lg p-4 bg-green-50">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div class="flex items-center gap-2">
+                                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            <span class="font-semibold text-gray-700">${cert.certType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                                        </div>
+                                        <span class="text-xs text-gray-500">${new Date(cert.createdAt).toLocaleDateString()}</span>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm mb-3">
+                                        ${cert.startDate ? `
+                                            <div><strong>Start Date:</strong> ${new Date(cert.startDate).toLocaleDateString()}</div>
+                                        ` : ''}
+                                        ${cert.endDate ? `
+                                            <div><strong>End Date:</strong> ${new Date(cert.endDate).toLocaleDateString()}</div>
+                                        ` : ''}
+                                        ${cert.restPeriod ? `
+                                            <div><strong>Rest Period:</strong> ${cert.restPeriod} days</div>
+                                        ` : ''}
+                                    </div>
+                                    <div class="text-sm mb-2">
+                                        <strong>Diagnosis:</strong>
+                                        <div class="mt-1 text-gray-700">${cert.diagnosis}</div>
+                                    </div>
+                                    ${cert.recommendations ? `
+                                        <div class="text-sm mb-2">
+                                            <strong>Recommendations:</strong>
+                                            <div class="mt-1 text-gray-700">${cert.recommendations}</div>
+                                        </div>
+                                    ` : ''}
+                                    ${cert.notes ? `
+                                        <div class="text-sm">
+                                            <strong>Additional Notes:</strong>
+                                            <div class="mt-1 text-gray-600">${cert.notes}</div>
+                                        </div>
+                                    ` : ''}
+                                    <div class="mt-3 pt-3 border-t border-green-200">
+                                        <button onclick="printMedicalCertificate('${cert.id}')" class="btn btn-sm btn-primary">
+                                            <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                                            </svg>
+                                            Print Certificate
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
             
             updateModalTranslations();
             
@@ -9408,6 +9877,536 @@
             console.log('Clinical Exam saved:', text);
             showTranslatedAlert('Clinical examination documented successfully');
             closeClinicalExamModal();
+        };
+
+        // Laboratory Assessment Functions
+        let selectedLabFiles = [];
+        
+        window.openLaboratoryAssessmentModal = function(consultationId) {
+            const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+            const consultation = consultations.find(c => c.id === consultationId);
+            
+            if (!consultation) {
+                showTranslatedAlert('Consultation not found.');
+                return;
+            }
+            
+            // Get patient info
+            const patient = storedPatients.find(p => p.id === consultation.patientId);
+            const patientName = patient ? patient.fullName : 'Unknown Patient';
+            const consultationDate = new Date(consultation.createdAt).toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            // Populate modal
+            document.getElementById('labAssessmentConsultationId').value = consultationId;
+            document.getElementById('labAssessmentPatientName').textContent = patientName;
+            document.getElementById('labAssessmentConsultationDate').textContent = consultationDate;
+            document.getElementById('labAssessmentNotes').value = '';
+            document.getElementById('labAssessmentFiles').value = '';
+            document.getElementById('uploadedFilesList').innerHTML = '';
+            selectedLabFiles = [];
+            
+            // Load existing assessments
+            loadExistingAssessments(consultationId);
+            
+            // Open modal with high z-index
+            const modal = document.getElementById('laboratoryAssessmentModal');
+            if (modal) {
+                modal.style.zIndex = '11000'; // Higher than consultation detail modal
+                modal.classList.add('active');
+                updateModalTranslations();
+            }
+        };
+        
+        window.openLabAssessmentFromConsultation = function() {
+            // Get selected patient from consultation form
+            const patientId = document.getElementById('consultPatient').value;
+            
+            if (!patientId) {
+                alert('Please select a patient first.');
+                return;
+            }
+            
+            // Get patient info
+            const patient = storedPatients.find(p => p.id === patientId);
+            const patientName = patient ? patient.fullName : 'Unknown Patient';
+            
+            // Use a temporary ID for new consultations (not yet saved)
+            const tempConsultationId = 'temp_consult_' + Date.now();
+            
+            // Store the current patient ID for reference
+            currentConsultationPatientId = patientId;
+            
+            // Populate modal
+            document.getElementById('labAssessmentConsultationId').value = tempConsultationId;
+            document.getElementById('labAssessmentPatientName').textContent = patientName;
+            document.getElementById('labAssessmentConsultationDate').textContent = new Date().toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            document.getElementById('labAssessmentNotes').value = '';
+            document.getElementById('labAssessmentFiles').value = '';
+            document.getElementById('uploadedFilesList').innerHTML = '';
+            selectedLabFiles = [];
+            
+            // Hide existing assessments section for new consultations
+            const section = document.getElementById('existingAssessmentsSection');
+            if (section) section.classList.add('hidden');
+            
+            // Open modal with high z-index to appear on top of consultation modal
+            const modal = document.getElementById('laboratoryAssessmentModal');
+            if (modal) {
+                modal.style.zIndex = '11000'; // Higher than consultation modal
+                modal.classList.add('active');
+                updateModalTranslations();
+            }
+        };
+        
+        window.closeLaboratoryAssessmentModal = function() {
+            const modal = document.getElementById('laboratoryAssessmentModal');
+            if (modal) {
+                modal.classList.remove('active');
+                modal.style.zIndex = ''; // Reset z-index
+            }
+            selectedLabFiles = [];
+        };
+        
+        function loadExistingAssessments(consultationId) {
+            const assessments = JSON.parse(localStorage.getItem('lab_assessments') || '[]');
+            const consultationAssessments = assessments.filter(a => a.consultationId === consultationId);
+            
+            const section = document.getElementById('existingAssessmentsSection');
+            const list = document.getElementById('existingAssessmentsList');
+            
+            if (consultationAssessments.length === 0) {
+                section.classList.add('hidden');
+                return;
+            }
+            
+            section.classList.remove('hidden');
+            list.innerHTML = consultationAssessments.map((assessment, index) => `
+                <div class="card p-3 bg-gray-50">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-semibold text-sm text-gray-700">Assessment #${index + 1}</span>
+                        <span class="text-xs text-gray-500">${new Date(assessment.createdAt).toLocaleString()}</span>
+                    </div>
+                    ${assessment.notes ? `
+                        <div class="text-sm text-gray-600 mb-2">
+                            <strong>Notes:</strong> ${assessment.notes}
+                        </div>
+                    ` : ''}
+                    ${assessment.files && assessment.files.length > 0 ? `
+                        <div class="text-sm">
+                            <strong>Files:</strong>
+                            <div class="mt-1 space-y-1">
+                                ${assessment.files.map(file => `
+                                    <div class="flex items-center text-blue-600">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                        <span>${file.name}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+        
+        // Handle file selection
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('labAssessmentFiles');
+            if (fileInput) {
+                fileInput.addEventListener('change', function(e) {
+                    const files = Array.from(e.target.files);
+                    
+                    // Process files
+                    files.forEach(file => {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            selectedLabFiles.push({
+                                name: file.name,
+                                type: file.type,
+                                size: file.size,
+                                data: event.target.result
+                            });
+                            updateUploadedFilesList();
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                });
+            }
+        });
+        
+        function updateUploadedFilesList() {
+            const container = document.getElementById('uploadedFilesList');
+            
+            if (selectedLabFiles.length === 0) {
+                container.innerHTML = '<p class="text-sm text-gray-500" data-translate="no_files_selected">No files selected</p>';
+                return;
+            }
+            
+            container.innerHTML = selectedLabFiles.map((file, index) => `
+                <div class="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-200">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <div>
+                            <div class="text-sm font-medium text-gray-900">${file.name}</div>
+                            <div class="text-xs text-gray-500">${(file.size / 1024).toFixed(2)} KB</div>
+                        </div>
+                    </div>
+                    <button type="button" onclick="removeLabFile(${index})" class="text-red-600 hover:text-red-800">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            `).join('');
+        }
+        
+        window.removeLabFile = function(index) {
+            selectedLabFiles.splice(index, 1);
+            updateUploadedFilesList();
+        };
+        
+        window.downloadLabFile = function(assessmentId, fileName) {
+            const assessments = JSON.parse(localStorage.getItem('lab_assessments') || '[]');
+            const assessment = assessments.find(a => a.id === assessmentId);
+            
+            if (!assessment) {
+                alert('Assessment not found.');
+                return;
+            }
+            
+            const file = assessment.files.find(f => f.name === fileName);
+            if (!file) {
+                alert('File not found.');
+                return;
+            }
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.href = file.data;
+            link.download = file.name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+        
+        // Handle form submission
+        document.getElementById('laboratoryAssessmentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const consultationId = document.getElementById('labAssessmentConsultationId').value;
+            const notes = document.getElementById('labAssessmentNotes').value.trim();
+            
+            if (!notes && selectedLabFiles.length === 0) {
+                alert('Please add notes or upload at least one file.');
+                return;
+            }
+            
+            // Save assessment
+            const assessments = JSON.parse(localStorage.getItem('lab_assessments') || '[]');
+            
+            const newAssessment = {
+                id: 'lab_' + Date.now(),
+                consultationId: consultationId,
+                notes: notes,
+                files: selectedLabFiles,
+                createdAt: new Date().toISOString()
+            };
+            
+            assessments.push(newAssessment);
+            localStorage.setItem('lab_assessments', JSON.stringify(assessments));
+            
+            // Show success message
+            const successMessage = translations[currentLanguage].assessment_saved || 'Laboratory assessment saved successfully!';
+            showTranslatedAlert('assessment_saved', successMessage);
+            
+            // Close modal
+            closeLaboratoryAssessmentModal();
+            
+            // Refresh consultation detail if it's open
+            const detailModal = document.getElementById('consultationDetailModal');
+            if (detailModal && detailModal.classList.contains('active')) {
+                viewConsultationDetail(consultationId);
+            }
+        });
+
+        // ========================================
+        // Medical Certificate Functions
+        // ========================================
+
+        window.openMedicalCertificateModal = function(consultationId) {
+            const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+            const consultation = consultations.find(c => c.id === consultationId);
+            
+            if (!consultation) {
+                showTranslatedAlert('Consultation not found.');
+                return;
+            }
+            
+            // Get patient and doctor info
+            const patient = storedPatients.find(p => p.id === consultation.patientId);
+            const patientName = patient ? patient.fullName : 'Unknown Patient';
+            const doctorName = consultation.doctor || 'Doctor';
+            const consultationDate = new Date(consultation.createdAt).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            // Populate modal
+            document.getElementById('certConsultationId').value = consultationId;
+            document.getElementById('certPatientName').textContent = patientName;
+            document.getElementById('certDate').textContent = consultationDate;
+            document.getElementById('certDoctorName').textContent = doctorName;
+            
+            // Set default start date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('certStartDate').value = today;
+            
+            // Clear other fields
+            document.getElementById('certType').value = '';
+            document.getElementById('certRestPeriod').value = '';
+            document.getElementById('certEndDate').value = '';
+            document.getElementById('certDiagnosis').value = consultation.notes || '';
+            document.getElementById('certRecommendations').value = '';
+            document.getElementById('certNotes').value = '';
+            
+            // Open modal with high z-index
+            const modal = document.getElementById('medicalCertificateModal');
+            if (modal) {
+                modal.style.zIndex = '11000'; // Higher than other modals
+                modal.classList.add('active');
+                updateModalTranslations();
+            }
+        };
+
+        window.openMedicalCertificateFromConsultation = function() {
+            // Get selected patient from consultation form
+            const patientId = document.getElementById('consultPatient').value;
+            
+            if (!patientId) {
+                alert('Please select a patient first.');
+                return;
+            }
+            
+            // Get patient info and session
+            const patient = storedPatients.find(p => p.id === patientId);
+            const patientName = patient ? patient.fullName : 'Unknown Patient';
+            const session = JSON.parse(localStorage.getItem('medconnect_session') || '{}');
+            const doctorName = session?.name || 'Doctor';
+            
+            // Use a temporary ID for new consultations
+            const tempConsultationId = 'temp_cert_consult_' + Date.now();
+            
+            // Store the current patient ID for reference
+            currentConsultationPatientId = patientId;
+            
+            // Populate modal
+            document.getElementById('certConsultationId').value = tempConsultationId;
+            document.getElementById('certPatientName').textContent = patientName;
+            document.getElementById('certDate').textContent = new Date().toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            document.getElementById('certDoctorName').textContent = doctorName;
+            
+            // Set default start date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('certStartDate').value = today;
+            
+            // Pre-fill diagnosis from consultation notes if available
+            const consultNotes = document.getElementById('consultNotes').value;
+            document.getElementById('certDiagnosis').value = consultNotes || '';
+            
+            // Clear other fields
+            document.getElementById('certType').value = '';
+            document.getElementById('certRestPeriod').value = '';
+            document.getElementById('certEndDate').value = '';
+            document.getElementById('certRecommendations').value = '';
+            document.getElementById('certNotes').value = '';
+            
+            // Open modal with high z-index to appear on top of consultation modal
+            const modal = document.getElementById('medicalCertificateModal');
+            if (modal) {
+                modal.style.zIndex = '11000'; // Higher than consultation modal
+                modal.classList.add('active');
+                updateModalTranslations();
+            }
+        };
+
+        window.closeMedicalCertificateModal = function() {
+            const modal = document.getElementById('medicalCertificateModal');
+            if (modal) {
+                modal.classList.remove('active');
+                modal.style.zIndex = ''; // Reset z-index
+            }
+        };
+
+        // Auto-calculate end date when rest period changes
+        document.addEventListener('DOMContentLoaded', function() {
+            const restPeriodInput = document.getElementById('certRestPeriod');
+            const startDateInput = document.getElementById('certStartDate');
+            const endDateInput = document.getElementById('certEndDate');
+            
+            if (restPeriodInput && startDateInput && endDateInput) {
+                const updateEndDate = function() {
+                    const startDate = startDateInput.value;
+                    const restPeriod = parseInt(restPeriodInput.value);
+                    
+                    if (startDate && restPeriod > 0) {
+                        const start = new Date(startDate);
+                        start.setDate(start.getDate() + restPeriod);
+                        endDateInput.value = start.toISOString().split('T')[0];
+                    }
+                };
+                
+                restPeriodInput.addEventListener('input', updateEndDate);
+                startDateInput.addEventListener('change', updateEndDate);
+            }
+        });
+
+        // Medical Certificate Form Submission
+        document.getElementById('medicalCertificateForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const consultationId = document.getElementById('certConsultationId').value;
+            const certType = document.getElementById('certType').value;
+            const restPeriod = document.getElementById('certRestPeriod').value;
+            const startDate = document.getElementById('certStartDate').value;
+            const endDate = document.getElementById('certEndDate').value;
+            const diagnosis = document.getElementById('certDiagnosis').value.trim();
+            const recommendations = document.getElementById('certRecommendations').value.trim();
+            const notes = document.getElementById('certNotes').value.trim();
+            
+            if (!certType || !startDate || !diagnosis) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            // Save certificate
+            const certificates = JSON.parse(localStorage.getItem('medical_certificates') || '[]');
+            
+            const newCertificate = {
+                id: 'cert_' + Date.now(),
+                consultationId: consultationId,
+                patientName: document.getElementById('certPatientName').textContent,
+                doctorName: document.getElementById('certDoctorName').textContent,
+                certType: certType,
+                restPeriod: restPeriod ? parseInt(restPeriod) : null,
+                startDate: startDate,
+                endDate: endDate || null,
+                diagnosis: diagnosis,
+                recommendations: recommendations,
+                notes: notes,
+                createdAt: new Date().toISOString()
+            };
+            
+            certificates.push(newCertificate);
+            localStorage.setItem('medical_certificates', JSON.stringify(certificates));
+            
+            // Show success message
+            const successMessage = translations[currentLanguage].certificate_saved || 'Medical certificate saved successfully!';
+            showTranslatedAlert('certificate_saved', successMessage);
+            
+            // Close modal
+            closeMedicalCertificateModal();
+            
+            // Refresh consultation detail if it's open
+            const detailModal = document.getElementById('consultationDetailModal');
+            if (detailModal && detailModal.classList.contains('active')) {
+                viewConsultationDetail(consultationId);
+            }
+        });
+
+        window.printMedicalCertificate = function(certificateId) {
+            const certificates = JSON.parse(localStorage.getItem('medical_certificates') || '[]');
+            const cert = certificates.find(c => c.id === certificateId);
+            
+            if (!cert) {
+                alert('Certificate not found.');
+                return;
+            }
+            
+            // Get cabinet settings for letterhead
+            const cabinetSettings = getCabinetSettings();
+            
+            // Create printable certificate
+            const printWindow = window.open('', '_blank');
+            const certTypeDisplay = cert.certType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            
+            let certificateHTML = '<!DOCTYPE html><html><head>';
+            certificateHTML += '<title>Medical Certificate - ' + cert.patientName + '</title>';
+            certificateHTML += '<style>';
+            certificateHTML += 'body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px; line-height: 1.6; }';
+            certificateHTML += '.header { text-align: center; border-bottom: 3px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px; }';
+            certificateHTML += '.logo { max-width: 120px; margin-bottom: 10px; }';
+            certificateHTML += '.cabinet-name { font-size: 24px; font-weight: bold; color: #1e40af; margin-bottom: 5px; }';
+            certificateHTML += '.cabinet-info { font-size: 14px; color: #666; }';
+            certificateHTML += '.certificate-title { text-align: center; font-size: 28px; font-weight: bold; color: #059669; margin: 30px 0; text-transform: uppercase; }';
+            certificateHTML += '.cert-body { margin: 30px 0; }';
+            certificateHTML += '.info-section { margin-bottom: 20px; }';
+            certificateHTML += '.info-label { font-weight: bold; color: #374151; }';
+            certificateHTML += '.info-value { color: #1f2937; margin-left: 10px; }';
+            certificateHTML += '.diagnosis-box { background: #f3f4f6; padding: 15px; border-left: 4px solid #2563eb; margin: 20px 0; }';
+            certificateHTML += '.signature-section { margin-top: 60px; display: flex; justify-content: space-between; }';
+            certificateHTML += '.signature-box { text-align: center; min-width: 200px; }';
+            certificateHTML += '.signature-line { border-top: 2px solid #000; margin-top: 50px; padding-top: 5px; }';
+            certificateHTML += '.footer { margin-top: 40px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #ddd; padding-top: 20px; }';
+            certificateHTML += '@media print { body { padding: 20px; } }';
+            certificateHTML += '</style></head><body>';
+            certificateHTML += '<div class="header">';
+            if (cabinetSettings.logo) {
+                certificateHTML += '<img src="' + cabinetSettings.logo + '" alt="Logo" class="logo">';
+            }
+            certificateHTML += '<div class="cabinet-name">' + (cabinetSettings.name || 'Medical Center') + '</div>';
+            if (cabinetSettings.address) {
+                certificateHTML += '<div class="cabinet-info">' + cabinetSettings.address + '</div>';
+            }
+            if (cabinetSettings.phone) {
+                certificateHTML += '<div class="cabinet-info">Tel: ' + cabinetSettings.phone + '</div>';
+            }
+            certificateHTML += '</div>';
+            certificateHTML += '<div class="certificate-title">Medical Certificate</div>';
+            certificateHTML += '<div style="text-align: center; margin-bottom: 20px; font-size: 16px; color: #059669;">' + certTypeDisplay + '</div>';
+            certificateHTML += '<div class="cert-body">';
+            certificateHTML += '<div class="info-section"><span class="info-label">Certificate ID:</span><span class="info-value">' + cert.id + '</span></div>';
+            certificateHTML += '<div class="info-section"><span class="info-label">Date of Issue:</span><span class="info-value">' + new Date(cert.createdAt).toLocaleDateString() + '</span></div>';
+            certificateHTML += '<div class="info-section"><span class="info-label">Patient Name:</span><span class="info-value">' + cert.patientName + '</span></div>';
+            if (cert.startDate) {
+                certificateHTML += '<div class="info-section"><span class="info-label">Period:</span><span class="info-value">From ' + new Date(cert.startDate).toLocaleDateString();
+                if (cert.endDate) certificateHTML += ' to ' + new Date(cert.endDate).toLocaleDateString();
+                if (cert.restPeriod) certificateHTML += ' (' + cert.restPeriod + ' days)';
+                certificateHTML += '</span></div>';
+            }
+            certificateHTML += '<div class="diagnosis-box"><div class="info-label" style="margin-bottom: 10px;">Medical Diagnosis / Condition:</div><div>' + cert.diagnosis + '</div></div>';
+            if (cert.recommendations) {
+                certificateHTML += '<div class="info-section"><div class="info-label" style="margin-bottom: 5px;">Medical Recommendations:</div><div style="color: #1f2937;">' + cert.recommendations + '</div></div>';
+            }
+            if (cert.notes) {
+                certificateHTML += '<div class="info-section"><div class="info-label" style="margin-bottom: 5px;">Additional Notes:</div><div style="color: #4b5563;">' + cert.notes + '</div></div>';
+            }
+            certificateHTML += '<div class="signature-section">';
+            certificateHTML += '<div class="signature-box"><div class="signature-line"><strong>Patient Signature</strong></div></div>';
+            certificateHTML += '<div class="signature-box"><div class="signature-line"><strong>Dr. ' + cert.doctorName + '</strong><br><span style="font-size: 12px;">Medical Doctor</span></div></div>';
+            certificateHTML += '</div></div>';
+            certificateHTML += '<div class="footer">This is an official medical certificate issued by ' + (cabinetSettings.name || 'Medical Center') + '<br>';
+            certificateHTML += 'Certificate ID: ' + cert.id + ' | Issued: ' + new Date(cert.createdAt).toLocaleString() + '</div>';
+            certificateHTML += '<scr' + 'ipt>window.onload = function() { window.print(); };</scr' + 'ipt>';
+            certificateHTML += '</body></html>';
+            
+            printWindow.document.write(certificateHTML);
+            printWindow.document.close();
         };
 
         // Logout function
