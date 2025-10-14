@@ -180,6 +180,36 @@
             margin-bottom: 0.5rem;
         }
 
+        /* Current time indicator in daily agenda */
+        .current-time-container {
+            position: relative;
+            overflow: hidden; /* ensure the indicator does not bleed into header/footer */
+        }
+        .current-time-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 0;
+            border-top: 2px solid #ef4444; /* red */
+            z-index: 10;
+            pointer-events: none;
+        }
+        .current-time-badge {
+            position: absolute;
+            left: 0.5rem;
+            top: 0;
+            transform: translateY(-50%);
+            background: #ffffff;
+            color: #ef4444;
+            border: 2px solid #ef4444;
+            border-radius: 9999px;
+            padding: 0.1rem 0.4rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            line-height: 1;
+            z-index: 11;
+        }
+
         .time-label {
             width: 5rem;
             flex-shrink: 0;
@@ -4485,9 +4515,9 @@
                 `;
             } else {
                 // Show appointments in time slots
-                agendaHTML += '<div class="space-y-2">';
+                agendaHTML += '<div class="space-y-2 current-time-container" id="currentTimeContainer">';
 
-                timeSlots.forEach(timeSlot => {
+                timeSlots.forEach((timeSlot, index) => {
                     const slotAppointments = appointments.filter(apt => apt.time === timeSlot);
 
                     agendaHTML += `
@@ -4499,7 +4529,7 @@
                             </svg>
                             ${timeSlot}
                         </div>
-                        <div class="slot-content">
+                        <div class="slot-content" data-slot-index="${index}">
                 `;
 
                     if (slotAppointments.length > 0) {
@@ -4520,6 +4550,22 @@
 
             document.getElementById('dailyAgenda').innerHTML = agendaHTML;
 
+            // Draw and update current time indicator if the selected date is today
+            try {
+                const container = document.getElementById('currentTimeContainer');
+                if (container && isSameDay(selectedDate, new Date())) {
+                    const update = () => renderOrUpdateCurrentTimeLine(container);
+                    update();
+                    // Update every minute
+                    if (window.__currentTimeInterval) clearInterval(window.__currentTimeInterval);
+                    window.__currentTimeInterval = setInterval(update, 60000);
+                    // Also update on scroll within the agenda container to keep the line pinned correctly
+                    container.addEventListener('scroll', update, { passive: true });
+                } else {
+                    if (window.__currentTimeInterval) clearInterval(window.__currentTimeInterval);
+                }
+            } catch {}
+
             // Update stats
             document.getElementById('totalAppointments').textContent = appointmentCount;
             document.getElementById('confirmedAppointments').textContent = confirmedCount;
@@ -4527,6 +4573,65 @@
             const cancelledEl = document.getElementById('cancelledAppointments');
             if (cancelledEl) cancelledEl.textContent = cancelledCount;
         };
+
+        function isSameDay(a, b) {
+            return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+        }
+
+        // Compute Y offset for current time within 08:00-18:00 grid built from 30-min slots
+        function computeCurrentTimeOffsetPx(container) {
+            const startHour = 8; // matches generateTimeSlots
+            const endHour = 18;
+            const now = new Date();
+            const minutesSinceStart = (now.getHours() - startHour) * 60 + now.getMinutes();
+            const totalMinutes = (endHour - startHour) * 60;
+            // If outside schedule, do not show
+            if (minutesSinceStart < 0 || minutesSinceStart > totalMinutes) return null;
+            const clamped = minutesSinceStart;
+
+            // Measure slots by summing heights of .time-slot blocks to avoid overlay issues
+            const slots = Array.from(container.querySelectorAll('.time-slot'));
+            if (slots.length === 0) return null;
+            const containerTop = container.getBoundingClientRect().top;
+            const top = slots[0].getBoundingClientRect().top;
+            const bottom = slots[slots.length - 1].getBoundingClientRect().bottom;
+            const usableHeight = bottom - top;
+            if (usableHeight <= 0) return null;
+
+            const ratio = clamped / totalMinutes;
+            return (top - containerTop) + usableHeight * ratio;
+        }
+
+        function renderOrUpdateCurrentTimeLine(container) {
+            let line = container.querySelector('.current-time-line');
+            let badge = container.querySelector('.current-time-badge');
+            if (!line) {
+                line = document.createElement('div');
+                line.className = 'current-time-line';
+                container.appendChild(line);
+            }
+            if (!badge) {
+                badge = document.createElement('div');
+                badge.className = 'current-time-badge';
+                container.appendChild(badge);
+            }
+
+            const y = computeCurrentTimeOffsetPx(container);
+            if (y == null) {
+                // hide when out of range
+                if (line) line.style.display = 'none';
+                if (badge) badge.style.display = 'none';
+                return;
+            }
+            line.style.display = 'block';
+            badge.style.display = 'block';
+            line.style.top = `${y}px`;
+            badge.style.top = `${y}px`;
+            const now = new Date();
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            badge.textContent = `${hh}:${mm}`;
+        }
 
         // Calendar functions
         const renderCalendar = () => {
@@ -5591,35 +5696,44 @@
                 return false;
             }
 
-            // Email validation (if provided)
+            // Normalize inputs for consistent comparisons
+            data.cinPassport = (data.cinPassport || '').trim();
+            data.email = (data.email || '').trim().toLowerCase();
+
+            // Email validation (if provided) - only format check, duplicates allowed
             if (data.email && data.email.trim()) {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(data.email)) {
                     showTranslatedAlert('valid_email');
                     return false;
                 }
+            }
 
-                // Check for duplicate email (only if email is provided)
-                const existingPatient = storedPatients.find(patient => patient.email === data.email);
-                if (existingPatient) {
-                    showTranslatedAlert('email_exists');
-                    return false;
+            // Ensure unique file number: if duplicate, auto-generate a new unique one and update the form
+            try {
+                const lsPatients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
+                const existingSet = new Set([
+                    ...((storedPatients || []).map(p => p && p.fileNumber).filter(Boolean)),
+                    ...(lsPatients.map(p => p && p.fileNumber).filter(Boolean))
+                ]);
+
+                if (existingSet.has(data.fileNumber)) {
+                    let newNum = generatePatientFileNumber();
+                    // Extra safety: loop until unique in case state changed
+                    while (existingSet.has(newNum)) {
+                        const m = /^P-(\d{4})-(\d{3,})$/i.exec(newNum);
+                        const y = new Date().getFullYear();
+                        const nextSeq = m ? (parseInt(m[2], 10) + 1) : (existingSet.size + 1);
+                        newNum = `P-${y}-${String(nextSeq).padStart(3, '0')}`;
+                    }
+                    data.fileNumber = newNum;
+                    const fileNumEl = document.getElementById('patientFileNumber');
+                    if (fileNumEl) fileNumEl.value = newNum;
+                    // No blocking alert; proceed with the unique number
                 }
-            }
+            } catch {}
 
-            // Check for duplicate file number
-            const existingFileNumber = storedPatients.find(patient => patient.fileNumber === data.fileNumber);
-            if (existingFileNumber) {
-                showTranslatedAlert('file_number_exists');
-                return false;
-            }
-
-            // Check for duplicate CIN/Passport
-            const existingCinPassport = storedPatients.find(patient => patient.cinPassport === data.cinPassport);
-            if (existingCinPassport) {
-                showTranslatedAlert('cin_passport_exists');
-                return false;
-            }
+            // CIN/Passport validation removed - duplicates are allowed
 
             return true;
         }
@@ -5631,18 +5745,15 @@
                 return false;
             }
 
-            // Email validation (if provided)
+            // Normalize inputs for consistent comparisons
+            data.cinPassport = (data.cinPassport || '').trim();
+            data.email = (data.email || '').trim().toLowerCase();
+
+            // Email validation (if provided) - only format check, duplicates allowed
             if (data.email && data.email.trim()) {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(data.email)) {
                     showTranslatedAlert('valid_email');
-                    return false;
-                }
-
-                // Check for duplicate email (excluding current patient and only if email is provided)
-                const existingPatient = storedPatients.find(patient => patient.email === data.email && patient.id !== editingPatient.id);
-                if (existingPatient) {
-                    showTranslatedAlert('email_exists');
                     return false;
                 }
             }
@@ -5654,12 +5765,7 @@
                 return false;
             }
 
-            // Check for duplicate CIN/Passport (excluding current patient)
-            const existingCinPassport = storedPatients.find(patient => patient.cinPassport === data.cinPassport && patient.id !== editingPatient.id);
-            if (existingCinPassport) {
-                showTranslatedAlert('cin_passport_exists');
-                return false;
-            }
+            // CIN/Passport validation removed - duplicates are allowed
 
             return true;
         }
@@ -5704,9 +5810,9 @@
                 const updatedPatient = {
                     ...editingPatient,
                     fileNumber: formData.fileNumber,
-                    cinPassport: formData.cinPassport,
+                    cinPassport: (formData.cinPassport || '').trim(),
                     fullName: formData.fullName,
-                    email: formData.email,
+                    email: (formData.email || '').trim().toLowerCase(),
                     phone: formData.phone,
                     dateOfBirth: formData.dateOfBirth || '',
                     gender: formData.gender || '',
@@ -5786,9 +5892,11 @@
             const newPatient = {
                 id: `patient-${Date.now()}`,
                 fileNumber: patientData.fileNumber,
-                cinPassport: patientData.cinPassport,
+                // Store trimmed CIN/Passport to avoid accidental whitespace differences
+                cinPassport: (patientData.cinPassport || '').trim(),
                 fullName: patientData.fullName,
-                email: patientData.email,
+                // Normalize email for storage
+                email: (patientData.email || '').trim().toLowerCase(),
                 phone: patientData.phone,
                 dateOfBirth: patientData.dateOfBirth || '',
                 gender: patientData.gender || '',
@@ -5803,8 +5911,8 @@
             saveStoredPatients();
             console.log('Stored patients:', storedPatients);
 
-            // Show success message
-            showPatientSuccess(newPatient);
+            // Return the new patient for the form handler
+            return newPatient;
         }
 
         function showPatientSuccess(patient) {
@@ -5918,14 +6026,14 @@
                             </button>
                         ` : ''}
                         ${canEdit ? `
-                            <button onclick="editPatient('${patient.id}')" class="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white">
-                                Edit
-                            </button>
+                        <button onclick="editPatient('${patient.id}')" class="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white">
+                            Edit
+                        </button>
                         ` : ''}
                         ${canDelete ? `
-                            <button onclick="deletePatient('${patient.id}')" class="btn btn-sm bg-red-600 hover:bg-red-700 text-white">
-                                Delete
-                            </button>
+                        <button onclick="deletePatient('${patient.id}')" class="btn btn-sm bg-red-600 hover:bg-red-700 text-white">
+                            Delete
+                        </button>
                         ` : ''}
                     </div>
                 </div>
@@ -5951,18 +6059,33 @@
         function generatePatientFileNumber() {
             const year = new Date().getFullYear();
             let maxSeq = 0;
+            // Build a set of existing numbers across both in-memory and localStorage
+            const existingNumbers = new Set();
             try {
-                const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
-                patients.forEach(p => {
-                    const m = /^P-(\d{4})-(\d{3,})$/i.exec(p.fileNumber || '');
+                const lsPatients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
+                lsPatients.forEach(p => { if (p && p.fileNumber) existingNumbers.add(p.fileNumber); });
+            } catch {}
+            try {
+                (storedPatients || []).forEach(p => { if (p && p.fileNumber) existingNumbers.add(p.fileNumber); });
+            } catch {}
+
+            // Determine the current max sequence for this year
+            existingNumbers.forEach(fn => {
+                const m = /^P-(\d{4})-(\d{3,})$/i.exec(fn || '');
                     if (m && parseInt(m[1], 10) === year) {
                         const seq = parseInt(m[2], 10);
                         if (!Number.isNaN(seq)) maxSeq = Math.max(maxSeq, seq);
                     }
                 });
-            } catch {}
-            const next = (maxSeq + 1).toString().padStart(3, '0');
-            return `P-${year}-${next}`;
+
+            // Generate next and ensure uniqueness by incrementing if needed
+            let seqNum = maxSeq + 1;
+            let candidate = `P-${year}-${String(seqNum).padStart(3, '0')}`;
+            while (existingNumbers.has(candidate)) {
+                seqNum += 1;
+                candidate = `P-${year}-${String(seqNum).padStart(3, '0')}`;
+            }
+            return candidate;
         }
 
         function searchPatients() {
@@ -6803,9 +6926,9 @@
 
                 // Fill first item description and an example price if missing
                 setTimeout(() => {
-                    const desc = document.getElementById('itemDescription1');
-                    const qty = document.getElementById('itemQuantity1');
-                    const price = document.getElementById('itemPrice1');
+                const desc = document.getElementById('itemDescription1');
+                const qty = document.getElementById('itemQuantity1');
+                const price = document.getElementById('itemPrice1');
                     
                     // Try to set 'General Consultation' if it exists in the bill descriptions
                     if (desc) {
@@ -6816,9 +6939,9 @@
                             if (typeof autoFillPrice === 'function') autoFillPrice(desc);
                         }
                     }
-                    if (qty) qty.value = 1;
-                    if (price && !price.value) price.value = 50;
-                    if (typeof calculateBillTotal === 'function') calculateBillTotal();
+                if (qty) qty.value = 1;
+                if (price && !price.value) price.value = 50;
+                if (typeof calculateBillTotal === 'function') calculateBillTotal();
                 }, 100);
             } catch {}
         }
