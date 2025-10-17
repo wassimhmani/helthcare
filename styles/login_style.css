@@ -1,0 +1,469 @@
+:root {
+    --medical-primary: #2563eb;
+    --medical-primary-dark: #1d4ed8;
+    --medical-secondary: #059669;
+    --medical-accent: #dc2626;
+    --medical-background: #f8fafc;
+    --medical-card: #ffffff;
+    --medical-text: #1e293b;
+    --medical-text-light: #64748b;
+    --medical-border: #e2e8f0;
+    --medical-input-bg: #f1f5f9;
+    --medical-success: #10b981;
+    --medical-warning: #f59e0b;
+    --medical-error: #ef4444;
+    --radius: 0.5rem;
+    --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+    background: linear-gradient(135deg, var(--medical-primary) 0%, var(--medical-secondary) 100%);
+    color: var(--medical-text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    position: relative;
+}
+
+/* Medical background pattern */
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.login-container {
+    background: var(--medical-card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 28rem;
+    padding: 2rem;
+    position: relative;
+    backdrop-filter: blur(10px);
+}
+
+.logo-section {
+    text-align: center;
+    margin-bottom: 3rem; /* more space under logo */
+}
+
+.logo {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--medical-primary), var(--medical-secondary));
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.logo::before {
+    content: '⚕️';
+    font-size: 1.5rem;
+}
+
+/* Footer styles (light, minimal, like agenda) */
+.footer {
+    position: static; /* non-fixed like agenda */
+    background: var(--medical-card);
+    padding: 1rem 0;
+    border-top: 1px solid var(--medical-border);
+}
+
+.footer-content {
+    max-width: 1200px; /* match content container style */
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.footer-logo-emblem {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+}
+
+.footer-logo-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.footer-logo-company {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--medical-text);
+    margin: 0;
+    letter-spacing: 0.5px;
+    line-height: 1;
+}
+
+.footer-logo-tagline {
+    font-size: 0.6rem;
+    color: var(--medical-text-light);
+    margin: 0;
+    letter-spacing: 0.3px;
+    opacity: 0.9;
+    line-height: 1;
+}
+
+.footer-separator {
+    width: 1px;
+    height: 30px;
+    background-color: var(--medical-border);
+    opacity: 1;
+}
+
+.footer-copyright {
+    font-size: 0.7rem;
+    color: var(--medical-text-light);
+    opacity: 1;
+}
+
+/* No extra padding needed since footer is not fixed */
+body {
+    padding-bottom: 0;
+}
+
+/* Mobile responsive footer */
+@media (max-width: 768px) {
+    .footer-content {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+    
+    .footer-separator {
+        display: none;
+    }
+    
+    .footer-logo {
+        gap: 0.5rem;
+    }
+    
+    .footer-logo-emblem {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .footer-logo-company {
+        font-size: 0.9rem;
+    }
+    
+    .footer-logo-tagline {
+        font-size: 0.55rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .footer-logo-text {
+        display: none;
+    }
+    
+    .footer-logo {
+        gap: 0;
+    }
+}
+
+.header {
+    margin-bottom: 2rem;
+    text-align: left; /* prevent inheriting center alignment */
+}
+
+/* Center the inline SVG logo robustly */
+.login-logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 0.5rem; /* ensure a bit of spacing even if wrapper shrinks */
+}
+.login-logo svg {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    height: auto;
+}
+
+.title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--medical-text);
+    margin-bottom: 0.5rem;
+    text-align: left;
+}
+
+.subtitle {
+    color: var(--medical-text-light);
+    text-align: left;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+/* Ensure form elements are left-aligned */
+.form-group, .form-label, .form-input, .remember-section, .footer-links {
+    text-align: left;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    font-weight: 500;
+    color: var(--medical-text);
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--medical-border);
+    border-radius: var(--radius);
+    background-color: var(--medical-input-bg);
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.form-input:focus {
+    border-color: var(--medical-primary);
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-input.error {
+    border-color: var(--medical-error);
+    background-color: #fef2f2;
+}
+
+.error-message {
+    color: var(--medical-error);
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    display: none;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.error-message.show {
+    display: flex;
+}
+
+.error-message::before {
+    content: '⚠️';
+    font-size: 0.75rem;
+}
+
+.role-selector {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.role-option {
+    padding: 0.75rem 0.5rem;
+    border: 2px solid var(--medical-border);
+    border-radius: var(--radius);
+    background: var(--medical-input-bg);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.role-option:hover {
+    border-color: var(--medical-primary);
+}
+
+.role-option.selected {
+    border-color: var(--medical-primary);
+    background: var(--medical-primary);
+    color: white;
+}
+
+.security-notice {
+    background: linear-gradient(90deg, #dbeafe, #ecfdf5);
+    border: 1px solid var(--medical-border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.75rem;
+    color: var(--medical-text-light);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.security-notice::before {
+    content: '🔒';
+    font-size: 1rem;
+}
+
+.remember-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+.remember-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--medical-text-light);
+}
+
+.checkbox {
+    width: 1rem;
+    height: 1rem;
+    accent-color: var(--medical-primary);
+}
+
+.submit-button {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    background: linear-gradient(135deg, var(--medical-primary), var(--medical-primary-dark));
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.submit-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+}
+
+.submit-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.loading-spinner {
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.footer-links {
+    text-align: center;
+    font-size: 0.875rem;
+}
+
+.footer-links a {
+    color: var(--medical-primary);
+    text-decoration: none;
+    margin: 0 0.5rem;
+    font-weight: 500;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+}
+
+.divider {
+    margin: 1rem 0;
+    text-align: center;
+    position: relative;
+    color: var(--medical-text-light);
+    font-size: 0.875rem;
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--medical-border);
+}
+
+.divider span {
+    background: var(--medical-card);
+    padding: 0 1rem;
+}
+
+.compliance-footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--medical-border);
+    font-size: 0.75rem;
+    color: var(--medical-text-light);
+}
+
+@media (max-width: 640px) {
+    .login-container {
+        padding: 1.5rem;
+        margin: 0.5rem;
+    }
+    
+    .role-selector {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --medical-background: #0f172a;
+        --medical-card: #1e293b;
+        --medical-text: #f1f5f9;
+        --medical-text-light: #94a3b8;
+        --medical-border: #334155;
+        --medical-input-bg: #334155;
+    }
+}
