@@ -221,10 +221,25 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 4rem;
+    height: 5.5rem;
 }
 
 .nav-logo {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    display: flex;
+    align-items: center;
+    height: 2rem;
+}
+
+.nav-logo img {
+    max-height: 80px;
+    width: auto;
+    object-fit: contain;
+}
+
+.nav-logo-fallback {
     font-size: 1.25rem;
     font-weight: 700;
     color: #111827;
@@ -427,6 +442,37 @@ body {
     }
 }
 
+/* Responsive grid adjustments */
+@media (max-width: 1024px) {
+    .grid.lg\\:grid-cols-4 {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .card {
+        margin: 0.5rem;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .card {
+        margin: 0.25rem;
+        padding: 0.75rem;
+    }
+    
+    .modal-content {
+        width: 98%;
+        margin: 0.5rem;
+        padding: 1rem;
+    }
+}
+
 @media (max-width: 480px) {
     .footer-logo-text {
         display: none;
@@ -480,6 +526,117 @@ body {
 
 .mobile-nav-link.active {
     color: #111827;
+}
+
+/* Firm Banner */
+.firm-banner {
+    position: sticky;
+    top: 5.5rem; /* keep it below the fixed nav */
+    z-index: 900; /* below nav-menu (1000) */
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.firm-banner-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem; /* smaller height */
+}
+
+/* Logo removed per user request */
+
+.firm-text {
+    display: flex;
+    flex-direction: row; /* horizontal info */
+    align-items: baseline;
+    gap: 0.75rem;
+    min-width: 0; /* allow truncation */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+}
+
+.firm-name {
+    font-size: 0.85rem; /* smaller */
+    font-weight: 800;
+    color: #1e40af;
+    letter-spacing: 0.5px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+}
+
+.firm-tagline {
+    font-size: 0.7rem; /* smaller address line */
+    color: #2563eb;
+    letter-spacing: 0.2px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+}
+
+.firm-meta {
+    font-size: 0.65rem; /* smaller phone */
+    color: #6b7280;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+}
+
+/* separators between inline items */
+#firmAddress::before {
+    content: '•';
+    color: #9ca3af;
+    margin: 0 0.25rem 0 0.1rem;
+}
+#firmPhone::before {
+    content: '•';
+    color: #9ca3af;
+    margin: 0 0.25rem 0 0.1rem;
+}
+
+/* truncate long address to keep height compact */
+.firm-text > * {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 640px) {
+    .firm-name { font-size: 0.8rem; }
+    .firm-tagline { display: none; }
+    .firm-meta { display: none; }
+    
+    .nav-logo img {
+        max-height: 35px;
+    }
+    
+    .nav-wrapper {
+        height: 3.5rem;
+    }
+    
+    .firm-banner {
+        top: 3.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .nav-logo img {
+        max-height: 30px;
+    }
+    
+    .nav-wrapper {
+        height: 3rem;
+        padding: 0 0.25rem;
+    }
+    
+    .firm-banner {
+        top: 3rem;
+    }
+    
+    .firm-banner-inner {
+        padding: 0.15rem 0.25rem;
+    }
+    
+    .firm-name {
+        font-size: 0.75rem;
+    }
 }
 
 /* Doctor Dashboard Styles */
@@ -571,6 +728,24 @@ body {
 
     .mobile-menu-btn {
         display: block;
+    }
+    
+    .nav-wrapper {
+        height: 4rem;
+        padding: 0 0.5rem;
+    }
+    
+    .nav-logo img {
+        max-height: 40px;
+    }
+    
+    .firm-banner {
+        top: 4rem;
+    }
+    
+    .firm-banner-inner {
+        padding: 0.2rem 0.5rem;
+        gap: 0.25rem;
     }
 }
 

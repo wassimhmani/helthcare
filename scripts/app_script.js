@@ -1088,7 +1088,11 @@
 
         // Utility functions
         const formatDate = (date) => {
-            return date.toLocaleDateString('en-US', {
+            // Get current language from i18n system or fallback to English
+            const currentLang = localStorage.getItem('app_lang') || 'en';
+            const locale = currentLang === 'fr' ? 'fr-FR' : currentLang === 'ar' ? 'ar-SA' : 'en-US';
+            
+            return date.toLocaleDateString(locale, {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
@@ -1127,7 +1131,7 @@
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                            Complete
+                            ${window.t ? window.t('complete', 'Complete') : 'Complete'}
                         </button>
                     `);
                     actions.push(`
@@ -1136,7 +1140,7 @@
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
-                            Cancel
+                            ${window.t ? window.t('cancel', 'Cancel') : 'Cancel'}
                         </button>
                     `);
                     break;
@@ -1147,7 +1151,7 @@
                             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                            Completed
+                            ${window.t ? window.t('completed', 'Completed') : 'Completed'}
                         </span>
                     `);
                     break;
@@ -1158,7 +1162,7 @@
                             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
-                            Cancelled
+                            ${window.t ? window.t('cancelled', 'Cancelled') : 'Cancelled'}
                         </span>
                     `);
                     break;
@@ -1190,10 +1194,10 @@
                                 <polyline points="12,6 12,12 16,14"/>
                             </svg>
                             <span class="font-medium">${appointment.time}</span>
-                            <span class="text-sm text-gray-500">(${appointment.duration} min)</span>
+                            <span class="text-sm text-gray-500">(${appointment.duration} ${window.t ? window.t('min', 'min') : 'min'})</span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span class="badge ${getStatusColor(appointment.status)}">${appointment.status}</span>
+                            <span class="badge ${getStatusColor(appointment.status)}">${window.t ? window.t(appointment.status.toLowerCase(), appointment.status) : appointment.status}</span>
                         </div>
                     </div>
                     <div class="space-y-2">
@@ -1203,7 +1207,7 @@
                                 <circle cx="12" cy="7" r="4"/>
                             </svg>
                             <span class="font-medium">${appointment.clientName}</span>
-                            <span class="badge badge-outline ${getTypeColor(appointment.type)}">${appointment.type}</span>
+                            <span class="badge badge-outline ${getTypeColor(appointment.type)}">${window.t ? window.t(appointment.type.toLowerCase().replace(/\s+/g, '_'), appointment.type) : appointment.type}</span>
                         </div>
                         ${appointment.doctor ? `
                             <div class="flex items-center gap-2 text-sm text-gray-600">
@@ -1211,7 +1215,7 @@
                                     <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
                                     <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
                                 </svg>
-                                <span><strong>Doctor:</strong> ${appointment.doctor}</span>
+                                <span><strong>${window.t ? window.t('doctor', 'Doctor') : 'Doctor'}:</strong> ${appointment.doctor}</span>
                             </div>
                         ` : ''}
                         <div class="flex flex-col gap-1 text-sm text-gray-500">
@@ -1277,18 +1281,29 @@
                                 </svg>
                                 <h2 class="text-xl font-semibold">${formatDate(selectedDate)}</h2>
                             </div>
-                            <button class="btn btn-primary inline-flex items-center" onclick="showAddAppointmentModal()" title="Add Appointment">
-                                <svg class="icon mr-2" viewBox="0 0 24 24">
-                                    <path d="M12 4v16M20 12H4" />
-                                </svg>
-                                Add Appointment
-                            </button>
+                            <div class="flex gap-2">
+                                <button class="btn btn-primary inline-flex items-center" onclick="showAddAppointmentModal()" title="${window.t ? window.t('add_appointment', 'Add Appointment') : 'Add Appointment'}">
+                                    <svg class="icon mr-2" viewBox="0 0 24 24">
+                                        <path d="M12 4v16M20 12H4" />
+                                    </svg>
+                                    ${window.t ? window.t('add_appointment', 'Add Appointment') : 'Add Appointment'}
+                                </button>
+                                <button class="btn btn-outline inline-flex items-center" onclick="showPatientManagement()" title="${window.t ? window.t('add_new_patient', 'Add New Patient') : 'Add New Patient'}">
+                                    <svg class="icon mr-2" viewBox="0 0 24 24">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                        <circle cx="9" cy="7" r="4" />
+                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                    </svg>
+                                    ${window.t ? window.t('add_new_patient', 'Add New Patient') : 'Add New Patient'}
+                                </button>
+                            </div>
                         </div>
                         <div class="flex gap-2 mt-2">
-                            <span class="badge badge-secondary">${appointmentCount} Total</span>
-                            <span class="badge bg-green-100 text-green-800">${confirmedCount} Confirmed</span>
-                            <span class="badge bg-blue-100 text-blue-800">${completedCount} Completed</span>
-                            <span class="badge bg-red-100 text-red-800">${cancelledCount} ${translations[currentLanguage]?.cancelled || 'Cancelled'}</span>
+                            <span class="badge badge-secondary">${appointmentCount} ${window.t ? window.t('total', 'Total') : 'Total'}</span>
+                            <span class="badge bg-green-100 text-green-800">${confirmedCount} ${window.t ? window.t('confirmed', 'Confirmed') : 'Confirmed'}</span>
+                            <span class="badge bg-blue-100 text-blue-800">${completedCount} ${window.t ? window.t('completed', 'Completed') : 'Completed'}</span>
+                            <span class="badge bg-red-100 text-red-800">${cancelledCount} ${window.t ? window.t('cancelled', 'Cancelled') : 'Cancelled'}</span>
                         </div>
                     </div>
             `;
@@ -1300,14 +1315,25 @@
                         <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                         </svg>
-                        <h3 class="text-lg font-semibold text-gray-600 mb-2">No Appointments Scheduled</h3>
-                        <p class="text-gray-500 mb-4">There are no appointments scheduled for ${formatDate(selectedDate)}.</p>
-                        <button class="btn btn-primary" onclick="showAddAppointmentModal()">
-                            <svg class="icon-sm mr-2" viewBox="0 0 24 24">
-                                <path d="M12 4v16m8-8H4"/>
-                            </svg>
-                            Add First Appointment
-                        </button>
+                        <h3 class="text-lg font-semibold text-gray-600 mb-2">${window.t ? window.t('no_appointments_today', 'No Appointments Scheduled') : 'No Appointments Scheduled'}</h3>
+                        <p class="text-gray-500 mb-4">${window.t ? window.t('no_appointments_for_date', 'There are no appointments scheduled for') : 'There are no appointments scheduled for'} ${formatDate(selectedDate)}.</p>
+                        <div class="flex gap-2 justify-center">
+                            <button class="btn btn-primary" onclick="showAddAppointmentModal()">
+                                <svg class="icon-sm mr-2" viewBox="0 0 24 24">
+                                    <path d="M12 4v16m8-8H4"/>
+                                </svg>
+                                ${window.t ? window.t('add_first_appointment', 'Add First Appointment') : 'Add First Appointment'}
+                            </button>
+                            <button class="btn btn-outline" onclick="showPatientManagement()">
+                                <svg class="icon-sm mr-2" viewBox="0 0 24 24">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                    <circle cx="9" cy="7" r="4" />
+                                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                </svg>
+                                ${window.t ? window.t('add_new_patient', 'Add New Patient') : 'Add New Patient'}
+                            </button>
+                        </div>
                     </div>
                 `;
             } else {
@@ -1334,7 +1360,7 @@
                             agendaHTML += createAppointmentCard(appointment);
                         });
                     } else {
-                        agendaHTML += '<div class="available-slot">Available</div>';
+                        agendaHTML += `<div class="available-slot">${window.t ? window.t('available', 'Available') : 'Available'}</div>`;
                     }
 
                     agendaHTML += '</div></div>';
@@ -1435,8 +1461,12 @@
             const year = currentCalendarDate.getFullYear();
             const month = currentCalendarDate.getMonth();
 
+            // Get current language from i18n system or fallback to English
+            const currentLang = localStorage.getItem('app_lang') || 'en';
+            const locale = currentLang === 'fr' ? 'fr-FR' : currentLang === 'ar' ? 'ar-SA' : 'en-US';
+
             document.getElementById('currentMonthYear').textContent =
-                currentCalendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                currentCalendarDate.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
 
             const firstDay = new Date(year, month, 1);
             const lastDay = new Date(year, month + 1, 0);
@@ -1446,8 +1476,15 @@
             const calendarGrid = document.getElementById('calendarGrid');
             calendarGrid.innerHTML = '';
 
-            // Add day headers
-            const dayHeaders = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+            // Add day headers based on current language
+            let dayHeaders;
+            if (currentLang === 'fr') {
+                dayHeaders = ['D', 'L', 'M', 'M', 'J', 'V', 'S']; // Dim, Lun, Mar, Mer, Jeu, Ven, Sam
+            } else if (currentLang === 'ar') {
+                dayHeaders = ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س']; // Arabic day abbreviations
+            } else {
+                dayHeaders = ['S', 'M', 'T', 'W', 'T', 'F', 'S']; // English
+            }
             dayHeaders.forEach(day => {
                 const dayHeader = document.createElement('div');
                 dayHeader.className = 'text-center text-sm font-medium text-gray-500 p-2';
@@ -1481,6 +1518,9 @@
                 calendarGrid.appendChild(dayElement);
             }
         };
+
+        // Expose renderCalendar to global scope for language switching
+        window.renderCalendar = renderCalendar;
 
         // Navigation functions
         const goToPreviousDay = () => {
@@ -1956,7 +1996,7 @@
         }
 
         // Patient Management Functions
-        function showPatientManagement() {
+        function showPatientManagement(fromMenu = false) {
             // Check permission
             if (!hasPermission('view_patients')) {
                 alert('You do not have permission to access patient management.');
@@ -1966,15 +2006,56 @@
             const modal = document.getElementById('patientManagementModal');
             modal.classList.add('active');
 
+            // Update modal title based on context
+            const modalTitle = modal.querySelector('.modal-title');
+            if (modalTitle) {
+                if (fromMenu) {
+                    modalTitle.textContent = 'Patient Management';
+                } else {
+                    modalTitle.textContent = 'Patient Addition';
+                }
+            }
+
             // Close mobile menu if open
             const mobileMenu = document.getElementById('mobile-menu');
             mobileMenu.classList.add('hidden');
+
+            // Hide all buttons if called from menu
+            const addPatientButton = document.getElementById('addPatientTab');
+            const viewPatientsButton = document.getElementById('viewPatientsTab');
+            const buttonContainer = addPatientButton?.parentElement;
+            
+            if (fromMenu) {
+                // Hide the entire button container when called from menu
+                if (buttonContainer) {
+                    buttonContainer.style.display = 'none';
+                }
+                // Switch to view patients tab
+                switchPatientTab('view');
+            } else {
+                // Show buttons when called from other places
+                if (buttonContainer) {
+                    buttonContainer.style.display = 'flex';
+                }
+                if (addPatientButton) {
+                    addPatientButton.style.display = 'inline-flex';
+                }
+                if (viewPatientsButton) {
+                    viewPatientsButton.style.display = 'inline-flex';
+                }
+            }
 
             // Load patients list
             loadPatientsList();
 
             // Update modal translations
             updateModalTranslations();
+
+            // Set initial tab state based on context
+            if (!fromMenu) {
+                // When not from menu, ensure we're on the Add tab
+                switchPatientTab('add');
+            }
 
             // Auto-generate file number on open (Add tab)
             const fileNumEl = document.getElementById('patientFileNumber');
@@ -2001,12 +2082,18 @@
             const viewContent = document.getElementById('viewPatientsContent');
             const addTab = document.getElementById('addPatientTab');
             const viewTab = document.getElementById('viewPatientsTab');
+            const modal = document.getElementById('patientManagementModal');
+            const modalTitle = modal?.querySelector('.modal-title');
 
             if (tab === 'add') {
                 addContent.style.display = 'block';
                 viewContent.style.display = 'none';
                 addTab.className = 'btn btn-primary';
                 viewTab.className = 'btn btn-secondary';
+                // Update modal title
+                if (modalTitle) {
+                    modalTitle.textContent = 'Patient Addition';
+                }
                 // Ensure file number is generated when switching back to Add tab
                 const fileNumEl = document.getElementById('patientFileNumber');
                 if (fileNumEl) {
@@ -2018,6 +2105,10 @@
                 viewContent.style.display = 'block';
                 addTab.className = 'btn btn-secondary';
                 viewTab.className = 'btn btn-primary';
+                // Update modal title
+                if (modalTitle) {
+                    modalTitle.textContent = 'Patient Management';
+                }
                 loadPatientsList();
             }
         }
@@ -3749,10 +3840,17 @@
             modal.classList.add('active');
             modal.style.opacity = '1'; // Reset opacity
 
+            // Get current language from i18n system or fallback to legacy
+            const currentLang = localStorage.getItem('app_lang') || currentLanguage || 'en';
+            console.log('Current language when opening modal:', currentLang);
+            
             // Set current language as selected
-            const currentLangRadio = document.getElementById(`lang-${currentLanguage}`);
+            const currentLangRadio = document.getElementById(`lang-${currentLang}`);
             if (currentLangRadio) {
                 currentLangRadio.checked = true;
+                console.log(`Set radio button ${currentLang} as checked`);
+            } else {
+                console.log(`Radio button for ${currentLang} not found`);
             }
 
             // Update modal translations immediately
@@ -3764,23 +3862,29 @@
         }
 
         function updateModalTranslations() {
-            // Update translations for all modal elements
-            const modalElements = document.querySelectorAll('.modal [data-translate]');
-            modalElements.forEach(element => {
-                const key = element.getAttribute('data-translate');
-                if (translations[currentLanguage] && translations[currentLanguage][key]) {
-                    element.textContent = translations[currentLanguage][key];
-                }
-            });
+            // Use i18n system if available, otherwise fallback to legacy system
+            if (window.I18n && window.I18n.walkAndTranslate) {
+                // Use the i18n system to translate all elements
+                window.I18n.walkAndTranslate();
+            } else {
+                // Fallback to legacy translation system
+                const modalElements = document.querySelectorAll('.modal [data-translate]');
+                modalElements.forEach(element => {
+                    const key = element.getAttribute('data-translate');
+                    if (translations[currentLanguage] && translations[currentLanguage][key]) {
+                        element.textContent = translations[currentLanguage][key];
+                    }
+                });
 
-            // Update placeholder translations
-            const placeholderElements = document.querySelectorAll('.modal [data-translate-placeholder]');
-            placeholderElements.forEach(element => {
-                const key = element.getAttribute('data-translate-placeholder');
-                if (translations[currentLanguage] && translations[currentLanguage][key]) {
-                    element.placeholder = translations[currentLanguage][key];
-                }
-            });
+                // Update placeholder translations
+                const placeholderElements = document.querySelectorAll('.modal [data-translate-placeholder]');
+                placeholderElements.forEach(element => {
+                    const key = element.getAttribute('data-translate-placeholder');
+                    if (translations[currentLanguage] && translations[currentLanguage][key]) {
+                        element.placeholder = translations[currentLanguage][key];
+                    }
+                });
+            }
         }
 
         function closeLanguageSettings() {
@@ -4037,6 +4141,10 @@
 
         function saveCabinetSettings(settings) {
             localStorage.setItem('cabinet_settings', JSON.stringify(settings));
+            // Refresh cabinet info display after saving
+            if (window.updateCabinetInfo) {
+                window.updateCabinetInfo();
+            }
         }
 
         function showCabinetSettingsModal() {
@@ -4821,6 +4929,16 @@
             // Also update modal translations specifically
             updateModalTranslations();
 
+            // Refresh dashboard to update dynamic content
+            if (typeof renderDailyAgenda === 'function') {
+                renderDailyAgenda();
+            }
+            
+            // Refresh calendar to update month/year and day headers
+            if (typeof renderCalendar === 'function') {
+                renderCalendar();
+            }
+
             // Restore modal opacity and close after showing the change
             setTimeout(() => {
                 modal.style.opacity = '1';
@@ -4852,7 +4970,12 @@
 
         // Helper function for translated alerts
         function showTranslatedAlert(key, ...args) {
-            let message = translations[currentLanguage] && translations[currentLanguage][key] ? translations[currentLanguage][key] : key;
+            let message;
+            if (window.t) {
+                message = window.t(key, key);
+            } else {
+                message = translations[currentLanguage] && translations[currentLanguage][key] ? translations[currentLanguage][key] : key;
+            }
             if (args.length > 0) {
                 message = message.replace(/\{(\d+)\}/g, (match, index) => args[index] || match);
             }
@@ -4861,7 +4984,12 @@
 
         // Helper function for translated confirm dialogs
         function showTranslatedConfirm(key, ...args) {
-            let message = translations[currentLanguage] && translations[currentLanguage][key] ? translations[currentLanguage][key] : key;
+            let message;
+            if (window.t) {
+                message = window.t(key, key);
+            } else {
+                message = translations[currentLanguage] && translations[currentLanguage][key] ? translations[currentLanguage][key] : key;
+            }
             if (args.length > 0) {
                 message = message.replace(/\{(\d+)\}/g, (match, index) => args[index] || match);
             }
@@ -4870,6 +4998,12 @@
 
         // Initialize language on page load
         function initializeLanguage() {
+            // Only initialize legacy system if i18n is not available
+            if (window.I18n) {
+                console.log('i18n system available, skipping legacy language initialization');
+                return;
+            }
+            
             const savedLang = localStorage.getItem('selectedLanguage') || 'en';
             currentLanguage = savedLang;
             if (savedLang !== 'en') {
@@ -5194,11 +5328,15 @@
                             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
                         }
                         .bill-header {
-                            text-align: center;
+                            display: flex;
+                            align-items: center;
+                            gap: 1rem;
                             border-bottom: 3px solid #2563eb;
                             padding-bottom: 1rem;
                             margin-bottom: 2rem;
                         }
+                        .bill-logo svg { display:block; }
+                        .bill-header-text { display:flex; flex-direction:column; }
                         .bill-title {
                             font-size: 2rem;
                             font-weight: bold;
@@ -5325,8 +5463,28 @@
                 <body>
                     <div class="printable-bill">
                         <div class="bill-header">
-                            <div class="bill-title">MEDICAL BILL</div>
-                            <div class="bill-subtitle">Healthcare System</div>
+                            <div class="bill-logo" aria-hidden="true">${(function(){
+                                try {
+                                    const s = getCabinetSettings();
+                                    if (s && s.logo && /^data:image\//.test(s.logo)) {
+                                        return `<img src="${s.logo}" alt="Logo" style="width:48px;height:48px;object-fit:contain;"/>`;
+                                    }
+                                } catch(e) {}
+                                return `<svg width="48" height="48" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg"><path d="M28 8 L22 34 L40 34 Z" fill="#2563eb"/><path d="M28 8 L26 34 L34 34 Z" fill="#3b82f6" opacity="0.85"/><path d="M12 42 Q22 36 28 42 Q34 36 44 42 Q34 48 28 42 Q22 48 12 42 Z" fill="#2563eb"/></svg>`;
+                            })()}</div>
+                            <div class="bill-header-text">
+                                ${(function(){
+                                    try {
+                                        const s = getCabinetSettings();
+                                        const name = (s && s.name && s.name.trim()) ? s.name : 'Medical Center';
+                                        const address = (s && s.address && s.address.trim()) ? s.address : '';
+                                        const phone = (s && s.phone && s.phone.trim()) ? s.phone : '';
+                                        return `<div class="bill-title">${name}</div><div class="bill-subtitle">${address}</div><div style="color:#6b7280;font-size:0.9rem;">${phone ? `Tel: ${phone}` : ''}</div>`;
+                                    } catch(e) {
+                                        return `<div class="bill-title">Medical Center</div>`;
+                                    }
+                                })()}
+                            </div>
                         </div>
                         
                         <div class="bill-info">
@@ -5477,9 +5635,29 @@
 
             return `
                 <div class="printable-bill">
-                    <div class="bill-header">
-                        <div class="bill-title">MEDICAL BILL</div>
-                        <div class="bill-subtitle">Healthcare System</div>
+                    <div class="bill-header" style="display:flex;align-items:center;gap:1rem;border-bottom:3px solid #2563eb;padding-bottom:1rem;margin-bottom:2rem;">
+                        <div class="bill-logo" aria-hidden="true">${(function(){
+                            try {
+                                const s = getCabinetSettings();
+                                if (s && s.logo && /^data:image\//.test(s.logo)) {
+                                    return `<img src="${s.logo}" alt="Logo" style="width:48px;height:48px;object-fit:contain;"/>`;
+                                }
+                            } catch(e) {}
+                            return `<svg width=\"48\" height=\"48\" viewBox=\"0 0 56 56\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M28 8 L22 34 L40 34 Z\" fill=\"#2563eb\"/><path d=\"M28 8 L26 34 L34 34 Z\" fill=\"#3b82f6\" opacity=\"0.85\"/><path d=\"M12 42 Q22 36 28 42 Q34 36 44 42 Q34 48 28 42 Q22 48 12 42 Z\" fill=\"#2563eb\"/></svg>`;
+                        })()}</div>
+                        <div class="bill-header-text" style="display:flex;flex-direction:column;">
+                            ${(function(){
+                                try {
+                                    const s = getCabinetSettings();
+                                    const name = (s && s.name && s.name.trim()) ? s.name : 'Medical Center';
+                                    const address = (s && s.address && s.address.trim()) ? s.address : '';
+                                    const phone = (s && s.phone && s.phone.trim()) ? s.phone : '';
+                                    return `<div class=\"bill-title\" style=\"font-weight:700;color:#1e40af;font-size:1.5rem;\">${name}</div><div class=\"bill-subtitle\" style=\"color:#2563eb;\">${address}</div><div style=\"color:#6b7280;font-size:0.9rem;\">${phone ? `Tel: ${phone}` : ''}</div>`;
+                                } catch(e) {
+                                    return `<div class=\"bill-title\" style=\"font-weight:700;color:#1e40af;font-size:1.5rem;\">Medical Center</div>`;
+                                }
+                            })()}
+                        </div>
                     </div>
                     
                     <div class="bill-info">
@@ -5991,10 +6169,22 @@
             loadStoredAppointments();
             loadStoredPatients();
             loadStoredBills();
-            renderCalendar();
-            renderDailyAgenda();
             initializeLanguage();
-            loadDoctorDashboard();
+            
+            // Wait for i18n system to be ready before rendering
+            const renderDashboard = () => {
+                renderCalendar();
+                renderDailyAgenda();
+                loadDoctorDashboard();
+            };
+            
+            // If i18n is available, wait for it to initialize
+            if (window.I18n) {
+                // Small delay to ensure i18n is fully initialized
+                setTimeout(renderDashboard, 100);
+            } else {
+                renderDashboard();
+            }
             
             // Apply permission-based UI
             applyPermissionBasedUI();
@@ -6566,7 +6756,12 @@
         function loadTodayAppointments() {
             const today = new Date();
             const todayStr = formatDateForStorage(today);
-            const appointments = getAppointmentsForDate(today);
+            const allAppointments = getAppointmentsForDate(today);
+            
+            // Filter only confirmed appointments for doctor dashboard
+            const appointments = allAppointments.filter(appointment => 
+                appointment.status && appointment.status.toLowerCase() === 'confirmed'
+            );
             
             const appointmentCountEl = document.getElementById('appointmentCount');
             const appointmentsListEl = document.getElementById('todayAppointmentsList');

@@ -19,8 +19,10 @@
   }
 
   function translateElement(el){
-    const key = el.getAttribute('data-i18n');
+    const key = el.getAttribute('data-i18n') || el.getAttribute('data-translate');
+    const placeholderKey = el.getAttribute('data-translate-placeholder');
     const attrMap = el.getAttribute('data-i18n-attr');
+    
     if(key){
       const val = lookup(key);
       if(val !== null){
@@ -31,11 +33,19 @@
         }
       }
     }
+    
+    if(placeholderKey){
+      const val = lookup(placeholderKey);
+      if(val !== null){
+        el.placeholder = val;
+      }
+    }
+    
     if(attrMap){
       const pairs = attrMap.split(',').map(s=>s.trim()).filter(Boolean);
       for(const p of pairs){
         const [attr, attrKeyRaw] = p.split(':').map(s=>s.trim());
-        const attrKey = attrKeyRaw || el.getAttribute('data-i18n');
+        const attrKey = attrKeyRaw || el.getAttribute('data-i18n') || el.getAttribute('data-translate');
         if(attr && attrKey){
           const v = lookup(attrKey);
           if(v !== null){
@@ -47,7 +57,7 @@
   }
 
   function walkAndTranslate(root=document){
-    const nodes = root.querySelectorAll('[data-i18n], [data-i18n-attr]');
+    const nodes = root.querySelectorAll('[data-i18n], [data-i18n-attr], [data-translate], [data-translate-placeholder]');
     nodes.forEach(translateElement);
     // document title
     const titleKey = document.querySelector('title')?.getAttribute('data-i18n');
@@ -113,6 +123,6 @@
   }
 
   // expose
-  window.I18n = { setLanguage, initI18n, t };
+  window.I18n = { setLanguage, initI18n, t, walkAndTranslate };
   window.t = t;
 })();
