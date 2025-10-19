@@ -165,10 +165,10 @@
                     <label class="form-label" for="patientSelection" data-translate="select_patient">Select Patient
                         *</label>
                     <select id="patientSelection" class="form-input" required onchange="handlePatientSelection()">
-                        <option value="">Choose a patient...</option>
+                        <option value="" data-translate="choose_patient">Choose a patient...</option>
                     </select>
                     <div class="mt-2">
-                        <button type="button" class="btn btn-primary btn-sm" onclick="showPatientManagement()">
+                        <button type="button" class="btn btn-primary btn-sm" onclick="showPatientManagement()" data-translate="add_new_patient">
                             <svg class="icon-sm mr-1" viewBox="0 0 24 24">
                                 <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                                 <circle cx="9" cy="7" r="4" />
@@ -183,12 +183,12 @@
                 <!-- Patient Details Display (Read-only) -->
                 <div id="selectedPatientDetails" class="hidden">
                     <div class="card p-4 mb-4">
-                        <h4 class="font-semibold mb-2">Selected Patient Details</h4>
+                        <h4 class="font-semibold mb-2" data-translate="selected_patient_details">Selected Patient Details</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                            <div><strong>Name:</strong> <span id="displayPatientName">-</span></div>
-                            <div><strong>Email:</strong> <span id="displayPatientEmail">-</span></div>
-                            <div><strong>Phone:</strong> <span id="displayPatientPhone">-</span></div>
-                            <div><strong>Age:</strong> <span id="displayPatientAge">-</span></div>
+                            <div><strong data-translate="name">Name:</strong> <span id="displayPatientName">-</span></div>
+                            <div><strong data-translate="email">Email:</strong> <span id="displayPatientEmail">-</span></div>
+                            <div><strong data-translate="phone">Phone:</strong> <span id="displayPatientPhone">-</span></div>
+                            <div><strong data-translate="age">Age:</strong> <span id="displayPatientAge">-</span></div>
                         </div>
                     </div>
                 </div>
@@ -235,11 +235,11 @@
                     <label class="form-label" for="appointmentType" data-translate="appointment_type">Appointment
                         Type</label>
                     <select id="appointmentType" class="form-input" required>
-                        <option value="">Select type</option>
-                        <option value="Consultation">General Consultation</option>
-                        <option value="Follow-up">Follow-up Visit</option>
-                        <option value="Check-up">Regular Check-up</option>
-                        <option value="Emergency">Emergency Visit</option>
+                        <option value="" data-translate="select_type">Select type</option>
+                        <option value="Consultation" data-translate="general_consultation">General Consultation</option>
+                        <option value="Follow-up" data-translate="follow_up_visit">Follow-up Visit</option>
+                        <option value="Check-up" data-translate="regular_checkup">Regular Check-up</option>
+                        <option value="Emergency" data-translate="emergency_visit">Emergency Visit</option>
                     </select>
                 </div>
 
@@ -424,6 +424,7 @@
                             <label class="form-label" for="patientFileNumber"
                                 data-translate="patient_file_number">Patient File Number *</label>
                             <input type="text" id="patientFileNumber" class="form-input"
+                                data-translate-placeholder="file_number_example"
                                 placeholder="Enter patient file number (e.g., P-2024-001)" required>
                         </div>
 
@@ -431,6 +432,7 @@
                             <label class="form-label" for="patientCinPassport" data-translate="cin_passport">CIN or
                                 Passeport *</label>
                             <input type="text" id="patientCinPassport" class="form-input"
+                                data-translate-placeholder="cin_passport_example"
                                 placeholder="Enter CIN or Passport number" required>
                         </div>
 
@@ -438,6 +440,7 @@
                             <label class="form-label" for="patientFullName" data-translate="full_name">Full Name
                                 *</label>
                             <input type="text" id="patientFullName" class="form-input"
+                                data-translate-placeholder="full_name_example"
                                 placeholder="Enter patient's full name" required>
                         </div>
 
@@ -445,14 +448,16 @@
                             <label class="form-label" for="patientEmailAddress" data-translate="email_address">Email
                                 Address</label>
                             <input type="email" id="patientEmailAddress" class="form-input"
+                                data-translate-placeholder="email_example"
                                 placeholder="patient@example.com">
                         </div>
 
                         <div class="form-group">
                             <label class="form-label" for="patientPhoneNumber" data-translate="phone_number">Phone
                                 Number *</label>
-                            <input type="tel" id="patientPhoneNumber" class="form-input" placeholder="+1 (555) 123-4567"
-                                required>
+                            <input type="tel" id="patientPhoneNumber" class="form-input" 
+                                data-translate-placeholder="phone_example"
+                                placeholder="+1 (555) 123-4567" required>
                         </div>
 
                         <div class="form-group">
@@ -464,15 +469,16 @@
                         <div class="form-group">
                             <label class="form-label" for="patientGender" data-translate="gender">Gender</label>
                             <select id="patientGender" class="form-input">
-                                <option value="">Select gender</option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
+                                <option value="" data-translate="select_gender">Select gender</option>
+                                <option value="Male" data-translate="male">Male</option>
+                                <option value="Female" data-translate="female">Female</option>
                             </select>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label" for="patientAddress" data-translate="address">Address</label>
                             <input type="text" id="patientAddress" class="form-input"
+                                data-translate-placeholder="address_example"
                                 placeholder="Street address, City, State">
                         </div>
                     </div>
@@ -498,6 +504,7 @@
                 <div class="mb-4">
                     <div class="relative">
                         <input type="text" id="patientSearch" class="form-input pr-10"
+                            data-translate-placeholder="search_patients"
                             placeholder="Search patients by name, CIN/Passport, file number, email, phone, or date of birth..."
                             onkeyup="searchPatients()">
                         <button type="button" id="clearSearch"
@@ -536,6 +543,7 @@
                         <label class="form-label" for="editPatientFileNumber"
                             data-translate="patient_file_number">Patient File Number *</label>
                         <input type="text" id="editPatientFileNumber" class="form-input"
+                            data-translate-placeholder="file_number_example"
                             placeholder="Enter patient file number (e.g., P-2024-001)" required>
                     </div>
 
@@ -543,6 +551,7 @@
                         <label class="form-label" for="editPatientCinPassport" data-translate="cin_passport">CIN or
                             Passeport *</label>
                         <input type="text" id="editPatientCinPassport" class="form-input"
+                            data-translate-placeholder="cin_passport_example"
                             placeholder="Enter CIN or Passport number" required>
                     </div>
 
@@ -550,6 +559,7 @@
                         <label class="form-label" for="editPatientFullName" data-translate="full_name">Full Name
                             *</label>
                         <input type="text" id="editPatientFullName" class="form-input"
+                            data-translate-placeholder="full_name_example"
                             placeholder="Enter patient's full name" required>
                     </div>
 
@@ -557,14 +567,16 @@
                         <label class="form-label" for="editPatientEmailAddress" data-translate="email_address">Email
                             Address</label>
                         <input type="email" id="editPatientEmailAddress" class="form-input"
+                            data-translate-placeholder="email_example"
                             placeholder="patient@example.com">
                     </div>
 
                     <div class="form-group">
                         <label class="form-label" for="editPatientPhoneNumber" data-translate="phone_number">Phone
                             Number *</label>
-                        <input type="tel" id="editPatientPhoneNumber" class="form-input" placeholder="+1 (555) 123-4567"
-                            required>
+                        <input type="tel" id="editPatientPhoneNumber" class="form-input" 
+                            data-translate-placeholder="phone_example"
+                            placeholder="+1 (555) 123-4567" required>
                     </div>
 
                     <div class="form-group">
@@ -576,15 +588,16 @@
                     <div class="form-group">
                         <label class="form-label" for="editPatientGender" data-translate="gender">Gender</label>
                         <select id="editPatientGender" class="form-input">
-                            <option value="">Select gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
+                            <option value="" data-translate="select_gender">Select gender</option>
+                            <option value="Male" data-translate="male">Male</option>
+                            <option value="Female" data-translate="female">Female</option>
                         </select>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label" for="editPatientAddress" data-translate="address">Address</label>
                         <input type="text" id="editPatientAddress" class="form-input"
+                            data-translate-placeholder="address_example"
                             placeholder="Street address, City, State">
                     </div>
                 </div>
@@ -603,14 +616,6 @@
                     <!-- Current Files Display -->
                     <div id="editCurrentFiles" class="mb-4">
                         <!-- Current files will be displayed here -->
-                    </div>
-                </div>
-
-                <!-- Vitals History Section -->
-                <div class="form-group">
-                    <label class="form-label">Vitals History</label>
-                    <div id="editVitalsHistory" class="card p-3">
-                        <div class="text-sm text-gray-500">No vitals recorded yet.</div>
                     </div>
                 </div>
 
@@ -746,29 +751,27 @@
                                     <label class="form-label" for="itemDescription1"
                                         data-translate="description">Description</label>
                                     <select id="itemDescription1" class="form-input" required onchange="autoFillPrice(this)">
-                                        <option value="">Select service...</option>
+                                        <option value="" data-translate="select_service">Select service...</option>
                                     </select>
                                 </div>
                                 <div>
                                     <label class="form-label" for="itemQuantity1"
-                                        data-translate="quantity">Quantity</label>
+                                        data-translate="quantity">Quantité</label>
                                     <input type="number" id="itemQuantity1" class="form-input" min="1" value="1"
                                         required onchange="calculateBillTotal()" oninput="calculateBillTotal()">
                                 </div>
                                 <div>
-                                    <label class="form-label" for="itemPrice1" data-translate="price">Price ($)</label>
+                                    <label class="form-label" for="itemPrice1" data-translate="price">Prix ($)</label>
                                     <input type="number" id="itemPrice1" class="form-input" min="0" step="0.01"
-                                        placeholder="0.00" required onchange="calculateBillTotal()"
+                                        placeholder="0.00" data-translate-placeholder="price_placeholder" required onchange="calculateBillTotal()"
                                         oninput="calculateBillTotal()">
                                 </div>
                             </div>
                             <div class="mt-2 flex justify-end">
-                                <button type="button" class="btn btn-outline btn-sm" onclick="removeBillItem(this)">
-                                    <svg class="icon-sm mr-1" viewBox="0 0 24 24">
-                                        <path
-                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                <button type="button" class="btn btn-outline btn-sm text-red-600 hover:text-red-700 hover:bg-red-50 border-red-300 hover:border-red-400" onclick="removeBillItem(this)" title="Remove Item">
+                                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
-                                    <span data-translate="remove_item">Remove Item</span>
                                 </button>
                             </div>
                         </div>
@@ -783,18 +786,18 @@
 
                 <!-- Bill Summary -->
                 <div class="card p-4 mb-4">
-                    <h4 class="font-semibold mb-2">Bill Summary</h4>
+                    <h4 class="font-semibold mb-2" data-translate="bill_summary">Bill Summary</h4>
                     <div class="space-y-2 text-sm">
                         <div class="flex justify-between">
-                            <span>Subtotal:</span>
+                            <span data-translate="subtotal">Subtotal:</span>
                             <span id="billSubtotal">$0.00</span>
                         </div>
                         <div class="flex justify-between">
-                            <span>Tax (8%):</span>
+                            <span data-translate="tax_8_percent">Tax (8%):</span>
                             <span id="billTax">$0.00</span>
                         </div>
                         <div class="flex justify-between font-semibold text-lg border-t pt-2">
-                            <span>Total:</span>
+                            <span data-translate="total">Total:</span>
                             <span id="billTotal">$0.00</span>
                         </div>
                     </div>
@@ -803,7 +806,7 @@
                 <div class="form-group">
                     <label class="form-label" for="billNotes" data-translate="notes">Notes</label>
                     <textarea id="billNotes" class="form-input form-textarea"
-                        placeholder="Additional notes or payment instructions..."></textarea>
+                        placeholder="Additional notes or payment instructions..." data-translate-placeholder="bill_notes_placeholder"></textarea>
                 </div>
 
                 <div class="modal-actions">
@@ -842,6 +845,7 @@
                     <div class="mb-4">
                         <input type="text" id="billSearch" class="form-input" 
                             placeholder="Search bills by patient name, bill ID, or status..."
+                            data-translate-placeholder="search_bills_placeholder"
                             onkeyup="searchDoneBills()">
                     </div>
                     <div id="doneBillsContainer" class="space-y-3"></div>
@@ -960,14 +964,6 @@
                             <label for="lang-fr" class="flex items-center cursor-pointer" onclick="switchToLanguage('fr')">
                                 <span class="text-2xl mr-2">🇫🇷</span>
                                 <span data-translate="french">Français</span>
-                            </label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="radio" id="lang-ar" name="language" value="ar" class="mr-3"
-                                onchange="switchToLanguage('ar')" onclick="switchToLanguage('ar')">
-                            <label for="lang-ar" class="flex items-center cursor-pointer" onclick="switchToLanguage('ar')">
-                                <span class="text-2xl mr-2">🇸🇦</span>
-                                <span data-translate="arabic">العربية</span>
                             </label>
                         </div>
                     </div>
@@ -1651,18 +1647,18 @@
                         <div>
                             <label class="form-label" data-translate="select_month">Select Month:</label>
                             <select id="monthlyReportMonth" class="form-input" onchange="renderMonthlyReport()">
-                                <option value="0">January</option>
-                                <option value="1">February</option>
-                                <option value="2">March</option>
-                                <option value="3">April</option>
-                                <option value="4">May</option>
-                                <option value="5">June</option>
-                                <option value="6">July</option>
-                                <option value="7">August</option>
-                                <option value="8">September</option>
-                                <option value="9">October</option>
-                                <option value="10">November</option>
-                                <option value="11">December</option>
+                                <option value="0" data-translate="january">January</option>
+                                <option value="1" data-translate="february">February</option>
+                                <option value="2" data-translate="march">March</option>
+                                <option value="3" data-translate="april">April</option>
+                                <option value="4" data-translate="may">May</option>
+                                <option value="5" data-translate="june">June</option>
+                                <option value="6" data-translate="july">July</option>
+                                <option value="7" data-translate="august">August</option>
+                                <option value="8" data-translate="september">September</option>
+                                <option value="9" data-translate="october">October</option>
+                                <option value="10" data-translate="november">November</option>
+                                <option value="11" data-translate="december">December</option>
                             </select>
                         </div>
                         <div>
@@ -1892,7 +1888,7 @@
                     <div class="form-group">
                         <label class="form-label font-semibold" for="labAssessmentNotes" data-translate="lab_notes">Laboratory Assessment Notes</label>
                         <p class="text-sm text-gray-500 mb-2" data-translate="lab_notes_hint">Add notes, observations, or interpretations of the laboratory results</p>
-                        <textarea id="labAssessmentNotes" class="form-input form-textarea" rows="6" placeholder="Enter laboratory assessment notes, observations, and interpretations..."></textarea>
+                        <textarea id="labAssessmentNotes" class="form-input form-textarea" rows="6" data-translate-placeholder="lab_notes_placeholder" placeholder="Enter laboratory assessment notes, observations, and interpretations..."></textarea>
                     </div>
                     
                     <!-- Existing Assessments Display -->
@@ -1961,19 +1957,19 @@
                     <div class="form-group">
                         <label class="form-label font-semibold" for="certType" data-translate="certificate_type">Certificate Type *</label>
                         <select id="certType" class="form-input" required>
-                            <option value="">Select type...</option>
-                            <option value="sick_leave">Sick Leave Certificate</option>
-                            <option value="fitness">Fitness Certificate</option>
-                            <option value="medical_report">Medical Report Certificate</option>
-                            <option value="disability">Disability Certificate</option>
-                            <option value="other">Other</option>
+                            <option value="" data-translate="select_type">Select type...</option>
+                            <option value="sick_leave" data-translate="sick_leave_certificate">Sick Leave Certificate</option>
+                            <option value="fitness" data-translate="fitness_certificate">Fitness Certificate</option>
+                            <option value="medical_report" data-translate="medical_report_certificate">Medical Report Certificate</option>
+                            <option value="disability" data-translate="disability_certificate">Disability Certificate</option>
+                            <option value="other" data-translate="other">Other</option>
                         </select>
                     </div>
                     
                     <!-- Rest Period (for sick leave) -->
                     <div class="form-group">
                         <label class="form-label font-semibold" data-translate="rest_period">Rest Period (Days)</label>
-                        <input type="number" id="certRestPeriod" class="form-input" min="1" max="365" placeholder="e.g., 7">
+                        <input type="number" id="certRestPeriod" class="form-input" min="1" max="365" data-translate-placeholder="rest_period_placeholder" placeholder="e.g., 7">
                     </div>
                     
                     <!-- Start Date -->
@@ -1991,19 +1987,19 @@
                     <!-- Diagnosis/Condition -->
                     <div class="form-group">
                         <label class="form-label font-semibold" for="certDiagnosis" data-translate="diagnosis_condition">Diagnosis / Medical Condition *</label>
-                        <textarea id="certDiagnosis" class="form-input form-textarea" rows="3" placeholder="Brief description of the medical condition" required></textarea>
+                        <textarea id="certDiagnosis" class="form-input form-textarea" rows="3" data-translate-placeholder="diagnosis_placeholder" placeholder="Brief description of the medical condition" required></textarea>
                     </div>
                     
                     <!-- Recommendations -->
                     <div class="form-group">
                         <label class="form-label font-semibold" for="certRecommendations" data-translate="recommendations">Recommendations</label>
-                        <textarea id="certRecommendations" class="form-input form-textarea" rows="3" placeholder="Medical recommendations and restrictions (optional)"></textarea>
+                        <textarea id="certRecommendations" class="form-input form-textarea" rows="3" data-translate-placeholder="recommendations_placeholder" placeholder="Medical recommendations and restrictions (optional)"></textarea>
                     </div>
                     
                     <!-- Additional Notes -->
                     <div class="form-group">
                         <label class="form-label font-semibold" for="certNotes" data-translate="additional_notes">Additional Notes</label>
-                        <textarea id="certNotes" class="form-input form-textarea" rows="2" placeholder="Any additional information"></textarea>
+                        <textarea id="certNotes" class="form-input form-textarea" rows="2" data-translate-placeholder="additional_notes_placeholder" placeholder="Any additional information"></textarea>
                     </div>
                     
                     <!-- Preview/Print Option -->
@@ -2122,6 +2118,12 @@
                     }
                     // Update language radio buttons
                     updateLanguageRadioButtons(lang);
+                    // Refresh doctor dashboard if it's open
+                    const dashboardModal = document.getElementById('doctorDashboardModal');
+                    if (dashboardModal && dashboardModal.classList.contains('active')) {
+                        if (typeof window.loadTodayAppointments === 'function') window.loadTodayAppointments();
+                        if (typeof window.loadTodayConsultations === 'function') window.loadTodayConsultations();
+                    }
                 };
                 
                 // Set initial language radio button

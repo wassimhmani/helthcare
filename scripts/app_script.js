@@ -1,4 +1,3 @@
-
 // Global state
         let selectedDate = new Date();
         let currentCalendarDate = new Date();
@@ -187,8 +186,8 @@
                 due_date: 'Due Date',
                 bill_items: 'Bill Items',
                 description: 'Description',
-                quantity: 'Quantity',
-                price: 'Price ($)',
+                quantity: 'Quantité',
+                price: 'Prix ($)',
                 notes: 'Notes',
                 remove_item: 'Remove Item',
                 add_item: 'Add Item',
@@ -1090,7 +1089,7 @@
         const formatDate = (date) => {
             // Get current language from i18n system or fallback to English
             const currentLang = localStorage.getItem('app_lang') || 'en';
-            const locale = currentLang === 'fr' ? 'fr-FR' : currentLang === 'ar' ? 'ar-SA' : 'en-US';
+            const locale = currentLang === 'fr' ? 'fr-FR' : 'en-US';
             
             return date.toLocaleDateString(locale, {
                 weekday: 'long',
@@ -1253,7 +1252,6 @@
                 </div>
             `;
         };
-
         // Render daily agenda
         const renderDailyAgenda = () => {
             console.log('Rendering daily agenda for date:', selectedDate);
@@ -1283,9 +1281,9 @@
                             </div>
                             <div class="flex gap-2">
                                 <button class="btn btn-primary inline-flex items-center" onclick="showAddAppointmentModal()" title="${window.t ? window.t('add_appointment', 'Add Appointment') : 'Add Appointment'}">
-                                    <svg class="icon mr-2" viewBox="0 0 24 24">
-                                        <path d="M12 4v16M20 12H4" />
-                                    </svg>
+                                <svg class="icon mr-2" viewBox="0 0 24 24">
+                                    <path d="M12 4v16M20 12H4" />
+                                </svg>
                                     ${window.t ? window.t('add_appointment', 'Add Appointment') : 'Add Appointment'}
                                 </button>
                                 <button class="btn btn-outline inline-flex items-center" onclick="showPatientManagement()" title="${window.t ? window.t('add_new_patient', 'Add New Patient') : 'Add New Patient'}">
@@ -1296,7 +1294,7 @@
                                         <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                                     </svg>
                                     ${window.t ? window.t('add_new_patient', 'Add New Patient') : 'Add New Patient'}
-                                </button>
+                            </button>
                             </div>
                         </div>
                         <div class="flex gap-2 mt-2">
@@ -1318,10 +1316,10 @@
                         <h3 class="text-lg font-semibold text-gray-600 mb-2">${window.t ? window.t('no_appointments_today', 'No Appointments Scheduled') : 'No Appointments Scheduled'}</h3>
                         <p class="text-gray-500 mb-4">${window.t ? window.t('no_appointments_for_date', 'There are no appointments scheduled for') : 'There are no appointments scheduled for'} ${formatDate(selectedDate)}.</p>
                         <div class="flex gap-2 justify-center">
-                            <button class="btn btn-primary" onclick="showAddAppointmentModal()">
-                                <svg class="icon-sm mr-2" viewBox="0 0 24 24">
-                                    <path d="M12 4v16m8-8H4"/>
-                                </svg>
+                        <button class="btn btn-primary" onclick="showAddAppointmentModal()">
+                            <svg class="icon-sm mr-2" viewBox="0 0 24 24">
+                                <path d="M12 4v16m8-8H4"/>
+                            </svg>
                                 ${window.t ? window.t('add_first_appointment', 'Add First Appointment') : 'Add First Appointment'}
                             </button>
                             <button class="btn btn-outline" onclick="showPatientManagement()">
@@ -1332,7 +1330,7 @@
                                     <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                                 </svg>
                                 ${window.t ? window.t('add_new_patient', 'Add New Patient') : 'Add New Patient'}
-                            </button>
+                        </button>
                         </div>
                     </div>
                 `;
@@ -1396,6 +1394,9 @@
             const cancelledEl = document.getElementById('cancelledAppointments');
             if (cancelledEl) cancelledEl.textContent = cancelledCount;
         };
+
+        // Expose renderDailyAgenda to global scope for language switching
+        window.renderDailyAgenda = renderDailyAgenda;
 
         function isSameDay(a, b) {
             return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
@@ -1463,7 +1464,7 @@
 
             // Get current language from i18n system or fallback to English
             const currentLang = localStorage.getItem('app_lang') || 'en';
-            const locale = currentLang === 'fr' ? 'fr-FR' : currentLang === 'ar' ? 'ar-SA' : 'en-US';
+            const locale = currentLang === 'fr' ? 'fr-FR' : 'en-US';
 
             document.getElementById('currentMonthYear').textContent =
                 currentCalendarDate.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
@@ -1480,8 +1481,6 @@
             let dayHeaders;
             if (currentLang === 'fr') {
                 dayHeaders = ['D', 'L', 'M', 'M', 'J', 'V', 'S']; // Dim, Lun, Mar, Mer, Jeu, Ven, Sam
-            } else if (currentLang === 'ar') {
-                dayHeaders = ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س']; // Arabic day abbreviations
             } else {
                 dayHeaders = ['S', 'M', 'T', 'W', 'T', 'F', 'S']; // English
             }
@@ -1593,10 +1592,10 @@
         // Patient selection functions
         function populatePatientDropdown() {
             const patientSelect = document.getElementById('patientSelection');
-            patientSelect.innerHTML = '<option value="">Choose a patient...</option>';
+            patientSelect.innerHTML = `<option value="">${window.t ? window.t('choose_patient', 'Choose a patient...') : 'Choose a patient...'}</option>`;
 
             if (storedPatients.length === 0) {
-                patientSelect.innerHTML = '<option value="">No patients available. Add a patient first.</option>';
+                patientSelect.innerHTML = `<option value="">${window.t ? window.t('no_patients_available', 'No patients available. Add a patient first.') : 'No patients available. Add a patient first.'}</option>`;
                 return;
             }
 
@@ -1735,7 +1734,7 @@
                             <h4>${file.name}</h4>
                             <p>Uploaded ${new Date(file.uploadedAt).toLocaleString()}</p>
                         </div>
-                        <span class="current-file-label">Current File</span>
+                        <span class="current-file-label">${window.t ? window.t('current_file', 'Current File') : 'Current File'}</span>
                     </div>
                 </div>
             `).join('');
@@ -1867,7 +1866,6 @@
 
             return true;
         }
-
         function showAppointmentSuccess(data) {
             // Create success message
             const successMessage = `
@@ -1876,17 +1874,17 @@
                         <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #059669;">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
-                        <h3 style="font-size: 1.125rem; font-weight: 600; color: #065f46; margin: 0;">Appointment Added Successfully!</h3>
+                        <h3 style="font-size: 1.125rem; font-weight: 600; color: #065f46; margin: 0;">${window.t ? window.t('appointment_added_successfully', 'Appointment Added Successfully!') : 'Appointment Added Successfully!'}</h3>
                     </div>
                     <div style="font-size: 0.875rem; color: #047857; margin-bottom: 0.75rem;">
-                        <p><strong>Patient:</strong> ${data.patientName}</p>
-                        <p><strong>Date:</strong> ${new Date(data.appointmentDate).toLocaleDateString()}</p>
-                        <p><strong>Time:</strong> ${data.appointmentTime}</p>
-                        <p><strong>Doctor:</strong> ${data.doctorName}</p>
-                        <p><strong>Type:</strong> ${data.appointmentType}</p>
+                        <p><strong>${window.t ? window.t('patient', 'Patient') : 'Patient'}:</strong> ${data.patientName}</p>
+                        <p><strong>${window.t ? window.t('date', 'Date') : 'Date'}:</strong> ${new Date(data.appointmentDate).toLocaleDateString()}</p>
+                        <p><strong>${window.t ? window.t('time', 'Time') : 'Time'}:</strong> ${data.appointmentTime}</p>
+                        <p><strong>${window.t ? window.t('doctor', 'Doctor') : 'Doctor'}:</strong> ${data.doctorName}</p>
+                        <p><strong>${window.t ? window.t('type', 'Type') : 'Type'}:</strong> ${data.appointmentType}</p>
                     </div>
                     <p style="font-size: 0.875rem; color: #059669; margin: 0;">
-                        The appointment has been added to the system. You can view it in the agenda.
+                        ${window.t ? window.t('appointment_added_to_system', 'The appointment has been added to the system. You can view it in the agenda.') : 'The appointment has been added to the system. You can view it in the agenda.'}
                     </p>
                 </div>
             `;
@@ -1945,9 +1943,9 @@
         // Show status update success message
         function showStatusUpdateMessage(appointment, newStatus) {
             const statusMessages = {
-                'confirmed': 'Appointment confirmed successfully!',
-                'completed': 'Appointment marked as completed!',
-                'cancelled': 'Appointment cancelled successfully!'
+                'confirmed': window.t ? window.t('appointment_confirmed_successfully', 'Appointment confirmed successfully!') : 'Appointment confirmed successfully!',
+                'completed': window.t ? window.t('appointment_marked_completed', 'Appointment marked as completed!') : 'Appointment marked as completed!',
+                'cancelled': window.t ? window.t('appointment_cancelled_successfully', 'Appointment cancelled successfully!') : 'Appointment cancelled successfully!'
             };
 
             const statusColors = {
@@ -1965,9 +1963,9 @@
                         <h3 style="font-size: 1.125rem; font-weight: 600; color: ${statusColors[newStatus]}; margin: 0;">${statusMessages[newStatus]}</h3>
                     </div>
                     <div style="font-size: 0.875rem; color: #374151; margin-bottom: 0.75rem;">
-                        <p><strong>Patient:</strong> ${appointment.clientName}</p>
-                        <p><strong>Time:</strong> ${appointment.time}</p>
-                        <p><strong>Status:</strong> <span style="color: ${statusColors[newStatus]}; font-weight: 600;">${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}</span></p>
+                        <p><strong>${window.t ? window.t('patient', 'Patient') : 'Patient'}:</strong> ${appointment.clientName}</p>
+                        <p><strong>${window.t ? window.t('time', 'Time') : 'Time'}:</strong> ${appointment.time}</p>
+                        <p><strong>${window.t ? window.t('status', 'Status') : 'Status'}:</strong> <span style="color: ${statusColors[newStatus]}; font-weight: 600;">${window.t ? window.t(newStatus.toLowerCase(), newStatus.charAt(0).toUpperCase() + newStatus.slice(1)) : newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}</span></p>
                     </div>
                 </div>
             `;
@@ -2135,51 +2133,51 @@
             patientDetailsInfo.innerHTML = `
                 <div class="space-y-2">
                     <div class="flex items-start">
-                        <span class="font-semibold text-gray-700 w-32">Full Name:</span>
+                        <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('full_name', 'Full Name') : 'Full Name'}:</span>
                         <span class="text-gray-900">${patient.fullName || 'N/A'}</span>
                     </div>
                     <div class="flex items-start">
-                        <span class="font-semibold text-gray-700 w-32">File Number:</span>
+                        <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('file_number', 'File Number') : 'File Number'}:</span>
                         <span class="text-gray-900">${patient.fileNumber || 'N/A'}</span>
                     </div>
                     <div class="flex items-start">
-                        <span class="font-semibold text-gray-700 w-32">CIN/Passport:</span>
+                        <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('cin_passport', 'CIN/Passport') : 'CIN/Passport'}:</span>
                         <span class="text-gray-900">${patient.cinPassport || 'N/A'}</span>
                     </div>
                     <div class="flex items-start">
-                        <span class="font-semibold text-gray-700 w-32">Email:</span>
+                        <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('email', 'Email') : 'Email'}:</span>
                         <span class="text-gray-900">${patient.email || 'N/A'}</span>
                     </div>
                     <div class="flex items-start">
-                        <span class="font-semibold text-gray-700 w-32">Phone:</span>
+                        <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('phone', 'Phone') : 'Phone'}:</span>
                         <span class="text-gray-900">${patient.phone || 'N/A'}</span>
                     </div>
                 </div>
                 <div class="space-y-2">
                     <div class="flex items-start">
-                        <span class="font-semibold text-gray-700 w-32">Date of Birth:</span>
+                        <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('date_of_birth', 'Date of Birth') : 'Date of Birth'}:</span>
                         <span class="text-gray-900">${patient.dateOfBirth ? new Date(patient.dateOfBirth).toLocaleDateString() : 'N/A'}</span>
                     </div>
                     <div class="flex items-start">
-                        <span class="font-semibold text-gray-700 w-32">Age:</span>
+                        <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('age', 'Age') : 'Age'}:</span>
                         <span class="text-gray-900">${age}</span>
                     </div>
                     <div class="flex items-start">
-                        <span class="font-semibold text-gray-700 w-32">Gender:</span>
-                        <span class="text-gray-900">${patient.gender || 'N/A'}</span>
+                        <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('gender', 'Gender') : 'Gender'}:</span>
+                        <span class="text-gray-900">${patient.gender ? (window.t ? window.t(patient.gender.toLowerCase(), patient.gender) : patient.gender) : 'N/A'}</span>
                     </div>
                     <div class="flex items-start">
-                        <span class="font-semibold text-gray-700 w-32">Address:</span>
+                        <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('address', 'Address') : 'Address'}:</span>
                         <span class="text-gray-900">${patient.address || 'N/A'}</span>
                     </div>
                     ${patient.medicalHistory ? `
                     <div class="flex items-start">
-                        <span class="font-semibold text-gray-700 w-32">Medical History:</span>
+                        <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('medical_history', 'Medical History') : 'Medical History'}:</span>
                         <span class="text-gray-900">${patient.medicalHistory}</span>
                     </div>
                     ` : ''}
                     <div class="flex items-start">
-                        <span class="font-semibold text-gray-700 w-32">Registered:</span>
+                        <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('registered', 'Registered') : 'Registered'}:</span>
                         <span class="text-gray-900">${new Date(patient.createdAt).toLocaleDateString()}</span>
                     </div>
                 </div>
@@ -2263,7 +2261,7 @@
                                     <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
                                     </svg>
-                                    <span><strong>Height:</strong> ${consultation.height} cm</span>
+                                    <span><strong>${window.t ? window.t('height', 'Height') : 'Height'}:</strong> ${consultation.height} cm</span>
                                 </div>
                             ` : ''}
                             ${consultation.weight ? `
@@ -2271,7 +2269,7 @@
                                     <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path>
                                     </svg>
-                                    <span><strong>Weight:</strong> ${consultation.weight} kg</span>
+                                    <span><strong>${window.t ? window.t('weight', 'Weight') : 'Weight'}:</strong> ${consultation.weight} kg</span>
                                 </div>
                             ` : ''}
                             ${consultation.bloodPressure ? `
@@ -2279,7 +2277,7 @@
                                     <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                                     </svg>
-                                    <span><strong>BP:</strong> ${consultation.bloodPressure}</span>
+                                    <span><strong>${window.t ? window.t('blood_pressure', 'BP') : 'BP'}:</strong> ${consultation.bloodPressure}</span>
                                 </div>
                             ` : ''}
                             ${consultation.temperature ? `
@@ -2287,7 +2285,7 @@
                                     <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                                     </svg>
-                                    <span><strong>Temp:</strong> ${consultation.temperature}°C</span>
+                                    <span><strong>${window.t ? window.t('temperature', 'Temp') : 'Temp'}:</strong> ${consultation.temperature}°C</span>
                                 </div>
                             ` : ''}
                         </div>
@@ -2391,7 +2389,7 @@
                                 </div>
                             </div>
                             <span class="badge ${statusClass} px-3 py-1 rounded-full text-xs font-semibold">
-                                ${bill.status}
+                                ${window.t ? window.t(bill.status.toLowerCase(), bill.status) : bill.status}
                             </span>
                         </div>
                         
@@ -2403,7 +2401,7 @@
                                     <div class="flex justify-between items-center text-sm bg-gray-50 p-2 rounded">
                                         <div>
                                             <span class="font-medium">${item.description}</span>
-                                            <span class="text-gray-500 ml-2">(Qty: ${item.quantity})</span>
+                                            <span class="text-gray-500 ml-2">(${window.t ? window.t('qty', 'Qty') : 'Qty'}: ${item.quantity})</span>
                                         </div>
                                         <span class="font-semibold">$${(item.price * item.quantity).toFixed(2)}</span>
                                     </div>
@@ -2449,6 +2447,11 @@
                     </div>
                 `;
             }).join('');
+            
+            // Update translations after rendering
+            if (window.I18n && window.I18n.walkAndTranslate) {
+                window.I18n.walkAndTranslate();
+            }
         }
 
         function viewBillDetails(billId) {
@@ -2496,7 +2499,6 @@
                 document.body.removeChild(link);
             }
         }
-
         // Handle patient form submission
         document.getElementById('patientForm').addEventListener('submit', function (event) {
             event.preventDefault();
@@ -2887,15 +2889,15 @@
                 <div class="patient-info">
                     <div class="patient-details">
                         <h3>${patient.fullName}</h3>
-                        <p><strong>File Number:</strong> ${patient.fileNumber || 'N/A'}</p>
-                        <p><strong>CIN/Passport:</strong> ${patient.cinPassport || 'N/A'}</p>
-                        <p><strong>Email:</strong> ${patient.email || 'N/A'}</p>
-                        <p><strong>Phone:</strong> ${patient.phone}</p>
-                        <p><strong>Age:</strong> ${age} ${patient.gender ? `• ${patient.gender}` : ''}</p>
-                        ${patient.address ? `<p><strong>Address:</strong> ${patient.address}</p>` : ''}
-                        ${patient.medicalHistory ? `<p><strong>Medical History:</strong> ${patient.medicalHistory}</p>` : ''}
-                        ${filesCount > 0 ? `<p><strong>Medical Files:</strong> ${filesCount} file(s) attached</p>` : ''}
-                        <p><strong>Added:</strong> ${new Date(patient.createdAt).toLocaleDateString()}</p>
+                        <p><strong>${window.t ? window.t('file_number', 'File Number') : 'File Number'}:</strong> ${patient.fileNumber || 'N/A'}</p>
+                        <p><strong>${window.t ? window.t('cin_passport', 'CIN/Passport') : 'CIN/Passport'}:</strong> ${patient.cinPassport || 'N/A'}</p>
+                        <p><strong>${window.t ? window.t('email', 'Email') : 'Email'}:</strong> ${patient.email || 'N/A'}</p>
+                        <p><strong>${window.t ? window.t('phone', 'Phone') : 'Phone'}:</strong> ${patient.phone}</p>
+                        <p><strong>${window.t ? window.t('age', 'Age') : 'Age'}:</strong> ${age} ${patient.gender ? `• ${window.t ? window.t(patient.gender.toLowerCase(), patient.gender) : patient.gender}` : ''}</p>
+                        ${patient.address ? `<p><strong>${window.t ? window.t('address', 'Address') : 'Address'}:</strong> ${patient.address}</p>` : ''}
+                        ${patient.medicalHistory ? `<p><strong>${window.t ? window.t('medical_history', 'Medical History') : 'Medical History'}:</strong> ${patient.medicalHistory}</p>` : ''}
+                        ${filesCount > 0 ? `<p><strong>${window.t ? window.t('medical_files', 'Medical Files') : 'Medical Files'}:</strong> ${filesCount} ${window.t ? window.t('files_attached', 'file(s) attached') : 'file(s) attached'}</p>` : ''}
+                        <p><strong>${window.t ? window.t('added', 'Added') : 'Added'}:</strong> ${new Date(patient.createdAt).toLocaleDateString()}</p>
                     </div>
                     <div class="patient-actions">
                         <button onclick="viewPatientDetails('${patient.id}')" class="btn btn-sm bg-purple-600 hover:bg-purple-700 text-white" data-translate="view_details">
@@ -2906,7 +2908,7 @@
                             View Details
                         </button>
                         ${filesCount > 0 ? `
-                            <button onclick="viewPatientFiles('${patient.id}')" class="btn btn-sm bg-green-600 hover:bg-green-700 text-white">
+                            <button onclick="viewPatientFiles('${patient.id}')" class="btn btn-sm bg-green-600 hover:bg-green-700 text-white" data-translate="files">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                 </svg>
@@ -2914,12 +2916,12 @@
                             </button>
                         ` : ''}
                         ${canEdit ? `
-                        <button onclick="editPatient('${patient.id}')" class="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white">
+                        <button onclick="editPatient('${patient.id}')" class="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white" data-translate="edit">
                             Edit
                         </button>
                         ` : ''}
                         ${canDelete ? `
-                        <button onclick="deletePatient('${patient.id}')" class="btn btn-sm bg-red-600 hover:bg-red-700 text-white">
+                        <button onclick="deletePatient('${patient.id}')" class="btn btn-sm bg-red-600 hover:bg-red-700 text-white" data-translate="delete">
                             Delete
                         </button>
                         ` : ''}
@@ -3090,7 +3092,6 @@
             // Reload all patients
             loadPatientsList();
         }
-
         function editPatient(patientId) {
             const patient = storedPatients.find(p => p.id === patientId);
             if (!patient) {
@@ -3131,91 +3132,7 @@
             // Update modal translations
             updateModalTranslations();
 
-            // Render vitals history
-            const vitalsHost = document.getElementById('editVitalsHistory');
-            if (vitalsHost) {
-                const hist = Array.isArray(patient.vitalsHistory) ? [...patient.vitalsHistory] : [];
-                // Sort descending by date
-                hist.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-                if (hist.length === 0) {
-                    vitalsHost.innerHTML = '<div class="text-sm text-gray-500">No vitals recorded yet.</div>';
-                } else {
-                    const getCat = (imc) => {
-                        if (!isFinite(imc)) return '';
-                        if (imc < 18.5) return 'Underweight';
-                        if (imc < 25) return 'Normal';
-                        if (imc < 30) return 'Overweight';
-                        return 'Obesity';
-                    };
-                    const getCatClass = (cat) => {
-                        switch (cat) {
-                            case 'Underweight': return 'badge bg-yellow-100 text-yellow-800';
-                            case 'Normal': return 'badge bg-green-100 text-green-800';
-                            case 'Overweight': return 'badge bg-orange-100 text-orange-800';
-                            case 'Obesity': return 'badge bg-red-100 text-red-800';
-                            default: return 'text-sm text-gray-500';
-                        }
-                    };
-
-                    const rows = hist.map((h) => {
-                        const dt = h.date ? new Date(h.date) : null;
-                        const dateStr = dt ? dt.toLocaleString() : '';
-                        const heightStr = (h.height ?? '') !== '' && h.height != null ? `${h.height} cm` : '';
-                        const weightStr = (h.weight ?? '') !== '' && h.weight != null ? `${h.weight} kg` : '';
-                        const imcVal = (typeof h.imc === 'number') ? h.imc : (
-                            (h.height && h.weight) ? +(h.weight / Math.pow(h.height/100, 2)).toFixed(1) : null
-                        );
-                        const tempStr = (h.temperature ?? '') !== '' && h.temperature != null ? `${h.temperature} °C` : '';
-                        const cat = (imcVal != null) ? getCat(imcVal) : '';
-                        const catClass = getCatClass(cat);
-                        const hrStr = (h.heartRate ?? '') !== '' && h.heartRate != null ? `HR: ${h.heartRate} bpm` : '';
-                        const sugarStr = (h.bloodSugar ?? '') !== '' && h.bloodSugar != null ? `Sugar: ${h.bloodSugar} mg/dL` : '';
-                        const bpStr = (h.bpSystolic != null || h.bpDiastolic != null)
-                            ? `BP: ${h.bpSystolic ?? ''}${(h.bpSystolic!=null||h.bpDiastolic!=null)?'/':''}${h.bpDiastolic ?? ''} mmHg`
-                            : '';
-                        const sublineParts = [hrStr, sugarStr, bpStr].filter(Boolean);
-                        const sublineHtml = sublineParts.length ? `
-                            <tr>
-                                <td colspan="6" class="p-2 pt-0 border-b text-xs text-gray-500">
-                                    ${sublineParts.join(' • ')}
-                                </td>
-                            </tr>
-                        ` : '';
-                        return `
-                            <tr>
-                                <td class="p-2 border-b text-sm text-gray-600">${dateStr}</td>
-                                <td class="p-2 border-b text-sm">${heightStr}</td>
-                                <td class="p-2 border-b text-sm">${weightStr}</td>
-                                <td class="p-2 border-b text-sm">${imcVal != null ? imcVal.toFixed(1) : ''}</td>
-                                <td class=\"p-2 border-b text-sm\">${tempStr}</td>
-                                <td class="p-2 border-b"><span class="${catClass}">${cat}</span></td>
-                            </tr>
-                            ${sublineHtml}
-                        `;
-                    }).join('');
-
-                    vitalsHost.innerHTML = `
-                        <div class="overflow-auto">
-                            <table class="min-w-full text-left">
-                                <thead>
-                                    <tr class="text-xs uppercase text-gray-500">
-                                        <th class="p-2 border-b">Date</th>
-                                        <th class="p-2 border-b">Height</th>
-                                        <th class="p-2 border-b">Weight</th>
-                                        <th class="p-2 border-b">IMC</th>
-                                        <th class=\"p-2 border-b\">Temp (°C)</th>
-                                        <th class="p-2 border-b">Category</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${rows}
-                                </tbody>
-                            </table>
-                        </div>
-                    `;
-                }
-            }
+            // Vitals history rendering removed with UI section
         }
 
         function deletePatient(patientId) {
@@ -3439,6 +3356,15 @@
             
             const modal = document.getElementById('billingModal');
             modal.classList.add('active');
+            
+            // Update translations after opening modal with a small delay to ensure DOM is ready
+            setTimeout(() => {
+                if (window.I18n && window.I18n.walkAndTranslate) {
+                    window.I18n.walkAndTranslate();
+                }
+                // Ensure we start with one clean bill item
+                resetBillItems();
+            }, 100);
 
             // Close mobile menu if open
             const mobileMenu = document.getElementById('mobile-menu');
@@ -3579,8 +3505,8 @@
                                 <div class="text-xs text-gray-500">Doctor: ${doctorName} • BMI: ${imcStr}</div>
                             </div>
                             <div class="flex items-center gap-2">
-                                <button class="btn btn-secondary" onclick="viewConsultationDetails('${c.id}')">View</button>
-                                <button class="btn btn-primary" onclick="createBillFromConsultation('${c.id}')">Create Bill</button>
+                                <button class="btn btn-secondary" onclick="viewConsultationDetails('${c.id}')" data-translate="view">${window.t ? window.t('view', 'View') : 'View'}</button>
+                                <button class="btn btn-primary" onclick="createBillFromConsultation('${c.id}')" data-translate="create_bill">${window.t ? window.t('create_bill', 'Create Bill') : 'Create Bill'}</button>
                             </div>
                         </div>
                     </div>
@@ -3666,7 +3592,7 @@
                                 </div>
                             </div>
                             <span class="badge ${statusClass} px-3 py-1 rounded-full text-xs font-semibold ml-4">
-                                ${bill.status}
+                                ${window.t ? window.t(bill.status.toLowerCase(), bill.status) : bill.status}
                             </span>
                         </div>
 
@@ -3712,6 +3638,11 @@
                     </div>
                 `;
             }).join('');
+            
+            // Update translations after rendering
+            if (window.I18n && window.I18n.walkAndTranslate) {
+                window.I18n.walkAndTranslate();
+            }
         }
 
         function searchDoneBills() {
@@ -3719,7 +3650,6 @@
             const searchTerm = searchInput ? searchInput.value : '';
             renderDoneBills(searchTerm);
         }
-
         function viewFullBillDetails(billId) {
             const bills = JSON.parse(localStorage.getItem('healthcareBills') || '[]');
             const bill = bills.find(b => b.id === billId);
@@ -3769,17 +3699,21 @@
                     const patientName = patient ? patient.fullName : 'Unknown Patient';
                     content.innerHTML = `
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><strong>Patient:</strong> ${patientName}</div>
-                            <div><strong>Doctor:</strong> ${c.doctor || ''}</div>
-                            <div><strong>Date:</strong> ${new Date(c.createdAt).toLocaleString()}</div>
-                            <div><strong>BMI:</strong> ${(typeof c.imc === 'number' && !isNaN(c.imc)) ? c.imc.toFixed(1) : '-'}</div>
+                            <div><strong>${window.t ? window.t('patient', 'Patient') : 'Patient'}:</strong> ${patientName}</div>
+                            <div><strong>${window.t ? window.t('doctor', 'Doctor') : 'Doctor'}:</strong> ${c.doctor || ''}</div>
+                            <div><strong>${window.t ? window.t('date', 'Date') : 'Date'}:</strong> ${new Date(c.createdAt).toLocaleString()}</div>
+                            <div><strong>${window.t ? window.t('bmi', 'BMI') : 'BMI'}:</strong> ${(typeof c.imc === 'number' && !isNaN(c.imc)) ? c.imc.toFixed(1) : '-'}</div>
                         </div>
                         <div class="mt-3">
-                            <strong>Notes:</strong>
+                            <strong>${window.t ? window.t('notes', 'Notes') : 'Notes'}:</strong>
                             <div class="text-sm whitespace-pre-wrap">${(c.notes || '').toString()}</div>
                         </div>
                     `;
                     modal.classList.add('active');
+                    // Update modal translations
+                    if (window.I18n && window.I18n.walkAndTranslate) {
+                        window.I18n.walkAndTranslate();
+                    }
                 }
             } catch {}
         }
@@ -3843,7 +3777,7 @@
             // Get current language from i18n system or fallback to legacy
             const currentLang = localStorage.getItem('app_lang') || currentLanguage || 'en';
             console.log('Current language when opening modal:', currentLang);
-            
+
             // Set current language as selected
             const currentLangRadio = document.getElementById(`lang-${currentLang}`);
             if (currentLangRadio) {
@@ -3868,22 +3802,22 @@
                 window.I18n.walkAndTranslate();
             } else {
                 // Fallback to legacy translation system
-                const modalElements = document.querySelectorAll('.modal [data-translate]');
-                modalElements.forEach(element => {
-                    const key = element.getAttribute('data-translate');
-                    if (translations[currentLanguage] && translations[currentLanguage][key]) {
-                        element.textContent = translations[currentLanguage][key];
-                    }
-                });
+            const modalElements = document.querySelectorAll('.modal [data-translate]');
+            modalElements.forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (translations[currentLanguage] && translations[currentLanguage][key]) {
+                    element.textContent = translations[currentLanguage][key];
+                }
+            });
 
-                // Update placeholder translations
-                const placeholderElements = document.querySelectorAll('.modal [data-translate-placeholder]');
-                placeholderElements.forEach(element => {
-                    const key = element.getAttribute('data-translate-placeholder');
-                    if (translations[currentLanguage] && translations[currentLanguage][key]) {
-                        element.placeholder = translations[currentLanguage][key];
-                    }
-                });
+            // Update placeholder translations
+            const placeholderElements = document.querySelectorAll('.modal [data-translate-placeholder]');
+            placeholderElements.forEach(element => {
+                const key = element.getAttribute('data-translate-placeholder');
+                if (translations[currentLanguage] && translations[currentLanguage][key]) {
+                    element.placeholder = translations[currentLanguage][key];
+                }
+            });
             }
         }
 
@@ -4362,7 +4296,6 @@
             const searchTerm = document.getElementById('descriptionSearch').value;
             renderBillDescriptionsList(searchTerm);
         }
-
         function editBillDescription(id) {
             const descriptions = getBillDescriptions();
             const desc = descriptions.find(d => d.id === id);
@@ -4412,6 +4345,13 @@
 
             const modal = document.getElementById('reportsModal');
             modal.classList.add('active');
+            
+            // Update translations after opening modal
+            setTimeout(() => {
+                if (window.I18n && window.I18n.walkAndTranslate) {
+                    window.I18n.walkAndTranslate();
+                }
+            }, 100);
             
             // Close mobile menu if open
             const mobileMenu = document.getElementById('mobile-menu');
@@ -4557,7 +4497,7 @@
                         <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
-                        <p data-translate="no_data_for_period">No billing data for this date.</p>
+                        <p data-translate="no_data_for_period">${window.t ? window.t('no_data_for_period', 'No billing data for this date.') : 'No billing data for this date.'}</p>
                     </div>
                 `;
                 return;
@@ -4573,7 +4513,7 @@
                     <div class="card p-4 bg-blue-50">
                         <div class="flex items-center justify-between">
                             <div>
-                                <div class="text-sm text-gray-600" data-translate="total_consultations">Total Consultations</div>
+                                <div class="text-sm text-gray-600" data-translate="total_consultations">${window.t ? window.t('total_consultations', 'Total Consultations') : 'Total Consultations'}</div>
                                 <div class="text-2xl font-bold text-blue-600">${totalConsultations}</div>
                             </div>
                             <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -4585,7 +4525,7 @@
                     <div class="card p-4 bg-green-50">
                         <div class="flex items-center justify-between">
                             <div>
-                                <div class="text-sm text-gray-600" data-translate="total_bills">Total Bills</div>
+                                <div class="text-sm text-gray-600" data-translate="total_bills">${window.t ? window.t('total_bills', 'Total Bills') : 'Total Bills'}</div>
                                 <div class="text-2xl font-bold text-green-600">${totalBills}</div>
                             </div>
                             <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -4597,7 +4537,7 @@
                     <div class="card p-4 bg-yellow-50">
                         <div class="flex items-center justify-between">
                             <div>
-                                <div class="text-sm text-gray-600" data-translate="total_profit">Total Profit</div>
+                                <div class="text-sm text-gray-600" data-translate="total_profit">${window.t ? window.t('total_profit', 'Total Profit') : 'Total Profit'}</div>
                                 <div class="text-2xl font-bold text-yellow-600">$${totalProfit.toFixed(2)}</div>
                             </div>
                             <svg class="w-10 h-10 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -4609,19 +4549,19 @@
 
                 <!-- Bills Details -->
                 <div class="card p-4">
-                    <h3 class="text-lg font-semibold mb-4" data-translate="bill_details">Bill Details</h3>
+                    <h3 class="text-lg font-semibold mb-4" data-translate="bill_details">${window.t ? window.t('bill_details', 'Bill Details') : 'Bill Details'}</h3>
                     <div class="space-y-3">
                         ${data.bills.map(bill => `
                             <div class="border-b pb-3">
                                 <div class="flex justify-between items-start">
                                     <div class="flex-1">
                                         <div class="font-semibold text-gray-900">${bill.patientName}</div>
-                                        <div class="text-sm text-gray-600">Bill ID: ${bill.id}</div>
+                                        <div class="text-sm text-gray-600">${window.t ? window.t('bill_id', 'Bill ID') : 'Bill ID'}: ${bill.id}</div>
                                         <div class="text-xs text-gray-500">${new Date(bill.createdAt).toLocaleString()}</div>
                                     </div>
                                     <div class="text-right">
                                         <div class="font-bold text-green-600">$${bill.total.toFixed(2)}</div>
-                                        <div class="text-xs text-gray-500">${bill.items.length} items</div>
+                                        <div class="text-xs text-gray-500">${bill.items.length} ${window.t ? window.t('items', 'items') : 'items'}</div>
                                     </div>
                                 </div>
                             </div>
@@ -4629,6 +4569,11 @@
                     </div>
                 </div>
             `;
+            
+            // Update translations after rendering
+            if (window.I18n && window.I18n.walkAndTranslate) {
+                window.I18n.walkAndTranslate();
+            }
         }
 
         function renderWeeklyReport() {
@@ -4683,7 +4628,7 @@
                     <div class="card p-4 bg-blue-50">
                         <div class="flex items-center justify-between">
                             <div>
-                                <div class="text-sm text-gray-600" data-translate="total_consultations">Total Consultations</div>
+                                <div class="text-sm text-gray-600" data-translate="total_consultations">${window.t ? window.t('total_consultations', 'Total Consultations') : 'Total Consultations'}</div>
                                 <div class="text-2xl font-bold text-blue-600">${totalConsultations}</div>
                             </div>
                             <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -4695,7 +4640,7 @@
                     <div class="card p-4 bg-green-50">
                         <div class="flex items-center justify-between">
                             <div>
-                                <div class="text-sm text-gray-600" data-translate="total_bills">Total Bills</div>
+                                <div class="text-sm text-gray-600" data-translate="total_bills">${window.t ? window.t('total_bills', 'Total Bills') : 'Total Bills'}</div>
                                 <div class="text-2xl font-bold text-green-600">${totalBills}</div>
                             </div>
                             <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -4707,7 +4652,7 @@
                     <div class="card p-4 bg-yellow-50">
                         <div class="flex items-center justify-between">
                             <div>
-                                <div class="text-sm text-gray-600" data-translate="total_profit">Total Profit</div>
+                                <div class="text-sm text-gray-600" data-translate="total_profit">${window.t ? window.t('total_profit', 'Total Profit') : 'Total Profit'}</div>
                                 <div class="text-2xl font-bold text-yellow-600">$${totalProfit.toFixed(2)}</div>
                             </div>
                             <svg class="w-10 h-10 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -4726,7 +4671,7 @@
                                 <div class="flex justify-between items-center">
                                     <div>
                                         <div class="font-semibold text-gray-900">${day}</div>
-                                        <div class="text-sm text-gray-600">${billsByDay[day].bills.length} bills</div>
+                                        <div class="text-sm text-gray-600">${billsByDay[day].bills.length} ${window.t ? window.t('bills', 'bills') : 'bills'}</div>
                                     </div>
                                     <div class="text-xl font-bold text-green-600">$${billsByDay[day].total.toFixed(2)}</div>
                                 </div>
@@ -4735,6 +4680,11 @@
                     </div>
                 </div>
             `;
+            
+            // Update translations after rendering
+            if (window.I18n && window.I18n.walkAndTranslate) {
+                window.I18n.walkAndTranslate();
+            }
         }
 
         function renderMonthlyReport() {
@@ -4774,7 +4724,7 @@
             data.bills.forEach(bill => {
                 const billDate = new Date(bill.createdAt);
                 const weekNum = Math.ceil(billDate.getDate() / 7);
-                const weekKey = `Week ${weekNum}`;
+                const weekKey = `${window.t ? window.t('week', 'Week') : 'Week'} ${weekNum}`;
                 
                 if (!billsByWeek[weekKey]) {
                     billsByWeek[weekKey] = {
@@ -4794,7 +4744,7 @@
                     <div class="card p-4 bg-blue-50">
                         <div class="flex items-center justify-between">
                             <div>
-                                <div class="text-sm text-gray-600" data-translate="total_consultations">Total Consultations</div>
+                                <div class="text-sm text-gray-600" data-translate="total_consultations">${window.t ? window.t('total_consultations', 'Total Consultations') : 'Total Consultations'}</div>
                                 <div class="text-2xl font-bold text-blue-600">${totalConsultations}</div>
                             </div>
                             <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -4806,7 +4756,7 @@
                     <div class="card p-4 bg-green-50">
                         <div class="flex items-center justify-between">
                             <div>
-                                <div class="text-sm text-gray-600" data-translate="total_bills">Total Bills</div>
+                                <div class="text-sm text-gray-600" data-translate="total_bills">${window.t ? window.t('total_bills', 'Total Bills') : 'Total Bills'}</div>
                                 <div class="text-2xl font-bold text-green-600">${totalBills}</div>
                             </div>
                             <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -4818,7 +4768,7 @@
                     <div class="card p-4 bg-yellow-50">
                         <div class="flex items-center justify-between">
                             <div>
-                                <div class="text-sm text-gray-600" data-translate="total_profit">Total Profit</div>
+                                <div class="text-sm text-gray-600" data-translate="total_profit">${window.t ? window.t('total_profit', 'Total Profit') : 'Total Profit'}</div>
                                 <div class="text-2xl font-bold text-yellow-600">$${totalProfit.toFixed(2)}</div>
                             </div>
                             <svg class="w-10 h-10 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -4849,7 +4799,7 @@
                                 <div class="flex justify-between items-center">
                                     <div>
                                         <div class="font-semibold text-gray-900">${week}</div>
-                                        <div class="text-sm text-gray-600">${billsByWeek[week].bills.length} bills</div>
+                                        <div class="text-sm text-gray-600">${billsByWeek[week].bills.length} ${window.t ? window.t('bills', 'bills') : 'bills'}</div>
                                     </div>
                                     <div class="text-xl font-bold text-green-600">$${billsByWeek[week].total.toFixed(2)}</div>
                                 </div>
@@ -4858,6 +4808,11 @@
                     </div>
                 </div>
             `;
+            
+            // Update translations after rendering
+            if (window.I18n && window.I18n.walkAndTranslate) {
+                window.I18n.walkAndTranslate();
+            }
         }
 
         function exportReport() {
@@ -4910,14 +4865,9 @@
             // Update HTML lang attribute
             document.documentElement.lang = lang;
 
-            // Update text direction for Arabic
-            if (lang === 'ar') {
-                document.documentElement.dir = 'rtl';
-                document.body.style.fontFamily = 'Arial, sans-serif';
-            } else {
-                document.documentElement.dir = 'ltr';
-                document.body.style.fontFamily = '';
-            }
+            // Update text direction
+            document.documentElement.dir = 'ltr';
+            document.body.style.fontFamily = '';
 
             // Add visual feedback for language change
             const modal = document.getElementById('languageSettingsModal');
@@ -4995,7 +4945,6 @@
             }
             return confirm(message);
         }
-
         // Initialize language on page load
         function initializeLanguage() {
             // Only initialize legacy system if i18n is not available
@@ -5026,7 +4975,7 @@
 
         function loadPatientsForBilling() {
             const patientSelect = document.getElementById('billPatientSelection');
-            patientSelect.innerHTML = '<option value="">Choose a patient...</option>';
+            patientSelect.innerHTML = `<option value="">${window.t ? window.t('choose_patient', 'Choose a patient...') : 'Choose a patient...'}</option>`;
 
             storedPatients.forEach(patient => {
                 const option = document.createElement('option');
@@ -5064,11 +5013,63 @@
 
         function getBillDescriptionOptionsHTML() {
             const descriptions = getBillDescriptions();
-            let optionsHTML = '<option value="">Select service...</option>';
+            let optionsHTML = `<option value="">${window.t ? window.t('select_service', 'Select service...') : 'Select service...'}</option>`;
             descriptions.forEach(desc => {
                 optionsHTML += `<option value="${desc.name}" data-price="${desc.price}">${desc.name}</option>`;
             });
             return optionsHTML;
+        }
+
+        function createBillItemHTML(itemNumber) {
+            return `
+                <div class="bill-item border border-gray-200 rounded-lg p-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="form-label" for="itemDescription${itemNumber}" data-translate="description">Description</label>
+                            <select id="itemDescription${itemNumber}" class="form-input" required onchange="autoFillPrice(this)">
+                                ${getBillDescriptionOptionsHTML()}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label" for="itemQuantity${itemNumber}" data-translate="quantity">Quantity</label>
+                            <input type="number" id="itemQuantity${itemNumber}" class="form-input" min="1" value="1" required onchange="calculateBillTotal()" oninput="calculateBillTotal()">
+                        </div>
+                        <div>
+                            <label class="form-label" for="itemPrice${itemNumber}" data-translate="price">Price ($)</label>
+                            <input type="number" id="itemPrice${itemNumber}" class="form-input" min="0" step="0.01" placeholder="0.00" data-translate-placeholder="price_placeholder" required onchange="calculateBillTotal()" oninput="calculateBillTotal()">
+                        </div>
+                    </div>
+                    <div class="mt-2 flex justify-end">
+                        <button type="button" class="btn btn-outline btn-sm text-red-600 hover:text-red-700 hover:bg-red-50 border-red-300 hover:border-red-400" onclick="removeBillItem(this)" title="Remove Item">
+                            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function resetBillItems() {
+            const billItems = document.getElementById('billItems');
+            if (!billItems) {
+                console.error('Bill items container not found');
+                return;
+            }
+            
+            // Clear all existing items
+            billItems.innerHTML = '';
+            
+            // Add one default item
+            billItems.innerHTML = createBillItemHTML(1);
+            
+            // Update translations
+            if (window.I18n && window.I18n.walkAndTranslate) {
+                window.I18n.walkAndTranslate();
+            }
+            
+            // Recalculate totals
+            calculateBillTotal();
         }
 
         function addBillItem() {
@@ -5076,38 +5077,13 @@
             const itemCount = billItems.children.length + 1;
 
             const newItem = document.createElement('div');
-            newItem.className = 'bill-item border border-gray-200 rounded-lg p-4';
-            newItem.innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label class="form-label" for="itemDescription${itemCount}" data-translate="description">Description</label>
-                        <select id="itemDescription${itemCount}" class="form-input" required onchange="autoFillPrice(this)">
-                            ${getBillDescriptionOptionsHTML()}
-                        </select>
-                    </div>
-                    <div>
-                        <label class="form-label" for="itemQuantity${itemCount}" data-translate="quantity">Quantity</label>
-                        <input type="number" id="itemQuantity${itemCount}" class="form-input" min="1" value="1" required onchange="calculateBillTotal()" oninput="calculateBillTotal()">
-                    </div>
-                    <div>
-                        <label class="form-label" for="itemPrice${itemCount}" data-translate="price">Price ($)</label>
-                        <input type="number" id="itemPrice${itemCount}" class="form-input" min="0" step="0.01" placeholder="0.00" required onchange="calculateBillTotal()" oninput="calculateBillTotal()">
-                    </div>
-                </div>
-                <div class="mt-2 flex justify-end">
-                    <button type="button" class="btn btn-outline btn-sm bill-item-remove" onclick="removeBillItem(this)">
-                        <svg class="icon-sm mr-1" viewBox="0 0 24 24">
-                            <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                        </svg>
-                        <span data-translate="remove_item">Remove Item</span>
-                    </button>
-                </div>
-            `;
-
+            newItem.innerHTML = createBillItemHTML(itemCount);
             billItems.appendChild(newItem);
 
             // Update translations for the new item
-            updateModalTranslations();
+            if (window.I18n && window.I18n.walkAndTranslate) {
+                window.I18n.walkAndTranslate();
+            }
 
             calculateBillTotal();
         }
@@ -5172,54 +5148,7 @@
             if (patientSelect) patientSelect.disabled = false;
 
             // Reset bill items to just one
-            const billItems = document.getElementById('billItems');
-            billItems.innerHTML = `
-                <div class="bill-item border border-gray-200 rounded-lg p-4">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="form-label" for="itemDescription1">Description</label>
-                            <select id="itemDescription1" class="form-input" required onchange="autoFillPrice(this)">
-                                <option value="">Select service...</option>
-                                <option value="General Consultation" data-price="50">General Consultation</option>
-                                <option value="Follow-up Consultation" data-price="30">Follow-up Consultation</option>
-                                <option value="Emergency Consultation" data-price="100">Emergency Consultation</option>
-                                <option value="Blood Test" data-price="25">Blood Test</option>
-                                <option value="X-Ray" data-price="80">X-Ray</option>
-                                <option value="MRI Scan" data-price="300">MRI Scan</option>
-                                <option value="CT Scan" data-price="250">CT Scan</option>
-                                <option value="Ultrasound" data-price="120">Ultrasound</option>
-                                <option value="ECG" data-price="40">ECG</option>
-                                <option value="Vaccination" data-price="35">Vaccination</option>
-                                <option value="Prescription Medication" data-price="15">Prescription Medication</option>
-                                <option value="Physical Therapy Session" data-price="60">Physical Therapy Session</option>
-                                <option value="Laboratory Analysis" data-price="45">Laboratory Analysis</option>
-                                <option value="Minor Surgery" data-price="200">Minor Surgery</option>
-                                <option value="Dressing Change" data-price="20">Dressing Change</option>
-                                <option value="Injection" data-price="25">Injection</option>
-                                <option value="Other" data-price="0">Other</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="form-label" for="itemQuantity1">Quantity</label>
-                            <input type="number" id="itemQuantity1" class="form-input" min="1" value="1" required onchange="calculateBillTotal()" oninput="calculateBillTotal()">
-                        </div>
-                        <div>
-                            <label class="form-label" for="itemPrice1">Price ($)</label>
-                            <input type="number" id="itemPrice1" class="form-input" min="0" step="0.01" placeholder="0.00" required onchange="calculateBillTotal()" oninput="calculateBillTotal()">
-                        </div>
-                    </div>
-                    <div class="mt-2 flex justify-end">
-                        <button type="button" class="btn btn-outline btn-sm bill-item-remove" onclick="removeBillItem(this)">
-                            <svg class="icon-sm mr-1" viewBox="0 0 24 24">
-                                <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                            </svg>
-                            Remove Item
-                        </button>
-                    </div>
-                </div>
-            `;
-
-            calculateBillTotal();
+            resetBillItems();
         }
 
         function createBill(formData) {
@@ -5627,7 +5556,6 @@
 
             document.body.appendChild(modal);
         }
-
         function generatePrintableBillContent(bill) {
             const billDate = new Date(bill.billDate).toLocaleDateString();
             const dueDate = new Date(bill.dueDate).toLocaleDateString();
@@ -6163,7 +6091,6 @@
 
             console.log('Permissions applied:', permissions);
         }
-
         // Initialize the application
         document.addEventListener('DOMContentLoaded', () => {
             loadStoredAppointments();
@@ -6173,9 +6100,9 @@
             
             // Wait for i18n system to be ready before rendering
             const renderDashboard = () => {
-                renderCalendar();
-                renderDailyAgenda();
-                loadDoctorDashboard();
+            renderCalendar();
+            renderDailyAgenda();
+            loadDoctorDashboard();
             };
             
             // If i18n is available, wait for it to initialize
@@ -6223,7 +6150,7 @@
                 // Populate patients
                 const patientSelect = document.getElementById('consultPatient');
                 const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
-                patientSelect.innerHTML = '<option value="">Choose a patient...</option>' +
+                patientSelect.innerHTML = `<option value="">${window.t ? window.t('choose_patient', 'Choose a patient...') : 'Choose a patient...'}</option>` +
                     patients.map(p => `<option value="${p.id}">${p.fullName} (${p.fileNumber || 'No file#'}) - ${p.phone}</option>`).join('');
 
                 // Setup selected patient info section
@@ -6573,7 +6500,7 @@
         });
 
         // Doctor Dashboard Functions
-        function loadDoctorDashboard() {
+        window.loadDoctorDashboard = function() {
             const session = JSON.parse(localStorage.getItem('medconnect_session') || '{}');
             const isDoctor = session && session.role === 'doctor';
             
@@ -6643,7 +6570,7 @@
                 // Populate patients dropdown
                 const patientSelect = document.getElementById('consultPatient');
                 const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
-                patientSelect.innerHTML = '<option value="">Choose a patient...</option>' +
+                patientSelect.innerHTML = `<option value="">${window.t ? window.t('choose_patient', 'Choose a patient...') : 'Choose a patient...'}</option>` +
                     patients.map(p => `<option value="${p.id}">${p.fullName} (${p.fileNumber || 'No file#'}) - ${p.phone}</option>`).join('');
                 
                 // Pre-select the patient
@@ -6753,7 +6680,7 @@
             }
         };
 
-        function loadTodayAppointments() {
+        window.loadTodayAppointments = function() {
             const today = new Date();
             const todayStr = formatDateForStorage(today);
             const allAppointments = getAppointmentsForDate(today);
@@ -6769,7 +6696,7 @@
             appointmentCountEl.textContent = appointments.length;
             
             if (appointments.length === 0) {
-                appointmentsListEl.innerHTML = '<p class="text-gray-500 text-center py-4" data-translate="no_appointments_today">No appointments scheduled for today.</p>';
+                appointmentsListEl.innerHTML = `<p class="text-gray-500 text-center py-4" data-translate="no_appointments_today">${window.t ? window.t('no_appointments_today', 'No appointments scheduled for today.') : 'No appointments scheduled for today.'}</p>`;
                 return;
             }
             
@@ -6782,19 +6709,18 @@
                         <div class="patient-name">${patientName}</div>
                         <div class="appointment-time">${appointment.time} (${appointment.duration} min)</div>
                         <div class="flex items-center gap-2 mb-3">
-                            <span class="badge ${statusColor}">${appointment.status}</span>
+                            <span class="badge ${statusColor}">${window.t ? window.t(appointment.status.toLowerCase(), appointment.status) : appointment.status}</span>
                             ${appointment.notes ? `<span class="text-sm text-gray-600">${appointment.notes}</span>` : ''}
                         </div>
                         <div class="flex gap-2">
-                            <button class="btn btn-sm btn-primary" onclick="startConsultation('${appointment.id}', '${patientName}')" data-translate="consult">Consult</button>
-                            <button class="btn btn-sm btn-secondary" onclick="rejectConsultation('${appointment.id}')" data-translate="reject">Reject</button>
+                            <button class="btn btn-sm btn-primary" onclick="startConsultation('${appointment.id}', '${patientName}')" data-translate="consult">${window.t ? window.t('consult', 'Consult') : 'Consult'}</button>
+                            <button class="btn btn-sm btn-secondary" onclick="rejectConsultation('${appointment.id}')" data-translate="reject">${window.t ? window.t('reject', 'Reject') : 'Reject'}</button>
                         </div>
                     </div>
                 `;
             }).join('');
         }
-
-        function loadTodayConsultations() {
+        window.loadTodayConsultations = function() {
             const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
             const today = new Date();
             const todayStr = today.toISOString().split('T')[0]; // YYYY-MM-DD format
@@ -6811,7 +6737,7 @@
             consultationCountEl.textContent = todayConsultations.length;
             
             if (todayConsultations.length === 0) {
-                consultationsListEl.innerHTML = '<p class="text-gray-500 text-center py-4" data-translate="no_consultations_today">No consultations conducted today.</p>';
+                consultationsListEl.innerHTML = `<p class="text-gray-500 text-center py-4" data-translate="no_consultations_today">${window.t ? window.t('no_consultations_today', 'No consultations conducted today.') : 'No consultations conducted today.'}</p>`;
                 return;
             }
             
@@ -6861,31 +6787,31 @@
             const detailContent = document.getElementById('consultationDetailContent');
             detailContent.innerHTML = `
                 <div class="card p-4">
-                    <h3 class="text-lg font-semibold mb-4 text-gray-900">Patient Information</h3>
+                    <h3 class="text-lg font-semibold mb-4 text-gray-900">${window.t ? window.t('patient_information', 'Patient Information') : 'Patient Information'}</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                        <div><strong>Patient Name:</strong> ${patientName}</div>
-                        <div><strong>Date & Time:</strong> ${consultationTime}</div>
-                        <div><strong>Doctor:</strong> ${consultation.doctor || 'N/A'}</div>
-                        <div><strong>Payment Status:</strong> ${consultation.paymentStatus === 'paying' ? 'Paying Patient' : 'Non-Paying Patient'}</div>
+                        <div><strong>${window.t ? window.t('patient_name', 'Patient Name') : 'Patient Name'}:</strong> ${patientName}</div>
+                        <div><strong>${window.t ? window.t('date_time', 'Date & Time') : 'Date & Time'}:</strong> ${consultationTime}</div>
+                        <div><strong>${window.t ? window.t('doctor', 'Doctor') : 'Doctor'}:</strong> ${consultation.doctor || 'N/A'}</div>
+                        <div><strong>${window.t ? window.t('payment_status', 'Payment Status') : 'Payment Status'}:</strong> ${consultation.paymentStatus === 'paying' ? (window.t ? window.t('paying_patient', 'Paying Patient') : 'Paying Patient') : (window.t ? window.t('non_paying_patient', 'Non-Paying Patient') : 'Non-Paying Patient')}</div>
                     </div>
                 </div>
                 
                 <div class="card p-4">
-                    <h3 class="text-lg font-semibold mb-4 text-gray-900">Vital Signs</h3>
+                    <h3 class="text-lg font-semibold mb-4 text-gray-900">${window.t ? window.t('vital_signs', 'Vital Signs') : 'Vital Signs'}</h3>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                        ${consultation.height ? `<div><strong>Height:</strong> ${consultation.height} cm</div>` : ''}
-                        ${consultation.weight ? `<div><strong>Weight:</strong> ${consultation.weight} kg</div>` : ''}
-                        ${consultation.imc ? `<div><strong>IMC/BMI:</strong> ${consultation.imc} (${consultation.bmiCategory || 'N/A'})</div>` : ''}
-                        ${consultation.temperature ? `<div><strong>Temperature:</strong> ${consultation.temperature} °C</div>` : ''}
-                        ${consultation.heartRate ? `<div><strong>Heart Rate:</strong> ${consultation.heartRate} bpm</div>` : ''}
-                        ${consultation.bloodSugar ? `<div><strong>Blood Sugar:</strong> ${consultation.bloodSugar} mg/dL</div>` : ''}
-                        ${consultation.bpSystolic && consultation.bpDiastolic ? `<div><strong>Blood Pressure:</strong> ${consultation.bpSystolic}/${consultation.bpDiastolic} mmHg</div>` : ''}
+                        ${consultation.height ? `<div><strong>${window.t ? window.t('height', 'Height') : 'Height'}:</strong> ${consultation.height} cm</div>` : ''}
+                        ${consultation.weight ? `<div><strong>${window.t ? window.t('weight', 'Weight') : 'Weight'}:</strong> ${consultation.weight} kg</div>` : ''}
+                        ${consultation.imc ? `<div><strong>${window.t ? window.t('bmi', 'IMC/BMI') : 'IMC/BMI'}:</strong> ${consultation.imc} (${consultation.bmiCategory || 'N/A'})</div>` : ''}
+                        ${consultation.temperature ? `<div><strong>${window.t ? window.t('temperature', 'Temperature') : 'Temperature'}:</strong> ${consultation.temperature} °C</div>` : ''}
+                        ${consultation.heartRate ? `<div><strong>${window.t ? window.t('heart_rate', 'Heart Rate') : 'Heart Rate'}:</strong> ${consultation.heartRate} bpm</div>` : ''}
+                        ${consultation.bloodSugar ? `<div><strong>${window.t ? window.t('blood_sugar', 'Blood Sugar') : 'Blood Sugar'}:</strong> ${consultation.bloodSugar} mg/dL</div>` : ''}
+                        ${consultation.bpSystolic && consultation.bpDiastolic ? `<div><strong>${window.t ? window.t('blood_pressure', 'Blood Pressure') : 'Blood Pressure'}:</strong> ${consultation.bpSystolic}/${consultation.bpDiastolic} mmHg</div>` : ''}
                     </div>
                 </div>
                 
                 <div class="card p-4">
-                    <h3 class="text-lg font-semibold mb-3 text-gray-900">Clinical Notes</h3>
-                    <div class="text-sm text-gray-700 whitespace-pre-wrap">${consultation.notes || 'No notes provided.'}</div>
+                    <h3 class="text-lg font-semibold mb-3 text-gray-900">${window.t ? window.t('clinical_notes', 'Clinical Notes') : 'Clinical Notes'}</h3>
+                    <div class="text-sm text-gray-700 whitespace-pre-wrap">${consultation.notes || (window.t ? window.t('no_notes_provided', 'No notes provided.') : 'No notes provided.')}</div>
                 </div>
                 
                 ${consultation.prescription ? `
@@ -6904,7 +6830,7 @@
                 detailContent.innerHTML += `
                     <div class="card p-4">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-semibold text-gray-900">Laboratory Assessments</h3>
+                            <h3 class="text-lg font-semibold text-gray-900">${window.t ? window.t('laboratory_assessments', 'Laboratory Assessments') : 'Laboratory Assessments'}</h3>
                             <button class="btn btn-sm btn-outline" onclick="openLaboratoryAssessmentModal('${consultationId}')">
                                 <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -6957,7 +6883,7 @@
                             <svg class="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>
-                            <p class="text-gray-600 mb-3">No laboratory assessments yet</p>
+                            <p class="text-gray-600 mb-3">${window.t ? window.t('no_lab_assessments_yet', 'No laboratory assessments yet') : 'No laboratory assessments yet'}</p>
                             <button class="btn btn-primary btn-sm" onclick="openLaboratoryAssessmentModal('${consultationId}')">
                                 <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -7427,7 +7353,6 @@
                 updateModalTranslations();
             }
         };
-
         window.openMedicalCertificateFromConsultation = function() {
             // Get selected patient from consultation form
             const patientId = document.getElementById('consultPatient').value;
