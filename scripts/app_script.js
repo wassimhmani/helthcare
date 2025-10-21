@@ -40,7 +40,7 @@
                 // Bill Descriptions Management
                 add_new_description: 'Add New Service',
                 service_name: 'Service Name',
-                default_price: 'Default Price ($)',
+                default_price: 'Default Price (TND)',
                 add_service: 'Add Service',
                 existing_services: 'Existing Services',
                 search_services: 'Search services...',
@@ -187,7 +187,7 @@
                 bill_items: 'Bill Items',
                 description: 'Description',
                 quantity: 'Quantité',
-                price: 'Prix ($)',
+                price: 'Prix (TND)',
                 notes: 'Notes',
                 remove_item: 'Remove Item',
                 add_item: 'Add Item',
@@ -346,7 +346,7 @@
                 // Bill Descriptions Management
                 add_new_description: 'Ajouter un nouveau service',
                 service_name: 'Nom du service',
-                default_price: 'Prix par défaut ($)',
+                default_price: 'Prix par défaut (TND)',
                 add_service: 'Ajouter un service',
                 existing_services: 'Services existants',
                 search_services: 'Rechercher des services...',
@@ -493,7 +493,7 @@
                 bill_items: 'Articles de facturation',
                 description: 'Description',
                 quantity: 'Quantité',
-                price: 'Prix ($)',
+                price: 'Prix (TND)',
                 notes: 'Notes',
                 remove_item: 'Supprimer l\'élément',
                 add_item: 'Ajouter un élément',
@@ -652,7 +652,7 @@
                 // Bill Descriptions Management
                 add_new_description: 'إضافة خدمة جديدة',
                 service_name: 'اسم الخدمة',
-                default_price: 'السعر الافتراضي ($)',
+                default_price: 'السعر الافتراضي (TND)',
                 add_service: 'إضافة خدمة',
                 existing_services: 'الخدمات الموجودة',
                 search_services: 'البحث عن خدمات...',
@@ -799,7 +799,7 @@
                 bill_items: 'عناصر الفاتورة',
                 description: 'الوصف',
                 quantity: 'الكمية',
-                price: 'السعر ($)',
+                price: 'السعر (TND)',
                 notes: 'ملاحظات',
                 remove_item: 'إزالة العنصر',
                 add_item: 'إضافة عنصر',
@@ -2403,7 +2403,7 @@
                                             <span class="font-medium">${item.description}</span>
                                             <span class="text-gray-500 ml-2">(${window.t ? window.t('qty', 'Qty') : 'Qty'}: ${item.quantity})</span>
                                         </div>
-                                        <span class="font-semibold">$${(item.price * item.quantity).toFixed(2)}</span>
+                                        <span class="font-semibold">${(item.price * item.quantity).toFixed(2)} TND</span>
                                     </div>
                                 `).join('')}
                             </div>
@@ -2413,15 +2413,15 @@
                         <div class="border-t pt-3 space-y-1 text-sm">
                             <div class="flex justify-between">
                                 <span class="text-gray-600" data-translate="subtotal">Subtotal:</span>
-                                <span class="font-medium">$${bill.subtotal.toFixed(2)}</span>
+                                <span class="font-medium">${bill.subtotal.toFixed(2)} TND</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-600" data-translate="tax">Tax:</span>
-                                <span class="font-medium">$${bill.tax.toFixed(2)}</span>
+                                <span class="font-medium">${bill.tax.toFixed(2)} TND</span>
                             </div>
                             <div class="flex justify-between text-base font-bold border-t pt-2">
                                 <span data-translate="total">Total:</span>
-                                <span class="text-blue-600">$${bill.total.toFixed(2)}</span>
+                                <span class="text-blue-600">${bill.total.toFixed(2)} TND</span>
                             </div>
                         </div>
 
@@ -2468,7 +2468,7 @@
                 showPrintableBill(bill);
             } else {
                 // Fallback to simple display
-                alert(`Bill ID: ${bill.id}\nTotal: $${bill.total.toFixed(2)}\nStatus: ${bill.status}`);
+                alert(`Bill ID: ${bill.id}\nTotal: ${bill.total.toFixed(2)} TND\nStatus: ${bill.status}`);
             }
         }
 
@@ -3603,7 +3603,7 @@
                                 ${bill.items.slice(0, 3).map(item => `
                                     <div class="text-sm text-gray-600 flex justify-between">
                                         <span>${item.description} <span class="text-gray-400">(x${item.quantity})</span></span>
-                                        <span class="font-medium">$${(item.price * item.quantity).toFixed(2)}</span>
+                                        <span class="font-medium">${(item.price * item.quantity).toFixed(2)} TND</span>
                                     </div>
                                 `).join('')}
                                 ${bill.items.length > 3 ? `<div class="text-sm text-gray-500 italic">+ ${bill.items.length - 3} more items...</div>` : ''}
@@ -3613,10 +3613,10 @@
                         <!-- Bill Total -->
                         <div class="border-t pt-3 flex justify-between items-center">
                             <div>
-                                <div class="text-xs text-gray-500" data-translate="subtotal">Subtotal: $${bill.subtotal.toFixed(2)}</div>
-                                <div class="text-xs text-gray-500" data-translate="tax">Tax: $${bill.tax.toFixed(2)}</div>
+                                <div class="text-xs text-gray-500" data-translate="subtotal">Subtotal: ${bill.subtotal.toFixed(2)} TND</div>
+                                <div class="text-xs text-gray-500" data-translate="tax">Tax: ${bill.tax.toFixed(2)} TND</div>
                                 <div class="text-lg font-bold text-blue-600">
-                                    <span data-translate="total">Total:</span> $${bill.total.toFixed(2)}
+                                    <span data-translate="total">Total:</span> ${bill.total.toFixed(2)} TND
                                 </div>
                             </div>
                             <div class="flex gap-2">
@@ -3664,7 +3664,7 @@
                 showPrintableBill(bill);
             } else {
                 // Fallback to simple display
-                alert(`Bill ID: ${bill.id}\nPatient: ${bill.patientName}\nTotal: $${bill.total.toFixed(2)}\nStatus: ${bill.status}`);
+                alert(`Bill ID: ${bill.id}\nPatient: ${bill.patientName}\nTotal: ${bill.total.toFixed(2)} TND\nStatus: ${bill.status}`);
             }
         }
 
@@ -3881,14 +3881,104 @@
         function getSystemUsers() {
             const stored = localStorage.getItem('system_users');
             if (stored) {
-                return JSON.parse(stored);
+                try {
+                    const users = JSON.parse(stored);
+                    // Validate and fix user roles if needed
+                    return users.map(user => {
+                        // Ensure role is correct for default users
+                        if (user.id === 'user_default_1' && user.username === 'doctor') {
+                            user.role = 'doctor';
+                        } else if (user.id === 'user_default_2' && user.username === 'secretary') {
+                            user.role = 'secretary';
+                        }
+                        return user;
+                    });
+                } catch (error) {
+                    console.error('Error parsing users:', error);
+                    return getDefaultUsers();
+                }
             }
             // Default users (include current logged-in user)
-            return [];
+            return getDefaultUsers();
+        }
+
+        function getDefaultUsers() {
+            return [
+                { role: 'doctor', username: 'doctor', password: 'doctor123', name: 'Dr. John Smith', email: 'doctor@clinic.com', status: 'active', id: 'user_default_1' },
+                { role: 'secretary', username: 'secretary', password: 'secretary123', name: 'Alice Johnson', email: 'secretary@clinic.com', status: 'active', id: 'user_default_2' }
+            ];
         }
 
         function saveSystemUsers(users) {
             localStorage.setItem('system_users', JSON.stringify(users));
+        }
+
+        function exportUserCredentials() {
+            const users = getSystemUsers();
+            const credentials = users.map(user => {
+                return `Username: ${user.username}\nPassword: ${user.password}\nRole: ${user.role}\nName: ${user.name}\nEmail: ${user.email}\nStatus: ${user.status}\nID: ${user.id}\n---`;
+            }).join('\n\n');
+            
+            const exportData = `Healthcare System - User Credentials Export\nGenerated: ${new Date().toLocaleString()}\n\n${credentials}`;
+            
+            // Create and download the file
+            const blob = new Blob([exportData], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'users.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            // Show the content in a modal for easy copying to config/users.txt
+            showCredentialsModal(exportData);
+        }
+
+        function showCredentialsModal(credentials) {
+            // Create modal if it doesn't exist
+            let modal = document.getElementById('credentialsModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'credentialsModal';
+                modal.className = 'modal';
+                modal.innerHTML = `
+                    <div class="modal-content" style="max-width: 800px;">
+                        <div class="modal-header">
+                            <h2 class="modal-title">User Credentials Export</h2>
+                            <button class="modal-close" onclick="closeCredentialsModal()">&times;</button>
+                        </div>
+                        <div class="p-6">
+                            <p class="mb-4 text-gray-600">Copy the content below and save it to <code>config/users.txt</code>:</p>
+                            <textarea id="credentialsText" class="form-textarea" rows="20" style="font-family: monospace; font-size: 12px;" readonly></textarea>
+                            <div class="flex gap-2 mt-4">
+                                <button onclick="copyCredentials()" class="btn btn-primary">Copy to Clipboard</button>
+                                <button onclick="closeCredentialsModal()" class="btn btn-secondary">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+            
+            // Set the content
+            document.getElementById('credentialsText').value = credentials;
+            modal.classList.add('active');
+        }
+
+        function closeCredentialsModal() {
+            const modal = document.getElementById('credentialsModal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        }
+
+        function copyCredentials() {
+            const textarea = document.getElementById('credentialsText');
+            textarea.select();
+            document.execCommand('copy');
+            alert('Credentials copied to clipboard! You can now paste them into config/users.txt');
         }
 
         function showUserManagementModal() {
@@ -4104,8 +4194,8 @@
             
             // Load basic info
             document.getElementById('cabinetName').value = settings.name || '';
-            document.getElementById('cabinetAddress').value = settings.address || '';
-            document.getElementById('cabinetPhone').value = settings.phone || '';
+            document.getElementById('cabinetAddress').value = settings.address || 'Tunis, Tunisia';
+            document.getElementById('cabinetPhone').value = settings.phone || '00 000 000';
             
             // Load logo
             if (settings.logo) {
@@ -4272,7 +4362,7 @@
                 <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
                     <div class="flex-1">
                         <div class="font-semibold text-gray-900">${desc.name}</div>
-                        <div class="text-sm text-gray-600">$${Number(desc.price).toFixed(2)}</div>
+                        <div class="text-sm text-gray-600">${Number(desc.price).toFixed(2)} TND</div>
                     </div>
                     <div class="flex gap-2">
                         <button onclick="editBillDescription(${desc.id})" class="btn btn-sm btn-outline">
@@ -4538,7 +4628,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <div class="text-sm text-gray-600" data-translate="total_profit">${window.t ? window.t('total_profit', 'Total Profit') : 'Total Profit'}</div>
-                                <div class="text-2xl font-bold text-yellow-600">$${totalProfit.toFixed(2)}</div>
+                                <div class="text-2xl font-bold text-yellow-600">${totalProfit.toFixed(2)} TND</div>
                             </div>
                             <svg class="w-10 h-10 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -4560,7 +4650,7 @@
                                         <div class="text-xs text-gray-500">${new Date(bill.createdAt).toLocaleString()}</div>
                                     </div>
                                     <div class="text-right">
-                                        <div class="font-bold text-green-600">$${bill.total.toFixed(2)}</div>
+                                        <div class="font-bold text-green-600">${bill.total.toFixed(2)} TND</div>
                                         <div class="text-xs text-gray-500">${bill.items.length} ${window.t ? window.t('items', 'items') : 'items'}</div>
                                     </div>
                                 </div>
@@ -4653,7 +4743,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <div class="text-sm text-gray-600" data-translate="total_profit">${window.t ? window.t('total_profit', 'Total Profit') : 'Total Profit'}</div>
-                                <div class="text-2xl font-bold text-yellow-600">$${totalProfit.toFixed(2)}</div>
+                                <div class="text-2xl font-bold text-yellow-600">${totalProfit.toFixed(2)} TND</div>
                             </div>
                             <svg class="w-10 h-10 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -4673,7 +4763,7 @@
                                         <div class="font-semibold text-gray-900">${day}</div>
                                         <div class="text-sm text-gray-600">${billsByDay[day].bills.length} ${window.t ? window.t('bills', 'bills') : 'bills'}</div>
                                     </div>
-                                    <div class="text-xl font-bold text-green-600">$${billsByDay[day].total.toFixed(2)}</div>
+                                    <div class="text-xl font-bold text-green-600">${billsByDay[day].total.toFixed(2)} TND</div>
                                 </div>
                             </div>
                         `).join('')}
@@ -4769,7 +4859,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <div class="text-sm text-gray-600" data-translate="total_profit">${window.t ? window.t('total_profit', 'Total Profit') : 'Total Profit'}</div>
-                                <div class="text-2xl font-bold text-yellow-600">$${totalProfit.toFixed(2)}</div>
+                                <div class="text-2xl font-bold text-yellow-600">${totalProfit.toFixed(2)} TND</div>
                             </div>
                             <svg class="w-10 h-10 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -4781,7 +4871,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <div class="text-sm text-gray-600" data-translate="avg_per_bill">Avg. Per Bill</div>
-                                <div class="text-2xl font-bold text-purple-600">$${averagePerBill.toFixed(2)}</div>
+                                <div class="text-2xl font-bold text-purple-600">${averagePerBill.toFixed(2)} TND</div>
                             </div>
                             <svg class="w-10 h-10 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
@@ -4801,7 +4891,7 @@
                                         <div class="font-semibold text-gray-900">${week}</div>
                                         <div class="text-sm text-gray-600">${billsByWeek[week].bills.length} ${window.t ? window.t('bills', 'bills') : 'bills'}</div>
                                     </div>
-                                    <div class="text-xl font-bold text-green-600">$${billsByWeek[week].total.toFixed(2)}</div>
+                                    <div class="text-xl font-bold text-green-600">${billsByWeek[week].total.toFixed(2)} TND</div>
                                 </div>
                             </div>
                         `).join('')}
@@ -4840,7 +4930,7 @@
                 reportText += `\n${index + 1}. ${bill.patientName}\n`;
                 reportText += `   Bill ID: ${bill.id}\n`;
                 reportText += `   Date: ${new Date(bill.createdAt).toLocaleString()}\n`;
-                reportText += `   Total: $${bill.total.toFixed(2)}\n`;
+                reportText += `   Total: ${bill.total.toFixed(2)} TND\n`;
                 reportText += `   Items: ${bill.items.length}\n`;
             });
 
@@ -4866,8 +4956,8 @@
             document.documentElement.lang = lang;
 
             // Update text direction
-            document.documentElement.dir = 'ltr';
-            document.body.style.fontFamily = '';
+                document.documentElement.dir = 'ltr';
+                document.body.style.fontFamily = '';
 
             // Add visual feedback for language change
             const modal = document.getElementById('languageSettingsModal');
@@ -5023,28 +5113,28 @@
         function createBillItemHTML(itemNumber) {
             return `
                 <div class="bill-item border border-gray-200 rounded-lg p-4">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
                             <label class="form-label" for="itemDescription${itemNumber}" data-translate="description">Description</label>
                             <select id="itemDescription${itemNumber}" class="form-input" required onchange="autoFillPrice(this)">
-                                ${getBillDescriptionOptionsHTML()}
-                            </select>
-                        </div>
-                        <div>
+                            ${getBillDescriptionOptionsHTML()}
+                        </select>
+                    </div>
+                    <div>
                             <label class="form-label" for="itemQuantity${itemNumber}" data-translate="quantity">Quantity</label>
                             <input type="number" id="itemQuantity${itemNumber}" class="form-input" min="1" value="1" required onchange="calculateBillTotal()" oninput="calculateBillTotal()">
-                        </div>
-                        <div>
-                            <label class="form-label" for="itemPrice${itemNumber}" data-translate="price">Price ($)</label>
-                            <input type="number" id="itemPrice${itemNumber}" class="form-input" min="0" step="0.01" placeholder="0.00" data-translate-placeholder="price_placeholder" required onchange="calculateBillTotal()" oninput="calculateBillTotal()">
-                        </div>
                     </div>
-                    <div class="mt-2 flex justify-end">
+                    <div>
+                            <label class="form-label" for="itemPrice${itemNumber}" data-translate="price">Price</label>
+                            <input type="number" id="itemPrice${itemNumber}" class="form-input" min="0" step="0.01" placeholder="0.00" data-translate-placeholder="price_placeholder" required onchange="calculateBillTotal()" oninput="calculateBillTotal()">
+                    </div>
+                </div>
+                <div class="mt-2 flex justify-end">
                         <button type="button" class="btn btn-outline btn-sm text-red-600 hover:text-red-700 hover:bg-red-50 border-red-300 hover:border-red-400" onclick="removeBillItem(this)" title="Remove Item">
                             <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </button>
+                        </svg>
+                    </button>
                     </div>
                 </div>
             `;
@@ -5136,9 +5226,9 @@
             const taxElement = document.getElementById('billTax');
             const totalElement = document.getElementById('billTotal');
 
-            if (subtotalElement) subtotalElement.textContent = `$${subtotal.toFixed(2)}`;
-            if (taxElement) taxElement.textContent = `$${tax.toFixed(2)}`;
-            if (totalElement) totalElement.textContent = `$${total.toFixed(2)}`;
+            if (subtotalElement) subtotalElement.textContent = `${subtotal.toFixed(2)} TND`;
+            if (taxElement) taxElement.textContent = `${tax.toFixed(2)} TND`;
+            if (totalElement) totalElement.textContent = `${total.toFixed(2)} TND`;
         }
 
         function resetBillingForm() {
@@ -5447,8 +5537,8 @@
                                     <tr>
                                         <td>${item.description}</td>
                                         <td class="text-center">${item.quantity}</td>
-                                        <td class="text-right">$${item.price.toFixed(2)}</td>
-                                        <td class="text-right">$${item.total.toFixed(2)}</td>
+                                        <td class="text-right">${item.price.toFixed(2)} TND</td>
+                                        <td class="text-right">${item.total.toFixed(2)} TND</td>
                                     </tr>
                                 `).join('')}
                             </tbody>
@@ -5457,15 +5547,15 @@
                         <div class="bill-totals">
                             <div class="bill-total-row">
                                 <span>Subtotal:</span>
-                                <span>$${bill.subtotal.toFixed(2)}</span>
+                                <span>${bill.subtotal.toFixed(2)} TND</span>
                             </div>
                             <div class="bill-total-row">
                                 <span>Tax (8%):</span>
-                                <span>$${bill.tax.toFixed(2)}</span>
+                                <span>${bill.tax.toFixed(2)} TND</span>
                             </div>
                             <div class="bill-total-row final">
                                 <span>Total Amount:</span>
-                                <span>$${bill.total.toFixed(2)}</span>
+                                <span>${bill.total.toFixed(2)} TND</span>
                             </div>
                         </div>
                         
@@ -5619,8 +5709,8 @@
                                 <tr>
                                     <td>${item.description}</td>
                                     <td class="text-center">${item.quantity}</td>
-                                    <td class="text-right">$${item.price.toFixed(2)}</td>
-                                    <td class="text-right">$${item.total.toFixed(2)}</td>
+                                    <td class="text-right">${item.price.toFixed(2)} TND</td>
+                                    <td class="text-right">${item.total.toFixed(2)} TND</td>
                                 </tr>
                             `).join('')}
                         </tbody>
@@ -5629,15 +5719,15 @@
                     <div class="bill-totals">
                         <div class="bill-total-row">
                             <span>Subtotal:</span>
-                            <span>$${bill.subtotal.toFixed(2)}</span>
+                            <span>${bill.subtotal.toFixed(2)} TND</span>
                         </div>
                         <div class="bill-total-row">
                             <span>Tax (8%):</span>
-                            <span>$${bill.tax.toFixed(2)}</span>
+                            <span>${bill.tax.toFixed(2)} TND</span>
                         </div>
                         <div class="bill-total-row final">
                             <span>Total Amount:</span>
-                            <span>$${bill.total.toFixed(2)}</span>
+                            <span>${bill.total.toFixed(2)} TND</span>
                         </div>
                     </div>
                     
@@ -5831,10 +5921,13 @@
             });
             
             // Build settings object
+            const addressValue = document.getElementById('cabinetAddress').value.trim();
+            const phoneValue = document.getElementById('cabinetPhone').value.trim();
+            
             const settings = {
                 name: name,
-                address: document.getElementById('cabinetAddress').value.trim(),
-                phone: document.getElementById('cabinetPhone').value.trim(),
+                address: addressValue || 'Tunis, Tunisia',
+                phone: phoneValue || '00 000 000',
                 logo: logo,
                 timetable: timetable
             };
@@ -6097,6 +6190,23 @@
             loadStoredPatients();
             loadStoredBills();
             initializeLanguage();
+
+            // Fix user roles if needed
+            const users = getSystemUsers();
+            let needsUpdate = false;
+            users.forEach(user => {
+                if (user.id === 'user_default_1' && user.username === 'doctor' && user.role !== 'doctor') {
+                    user.role = 'doctor';
+                    needsUpdate = true;
+                } else if (user.id === 'user_default_2' && user.username === 'secretary' && user.role !== 'secretary') {
+                    user.role = 'secretary';
+                    needsUpdate = true;
+                }
+            });
+            if (needsUpdate) {
+                saveSystemUsers(users);
+                console.log('Fixed user roles');
+            }
             
             // Wait for i18n system to be ready before rendering
             const renderDashboard = () => {
@@ -6119,24 +6229,45 @@
             // Role-based UI
             let session = null;
             try { session = JSON.parse(localStorage.getItem('medconnect_session')); } catch { }
-            const isDoctor = session && session.role === 'doctor';
-
-            if (isDoctor) {
+            
+            // Debug: Log session data
+            console.log('Session data:', session);
+            
+            // Function to update user profile
+            function updateUserProfile() {
+                if (session && session.role) {
                 // Update profile UI
                 const nameEl = document.querySelector('.user-name');
                 const roleEl = document.querySelector('.user-role');
                 const avatarEl = document.querySelector('.user-avatar');
+                    
                 if (nameEl && session.name) nameEl.textContent = session.name;
-                if (roleEl) roleEl.textContent = 'Doctor';
-                if (avatarEl && session.name) avatarEl.textContent = (session.name.match(/\b([A-Z])/gi) || ['D', 'R']).slice(0, 2).join('').toUpperCase();
-            } else if (session && session.role === 'secretary') {
-                const nameEl = document.querySelector('.user-name');
-                const roleEl = document.querySelector('.user-role');
-                const avatarEl = document.querySelector('.user-avatar');
-                if (nameEl && session.name) nameEl.textContent = session.name;
-                if (roleEl) roleEl.textContent = 'Secretary';
-                if (avatarEl && session.name) avatarEl.textContent = (session.name.match(/\b([A-Z])/gi) || ['S', 'E']).slice(0, 2).join('').toUpperCase();
+                    
+                    if (roleEl) {
+                        // Set role based on actual session role
+                        if (session.role === 'doctor') {
+                            roleEl.textContent = window.t ? window.t('doctor', 'Doctor') : 'Doctor';
+                        } else if (session.role === 'secretary') {
+                            roleEl.textContent = window.t ? window.t('secretary', 'Secretary') : 'Secretary';
+                        } else {
+                            roleEl.textContent = session.role; // fallback to raw role
+                        }
+                    }
+                    
+                    if (avatarEl && session.name) {
+                        avatarEl.textContent = (session.name.match(/\b([A-Z])/gi) || ['U', 'S']).slice(0, 2).join('').toUpperCase();
+                    }
+                }
             }
+            
+            // Update profile immediately
+            updateUserProfile();
+            
+            // Also update after any translation updates (with a small delay to ensure DOM is ready)
+            setTimeout(updateUserProfile, 100);
+            
+            // Make updateUserProfile globally available for other parts of the code
+            window.updateUserProfile = updateUserProfile;
 
             // Consultation modal handlers
             const consultationModal = document.getElementById('consultationModal');
@@ -7533,12 +7664,8 @@
                 certificateHTML += '<img src="' + cabinetSettings.logo + '" alt="Logo" class="logo">';
             }
             certificateHTML += '<div class="cabinet-name">' + (cabinetSettings.name || 'Medical Center') + '</div>';
-            if (cabinetSettings.address) {
-                certificateHTML += '<div class="cabinet-info">' + cabinetSettings.address + '</div>';
-            }
-            if (cabinetSettings.phone) {
-                certificateHTML += '<div class="cabinet-info">Tel: ' + cabinetSettings.phone + '</div>';
-            }
+            certificateHTML += '<div class="cabinet-info">' + (cabinetSettings.address || 'Tunis, Tunisia') + '</div>';
+            certificateHTML += '<div class="cabinet-info">Tel: ' + (cabinetSettings.phone || '00 000 000') + '</div>';
             certificateHTML += '</div>';
             certificateHTML += '<div class="certificate-title">Medical Certificate</div>';
             certificateHTML += '<div style="text-align: center; margin-bottom: 20px; font-size: 16px; color: #059669;">' + certTypeDisplay + '</div>';

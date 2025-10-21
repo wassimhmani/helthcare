@@ -5,11 +5,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-i18n="title.agenda">Secretary Agenda</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <script src="library/tailwind.js"></script>
     <script src="i18n/i18n.js"></script>
     <script>
         window.addEventListener('DOMContentLoaded', () => {
-            if (window.I18n && I18n.initI18n) I18n.initI18n();
+            if (window.I18n && I18n.initI18n) {
+                console.log('Initializing i18n system...');
+                I18n.initI18n().then(() => {
+                    console.log('i18n system initialized');
+                    // Force translation after initialization
+                    setTimeout(() => {
+                        if (window.I18n && window.I18n.walkAndTranslate) {
+                            window.I18n.walkAndTranslate();
+                            console.log('Translations applied');
+                        }
+                    }, 100);
+                }).catch(error => {
+                    console.error('Error initializing i18n:', error);
+                });
+            } else {
+                console.error('i18n system not available');
+            }
         });
     </script>
     <script src="scripts/tailwinconfig.js"></script>
@@ -35,8 +53,8 @@
                 var stored = localStorage.getItem('cabinet_settings');
                 var settings = stored ? JSON.parse(stored) : {};
                 var name = settings.name && settings.name.trim() ? settings.name : 'Medical Center';
-                var address = settings.address && settings.address.trim() ? settings.address : '';
-                var phone = settings.phone && settings.phone.trim() ? settings.phone : '';
+                var address = settings.address && settings.address.trim() ? settings.address : 'Tunis, Tunisia';
+                var phone = settings.phone && settings.phone.trim() ? settings.phone : '00 000 000';
                 var logo = settings.logo || '';
 
                 var nameEl = document.getElementById('firmName');
@@ -45,7 +63,7 @@
 
                 if (nameEl) nameEl.textContent = name;
                 if (addrEl) addrEl.textContent = address;
-                if (phoneEl) phoneEl.textContent = phone ? ('Tel: ' + phone) : '';
+                if (phoneEl) phoneEl.textContent = 'Tel: ' + phone;
 
                 // Update navigation logo
                 var navLogoEl = document.getElementById('navLogo');
@@ -77,6 +95,14 @@
         
         // Make function globally available for updates
         window.updateCabinetInfo = updateCabinetInfo;
+        
+        // Global function to force translation updates
+        window.forceTranslationUpdate = function() {
+            if (window.I18n && window.I18n.walkAndTranslate) {
+                window.I18n.walkAndTranslate();
+                console.log('Forced translation update');
+            }
+        };
     </script>
     <!-- Horizontal Navigation Menu -->
     <nav class="nav-menu">
@@ -106,13 +132,14 @@
                     <div class="user-avatar">JD</div>
                     <div class="user-info">
                         <p class="user-name">John Doe</p>
-                        <p class="user-role" data-translate="secretary">Secretary</p>
+                        <p class="user-role">Secretary</p>
                     </div>
-                    <button class="logout-btn" onclick="logout()" title="Logout" data-translate="logout">
-                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button class="logout-btn" onclick="logout()" title="Logout">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right: 4px;">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
+                        <span data-translate="logout">Logout</span>
                     </button>
                 </div>
 
@@ -761,7 +788,7 @@
                                         required onchange="calculateBillTotal()" oninput="calculateBillTotal()">
                                 </div>
                                 <div>
-                                    <label class="form-label" for="itemPrice1" data-translate="price">Prix ($)</label>
+                                    <label class="form-label" for="itemPrice1" data-translate="price">Prix (TND)</label>
                                     <input type="number" id="itemPrice1" class="form-input" min="0" step="0.01"
                                         placeholder="0.00" data-translate-placeholder="price_placeholder" required onchange="calculateBillTotal()"
                                         oninput="calculateBillTotal()">
@@ -790,15 +817,15 @@
                     <div class="space-y-2 text-sm">
                         <div class="flex justify-between">
                             <span data-translate="subtotal">Subtotal:</span>
-                            <span id="billSubtotal">$0.00</span>
+                            <span id="billSubtotal">0.00 TND</span>
                         </div>
                         <div class="flex justify-between">
                             <span data-translate="tax_8_percent">Tax (8%):</span>
-                            <span id="billTax">$0.00</span>
+                            <span id="billTax">0.00 TND</span>
                         </div>
                         <div class="flex justify-between font-semibold text-lg border-t pt-2">
                             <span data-translate="total">Total:</span>
-                            <span id="billTotal">$0.00</span>
+                            <span id="billTotal">0.00 TND</span>
                         </div>
                     </div>
                 </div>
@@ -995,7 +1022,7 @@
                             <input type="text" id="newDescriptionName" class="form-input" required placeholder="e.g., General Consultation">
                         </div>
                         <div class="form-group">
-                            <label class="form-label" for="newDescriptionPrice" data-translate="default_price">Default Price ($) *</label>
+                            <label class="form-label" for="newDescriptionPrice" data-translate="default_price">Default Price (TND) *</label>
                             <input type="number" id="newDescriptionPrice" class="form-input" min="0" step="0.01" required placeholder="0.00">
                         </div>
                         <div class="form-group flex items-end">
@@ -1047,7 +1074,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="editDescriptionPrice" data-translate="default_price">Default Price ($) *</label>
+                    <label class="form-label" for="editDescriptionPrice" data-translate="default_price">Default Price (TND) *</label>
                     <input type="number" id="editDescriptionPrice" class="form-input" min="0" step="0.01" required>
                 </div>
 
@@ -1405,9 +1432,17 @@
                 <div class="card p-4">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="font-semibold" data-translate="existing_users">Existing Users</h3>
-                        <div class="text-sm text-gray-600">
-                            <span data-translate="total_users">Total Users:</span>
-                            <span id="totalUsersCount" class="font-semibold ml-1">0</span>
+                        <div class="flex items-center gap-4">
+                            <div class="text-sm text-gray-600">
+                                <span data-translate="total_users">Total Users:</span>
+                                <span id="totalUsersCount" class="font-semibold ml-1">0</span>
+                            </div>
+                            <button onclick="exportUserCredentials()" class="btn btn-outline btn-sm" data-translate="export_credentials">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                Export Credentials
+                            </button>
                         </div>
                     </div>
                     

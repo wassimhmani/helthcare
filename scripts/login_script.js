@@ -7,6 +7,14 @@ const buttonText = document.getElementById('buttonText');
 const loadingSpinner = document.getElementById('loadingSpinner');
 const roleOptions = document.querySelectorAll('.role-option');
 
+// Translation function fallback
+function translate(key, fallback = '') {
+    if (window.t) {
+        return window.t(key, fallback);
+    }
+    return fallback || key;
+}
+
 // Get system users from localStorage
 function getSystemUsers() {
     try {
@@ -26,24 +34,28 @@ function getSystemUsers() {
 
 let selectedRole = '';
 
-// Role selection
-roleOptions.forEach(option => {
-    option.addEventListener('click', () => {
-        roleOptions.forEach(opt => opt.classList.remove('selected'));
-        option.classList.add('selected');
-        selectedRole = option.dataset.role;
-        
-        // Ensure label/placeholder reflect current language
-        const employeeLabel = document.querySelector('label[for="employeeId"]');
-        if (window.t && employeeLabel) {
-            // Keep the label as "Username or Email"
-            if (t('employeeId.label')) {
-                employeeLabel.textContent = t('employeeId.label');
+// Role selection - ensure DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    const roleOptions = document.querySelectorAll('.role-option');
+    
+    roleOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            roleOptions.forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            selectedRole = option.dataset.role;
+            
+            // Ensure label/placeholder reflect current language
+            const employeeLabel = document.querySelector('label[for="employeeId"]');
+            if (window.t && employeeLabel) {
+                // Keep the label as "Username or Email"
+                if (translate('employeeId.label')) {
+                    employeeLabel.textContent = translate('employeeId.label');
+                }
+                if (translate('employeeId.placeholder')) {
+                    employeeIdInput.setAttribute('placeholder', translate('employeeId.placeholder'));
+                }
             }
-            if (t('employeeId.placeholder')) {
-                employeeIdInput.setAttribute('placeholder', t('employeeId.placeholder'));
-            }
-        }
+        });
     });
 });
 
@@ -83,21 +95,21 @@ function validateForm() {
     clearAllErrors();
     let isValid = true;
 
-    // Validate role selection - allow doctor, secretary, or admin
+    // Validate role selection - allow doctor or secretary
     if (!selectedRole) {
-        alert(t('alerts.selectRole'));
+        alert('Please select a role (Doctor or Secretary)');
         return false;
     }
     
     if (selectedRole !== 'doctor' && selectedRole !== 'secretary') {
-        alert(t('alerts.roleNotAllowed'));
+        alert('Invalid role selected');
         return false;
     }
 
     // Validate username/email
     const username = employeeIdInput.value.trim();
     if (!username) {
-        showError(employeeIdInput, document.getElementById('employeeIdError'), t('errors.employeeId.required'));
+        showError(employeeIdInput, document.getElementById('employeeIdError'), translate('errors.employeeId.required'));
         isValid = false;
     } else if (!validateUsername(username)) {
         showError(employeeIdInput, document.getElementById('employeeIdError'), 'Username must be at least 3 characters');
@@ -107,7 +119,7 @@ function validateForm() {
     // Validate password
     const password = passwordInput.value;
     if (!password) {
-        showError(passwordInput, document.getElementById('passwordError'), t('errors.password.required'));
+        showError(passwordInput, document.getElementById('passwordError'), translate('errors.password.required'));
         isValid = false;
     }
 
@@ -135,6 +147,8 @@ async function handleSubmit(e) {
 
         // Get system users from localStorage
         const systemUsers = getSystemUsers();
+        console.log('Available users:', systemUsers);
+        console.log('Login attempt:', { username, password, selectedRole });
         
         // Find user by username (or email) and password
         const user = systemUsers.find(u => 
@@ -143,8 +157,10 @@ async function handleSubmit(e) {
             u.role === selectedRole
         );
 
+        console.log('Found user:', user);
+
         if (!user) {
-            alert('❌ ' + t('alerts.invalidCredentials'));
+            alert('❌ Invalid credentials. Please check your username, password, and role selection.');
             return;
         }
 
@@ -172,12 +188,12 @@ async function handleSubmit(e) {
         }
 
         // Redirect
-        const roleName = user.role === 'doctor' ? t('role.doctor') : t('role.secretary');
-        alert(`✅ ${t('alerts.welcomePrefix')} ${user.name}!\n${t('alerts.roleLabel')}: ${roleName}`);
+        const roleName = user.role === 'doctor' ? 'Doctor' : 'Secretary';
+        alert(`✅ Welcome ${user.name}!\nRole: ${roleName}`);
         window.location.href ='agenda.html';
     } catch (error) {
         console.error('Login failed:', error);
-        alert('❌ ' + t('alerts.loginFailed'));
+        alert('❌ Login failed. Please try again.');
     } finally {
         // Reset button state
         submitButton.disabled = false;
@@ -186,32 +202,38 @@ async function handleSubmit(e) {
     }
 }
 
-// Event listeners
-form.addEventListener('submit', handleSubmit);
+// Event listeners - ensure DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    // Form submission
+    form.addEventListener('submit', handleSubmit);
 
-// Clear errors on input
-employeeIdInput.addEventListener('input', () => {
-    if (document.getElementById('employeeIdError').classList.contains('show')) {
-        clearError(employeeIdInput, document.getElementById('employeeIdError'));
-    }
-});
-
-passwordInput.addEventListener('input', () => {
-    if (document.getElementById('passwordError').classList.contains('show')) {
-        clearError(passwordInput, document.getElementById('passwordError'));
-    }
-});
-
-// Footer link handlers
-document.getElementById('forgotPassword').addEventListener('click', (e) => {
-    e.preventDefault();
-    alert('🔐 ' + t('forgot.dialog'));
-});
-
-const supportLink = document.getElementById('supportLink');
-if (supportLink) {
-    supportLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        alert('📞 ' + t('support.dialog'));
+    // Clear errors on input
+    employeeIdInput.addEventListener('input', () => {
+        if (document.getElementById('employeeIdError').classList.contains('show')) {
+            clearError(employeeIdInput, document.getElementById('employeeIdError'));
+        }
     });
-}
+
+    passwordInput.addEventListener('input', () => {
+        if (document.getElementById('passwordError').classList.contains('show')) {
+            clearError(passwordInput, document.getElementById('passwordError'));
+        }
+    });
+
+    // Footer link handlers
+    const forgotPasswordLink = document.getElementById('forgotPassword');
+    if (forgotPasswordLink) {
+        forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('🔐 Please contact your administrator to reset your password.');
+        });
+    }
+
+    const supportLink = document.getElementById('supportLink');
+    if (supportLink) {
+        supportLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('📞 For technical support, please contact your system administrator.');
+        });
+    }
+});

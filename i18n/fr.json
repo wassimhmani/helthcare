@@ -21,6 +21,10 @@
   "button": {
     "signIn": "Se connecter au portail"
   },
+  "switcher": {
+    "en": "Anglais",
+    "fr": "Français"
+  },
   "footer": {
     "support": "Support technique"
   },
@@ -524,5 +528,7 @@
   "appointment_confirmed_successfully": "Rendez-vous confirmé avec succès !",
   "appointment_marked_completed": "Rendez-vous marqué comme terminé !",
   "appointment_cancelled_successfully": "Rendez-vous annulé avec succès !",
-  "status": "Statut"
+  "status": "Statut",
+  "export_credentials": "Exporter les identifiants",
+  "doctor": "Médecin"
 }

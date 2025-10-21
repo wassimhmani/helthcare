@@ -21,6 +21,10 @@
   "button": {
     "signIn": "Sign In to Portal"
   },
+  "switcher": {
+    "en": "English",
+    "fr": "French"
+  },
   "footer": {
     "support": "Technical Support"
   },
@@ -521,5 +525,7 @@
   "appointment_confirmed_successfully": "Appointment confirmed successfully!",
   "appointment_marked_completed": "Appointment marked as completed!",
   "appointment_cancelled_successfully": "Appointment cancelled successfully!",
-  "status": "Status"
+  "status": "Status",
+  "export_credentials": "Export Credentials",
+  "doctor": "Doctor"
 }
