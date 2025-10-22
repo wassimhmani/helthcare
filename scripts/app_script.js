@@ -5120,7 +5120,7 @@
                             ${getBillDescriptionOptionsHTML()}
                         </select>
                     </div>
-                    <div>
+                    <div style="display: none;">
                             <label class="form-label" for="itemQuantity${itemNumber}" data-translate="quantity">Quantity</label>
                             <input type="number" id="itemQuantity${itemNumber}" class="form-input" min="1" value="1" required onchange="calculateBillTotal()" oninput="calculateBillTotal()">
                     </div>
@@ -5158,8 +5158,18 @@
                 window.I18n.walkAndTranslate();
             }
             
+            // Ensure all quantity fields are set to 1
+            setAllQuantitiesToOne();
+            
             // Recalculate totals
             calculateBillTotal();
+        }
+        
+        function setAllQuantitiesToOne() {
+            const quantityInputs = document.querySelectorAll('input[id^="itemQuantity"]');
+            quantityInputs.forEach(input => {
+                input.value = 1;
+            });
         }
 
         function addBillItem() {
@@ -5174,6 +5184,9 @@
             if (window.I18n && window.I18n.walkAndTranslate) {
                 window.I18n.walkAndTranslate();
             }
+            
+            // Ensure all quantity fields are set to 1
+            setAllQuantitiesToOne();
 
             calculateBillTotal();
         }
@@ -6229,6 +6242,9 @@
             // Role-based UI
             let session = null;
             try { session = JSON.parse(localStorage.getItem('medconnect_session')); } catch { }
+            
+            // Define isDoctor variable for use in event listeners
+            const isDoctor = session && session.role === 'doctor';
             
             // Debug: Log session data
             console.log('Session data:', session);
