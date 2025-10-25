@@ -1717,29 +1717,8 @@
     <div class="p-4" style="margin-top: 4rem;">
         <div class="max-w-7xl mx-auto">
             <!-- Header -->
-            <div class="mb-6">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center">
-                        <svg class="h-12 md:h-14 w-auto" viewBox="0 0 520 80" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CERCINATECK - VOTRE PARTENAIRE POUR UNE GESTION OPTIMALE">
-                            
-                            <g transform="translate(0,0)">
-                                
-                                <path d="M28 10 L22 40 L40 40 Z" fill="#000000" stroke="#000000" stroke-width="0.8"/>
-                                <path d="M28 10 L26 40 L34 40 Z" fill="#000000" opacity="0.85"/>
-                               
-                                <path d="M12 50 Q22 44 28 50 Q34 44 44 50 Q34 56 28 50 Q22 56 12 50 Z" fill="#000000" stroke="#000000" stroke-width="0.6"/>
-                                <path d="M6 60 Q22 54 28 60 Q34 54 50 60 Q34 66 28 60 Q22 66 6 60 Z" fill="#000000" stroke="#000000" stroke-width="0.6"/>
-                            </g>
-                            
-                            <line x1="70" y1="8" x2="70" y2="72" stroke="#000000" stroke-width="3"/>
-                            
-                            <g transform="translate(90,20)">
-                                <text x="0" y="28" font-family="Segoe UI, Roboto, Arial, sans-serif" font-size="34" font-weight="700" fill="#000000">CERCINATECK</text>
-                                <text x="0" y="52" font-family="Segoe UI, Roboto, Arial, sans-serif" font-size="14" font-weight="600" fill="#000000">VOTRE PARTENAIRE POUR UNE GESTION OPTIMALE</text>
-                            </g>
-                        </svg>
-                    </div>
-
+            <div class="mb-6 mt-8">
+                <div class="flex items-center justify-end mb-4">
                     <div class="flex items-center gap-2">
                         <button class="btn btn-outline" onclick="goToPreviousDay()">
                             <svg class="icon mr-2" viewBox="0 0 24 24">
@@ -1763,7 +1742,44 @@
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <!-- Calendar Sidebar -->
                 <div class="lg:col-span-1">
-                    <div class="card p-4">
+                    <!-- Cabinet Cash Card -->
+                    <div id="cabinetCashDisplay" class="card p-6">
+                                                <div class="flex items-center justify-between">
+                            <div class="flex flex-col">
+                                <div class="text-sm text-gray-500 mb-1" data-translate="cabinet_cash">Cabinet Cash</div>
+                            <div class="text-2xl font-bold text-blue-600 mb-1">0.00 TND</div>
+                                <div class="text-sm text-gray-400" data-translate="bills_today">bills today</div>
+                            </div>
+                            <svg class="w-12 h-12 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="card p-6 mt-4">
+                        <h3 class="text-lg font-semibold mb-4" data-translate="today_summary">Today's Summary</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span data-translate="total_appointments">Total Appointments</span>
+                                <span id="totalAppointments" class="font-semibold">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span data-translate="confirmed">Confirmed</span>
+                                <span id="confirmedAppointments" class="font-semibold text-green-600">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span data-translate="completed">Completed</span>
+                                <span id="pendingAppointments" class="font-semibold text-blue-600">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span data-translate="cancelled">Cancelled</span>
+                                <span id="cancelledAppointments" class="font-semibold text-red-600">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card p-4 mt-4">
                         <div class="flex items-center gap-2 mb-4">
                             <svg class="icon-lg" viewBox="0 0 24 24">
                                 <path d="M8 2v4" />
@@ -1789,29 +1805,6 @@
                             </div>
                             <div class="calendar-grid" id="calendarGrid">
                                 <!-- Calendar days will be generated by JavaScript -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Quick Stats -->
-                    <div class="card p-6 mt-4">
-                        <h3 class="text-lg font-semibold mb-4" data-translate="today_summary">Today's Summary</h3>
-                        <div class="space-y-2">
-                            <div class="flex justify-between">
-                                <span data-translate="total_appointments">Total Appointments</span>
-                                <span id="totalAppointments" class="font-semibold">0</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span data-translate="confirmed">Confirmed</span>
-                                <span id="confirmedAppointments" class="font-semibold text-green-600">0</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span data-translate="completed">Completed</span>
-                                <span id="pendingAppointments" class="font-semibold text-blue-600">0</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span data-translate="cancelled">Cancelled</span>
-                                <span id="cancelledAppointments" class="font-semibold text-red-600">0</span>
                             </div>
                         </div>
                     </div>

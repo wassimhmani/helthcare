@@ -530,5 +530,7 @@
   "appointment_cancelled_successfully": "Rendez-vous annulé avec succès !",
   "status": "Statut",
   "export_credentials": "Exporter les identifiants",
-  "doctor": "Médecin"
+  "doctor": "Médecin",
+  "cabinet_cash": "Trésorerie du Cabinet",
+  "bills_today": "factures aujourd'hui"
 }

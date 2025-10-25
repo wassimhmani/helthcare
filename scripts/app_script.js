@@ -1053,6 +1053,12 @@
             console.log('Total appointments after adding:', storedAppointments.length);
             console.log('All stored appointments:', storedAppointments);
             console.log('=== APPOINTMENT ADDED ===');
+            
+            // Update cabinet cash display after adding appointment
+            if (typeof updateCabinetCashDisplay === 'function') {
+                updateCabinetCashDisplay();
+            }
+            
             return newAppointment;
         };
 
@@ -1315,23 +1321,6 @@
                         </svg>
                         <h3 class="text-lg font-semibold text-gray-600 mb-2">${window.t ? window.t('no_appointments_today', 'No Appointments Scheduled') : 'No Appointments Scheduled'}</h3>
                         <p class="text-gray-500 mb-4">${window.t ? window.t('no_appointments_for_date', 'There are no appointments scheduled for') : 'There are no appointments scheduled for'} ${formatDate(selectedDate)}.</p>
-                        <div class="flex gap-2 justify-center">
-                        <button class="btn btn-primary" onclick="showAddAppointmentModal()">
-                            <svg class="icon-sm mr-2" viewBox="0 0 24 24">
-                                <path d="M12 4v16m8-8H4"/>
-                            </svg>
-                                ${window.t ? window.t('add_first_appointment', 'Add First Appointment') : 'Add First Appointment'}
-                            </button>
-                            <button class="btn btn-outline" onclick="showPatientManagement()">
-                                <svg class="icon-sm mr-2" viewBox="0 0 24 24">
-                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                                    <circle cx="9" cy="7" r="4" />
-                                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                                </svg>
-                                ${window.t ? window.t('add_new_patient', 'Add New Patient') : 'Add New Patient'}
-                        </button>
-                        </div>
                     </div>
                 `;
             } else {
@@ -1520,6 +1509,63 @@
 
         // Expose renderCalendar to global scope for language switching
         window.renderCalendar = renderCalendar;
+
+        // Function to calculate today's cabinet cash from bills
+        const calculateTodayCabinetCash = () => {
+            try {
+                const bills = JSON.parse(localStorage.getItem('healthcareBills') || '[]');
+                const today = new Date();
+                const todayStr = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+                
+                const todayBills = bills.filter(bill => {
+                    const billDate = new Date(bill.createdAt || bill.date);
+                    const billDateStr = billDate.toISOString().split('T')[0];
+                    return billDateStr === todayStr;
+                });
+                
+                const todayTotal = todayBills.reduce((sum, bill) => sum + (bill.total || 0), 0);
+                const billCount = todayBills.length;
+                
+                return {
+                    total: todayTotal,
+                    count: billCount,
+                    bills: todayBills
+                };
+            } catch (error) {
+                console.error('Error calculating today\'s cabinet cash:', error);
+                return { total: 0, count: 0, bills: [] };
+            }
+        };
+
+        // Function to update cabinet cash display
+        const updateCabinetCashDisplay = () => {
+            const cashData = calculateTodayCabinetCash();
+            const cashDisplay = document.getElementById('cabinetCashDisplay');
+            
+            if (cashDisplay) {
+                cashDisplay.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex flex-col">
+                            <div class="text-sm text-gray-500 mb-1" data-translate="cabinet_cash">Cabinet Cash</div>
+                            <div class="text-2xl font-bold text-blue-600 mb-1">${cashData.total.toFixed(2)} TND</div>
+                            <div class="text-sm text-gray-400">${cashData.count} <span data-translate="bills_today">bills today</span></div>
+                        </div>
+                        <svg class="w-12 h-12 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                `;
+                
+                // Apply translations to the newly added content
+                if (typeof applyTranslations === 'function') {
+                    applyTranslations(cashDisplay);
+                }
+            }
+        };
+
+        // Expose functions to global scope
+        window.calculateTodayCabinetCash = calculateTodayCabinetCash;
+        window.updateCabinetCashDisplay = updateCabinetCashDisplay;
 
         // Navigation functions
         const goToPreviousDay = () => {
@@ -5312,6 +5358,11 @@
             storedBills.push(newBill);
             saveStoredBills();
 
+            // Update cabinet cash display after creating bill
+            if (typeof updateCabinetCashDisplay === 'function') {
+                updateCabinetCashDisplay();
+            }
+
             return newBill;
         }
 
@@ -6226,6 +6277,10 @@
             renderCalendar();
             renderDailyAgenda();
             loadDoctorDashboard();
+            // Update cabinet cash display
+            if (typeof updateCabinetCashDisplay === 'function') {
+                updateCabinetCashDisplay();
+            }
             };
             
             // If i18n is available, wait for it to initialize

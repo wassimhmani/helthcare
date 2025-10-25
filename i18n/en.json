@@ -527,5 +527,7 @@
   "appointment_cancelled_successfully": "Appointment cancelled successfully!",
   "status": "Status",
   "export_credentials": "Export Credentials",
-  "doctor": "Doctor"
+  "doctor": "Doctor",
+  "cabinet_cash": "Cabinet Cash",
+  "bills_today": "bills today"
 }
