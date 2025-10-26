@@ -529,5 +529,16 @@
   "export_credentials": "Export Credentials",
   "doctor": "Doctor",
   "cabinet_cash": "Cabinet Cash",
-  "bills_today": "bills today"
+  "bills_today": "bills today",
+  "cash_entry": "Cash Entry",
+  "checkout": "Checkout",
+  "expenses": "Expenses",
+  "add_expense": "Add Expense",
+  "view_expenses": "View Expenses",
+  "amount": "Amount",
+  "expense_added": "Expense added successfully!",
+  "expense_updated": "Expense updated successfully!",
+  "expense_deleted": "Expense deleted successfully!",
+  "confirm_delete_expense": "Are you sure you want to delete this expense?",
+  "no_expenses_found": "No expenses found."
 }

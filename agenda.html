@@ -122,6 +122,8 @@
                         onclick="showDoctorDashboard()" data-translate="consultation" data-permission="view_consultations">Consultation</a>
                     <a href="#" class="nav-link" id="nav-billing" onclick="showBillingOrReadyBills()" 
                         data-translate="billing" data-permission="view_bills">Billing</a>
+                    <a href="#" class="nav-link" id="nav-expenses" onclick="showExpensesModal()" 
+                        data-translate="expenses">Expenses</a>
                     <a href="#" class="nav-link" id="nav-reports" onclick="showReportsModal()" 
                         data-translate="reports" data-permission="view_reports">Reports</a>
                     <a href="#" class="nav-link" id="nav-settings" onclick="showSettingsMenu()" 
@@ -163,6 +165,8 @@
                     onclick="showDoctorDashboard()" data-translate="consultation" data-permission="view_consultations">Consultation</a>
                 <a href="#" class="mobile-nav-link" id="nav-billing-mobile" onclick="showBillingOrReadyBills()" 
                     data-translate="billing" data-permission="view_bills">Billing</a>
+                <a href="#" class="mobile-nav-link" id="nav-expenses-mobile" onclick="showExpensesModal()" 
+                    data-translate="expenses">Expenses</a>
                 <a href="#" class="mobile-nav-link" id="nav-reports-mobile" onclick="showReportsModal()" 
                     data-translate="reports" data-permission="view_reports">Reports</a>
                 <a href="#" class="mobile-nav-link" id="nav-settings-mobile" onclick="showSettingsMenu()"
@@ -1744,7 +1748,7 @@
                 <div class="lg:col-span-1">
                     <!-- Cabinet Cash Card -->
                     <div id="cabinetCashDisplay" class="card p-6">
-                                                <div class="flex items-center justify-between">
+                                                <div class="flex items-center justify-between mb-3">
                             <div class="flex flex-col">
                                 <div class="text-sm text-gray-500 mb-1" data-translate="cabinet_cash">Cabinet Cash</div>
                             <div class="text-2xl font-bold text-blue-600 mb-1">0.00 TND</div>
@@ -1753,6 +1757,18 @@
                             <svg class="w-12 h-12 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
                             </svg>
+                        </div>
+                        <div class="flex justify-between items-center mt-3 pt-3 border-t border-gray-200">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm text-gray-600" data-translate="cash_entry">Cash Entry</span>
+                            </div>
+                            <div class="font-semibold text-gray-800">0.00 TND</div>
+                        </div>
+                        <div class="flex justify-between items-center mt-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm text-gray-600" data-translate="expenses">Expenses</span>
+                            </div>
+                            <div class="font-semibold text-gray-800">0.00 TND</div>
                         </div>
                     </div>
 
@@ -2109,6 +2125,51 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expenses Modal -->
+    <div class="modal" id="expensesModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 class="modal-title" data-translate="expenses">Expenses</h2>
+                <button class="modal-close" onclick="closeExpensesModal()">&times;</button>
+            </div>
+
+            <div class="flex gap-4 mb-6">
+                <button id="addExpenseTab" class="btn btn-primary" onclick="switchExpenseTab('add')" data-translate="add_expense">Add Expense</button>
+                <button id="viewExpensesTab" class="btn btn-secondary" onclick="switchExpenseTab('view')" data-translate="view_expenses">View Expenses</button>
+            </div>
+
+            <!-- Add Expense Form -->
+            <div id="addExpenseContent" class="expense-tab-content">
+                <form id="expenseForm">
+                    <div class="form-group">
+                        <label class="form-label" for="expenseDescription" data-translate="description">Description *</label>
+                        <textarea id="expenseDescription" class="form-input form-textarea" rows="3" placeholder="Enter expense description..." required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="expenseAmount" data-translate="amount">Amount (TND) *</label>
+                        <input type="number" id="expenseAmount" class="form-input" step="0.01" min="0" placeholder="0.00" required>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeExpensesModal()" data-translate="cancel">Cancel</button>
+                        <button type="submit" class="btn btn-primary" data-translate="add_expense">Add Expense</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- View Expenses List -->
+            <div id="viewExpensesContent" class="expense-tab-content" style="display: none;">
+                <div class="mb-4">
+                    <input type="text" id="expenseSearch" class="form-input" placeholder="Search expenses..." onkeyup="filterExpenses()">
+                </div>
+                <div class="expense-list" id="expenseList">
+                    <!-- Expenses will be loaded here -->
                 </div>
             </div>
         </div>

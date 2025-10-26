@@ -1540,19 +1540,33 @@
         // Function to update cabinet cash display
         const updateCabinetCashDisplay = () => {
             const cashData = calculateTodayCabinetCash();
+            const expensesData = calculateTodayExpenses();
+            const netCash = cashData.total - expensesData;
             const cashDisplay = document.getElementById('cabinetCashDisplay');
             
             if (cashDisplay) {
                 cashDisplay.innerHTML = `
-                    <div class="flex items-center justify-between">
+                    <div class="flex items-center justify-between mb-3">
                         <div class="flex flex-col">
                             <div class="text-sm text-gray-500 mb-1" data-translate="cabinet_cash">Cabinet Cash</div>
-                            <div class="text-2xl font-bold text-blue-600 mb-1">${cashData.total.toFixed(2)} TND</div>
+                            <div class="text-2xl font-bold text-blue-600 mb-1">${netCash.toFixed(2)} TND</div>
                             <div class="text-sm text-gray-400">${cashData.count} <span data-translate="bills_today">bills today</span></div>
                         </div>
                         <svg class="w-12 h-12 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
                         </svg>
+                    </div>
+                    <div class="flex justify-between items-center mt-3 pt-3 border-t border-gray-200">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-gray-600" data-translate="cash_entry">Cash Entry</span>
+                        </div>
+                        <div class="font-semibold text-gray-800">${cashData.total.toFixed(2)} TND</div>
+                    </div>
+                    <div class="flex justify-between items-center mt-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-gray-600" data-translate="expenses">Expenses</span>
+                        </div>
+                        <div class="font-semibold text-gray-800">${expensesData.toFixed(2)} TND</div>
                     </div>
                 `;
                 
@@ -2031,12 +2045,12 @@
             // Scroll to success message
             successDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-            // Remove success message after 5 seconds
+            // Remove success message after 1 second
             setTimeout(() => {
                 if (successDiv.parentElement) {
                     successDiv.remove();
                 }
-            }, 5000);
+            }, 1000);
         }
 
         // Patient Management Functions
@@ -7785,3 +7799,237 @@
                 window.location.href = 'loginForm.html';
             }
         };
+
+        // ========================================
+        // Expenses Management Functions
+        // ========================================
+
+        // Initialize expenses array
+        let storedExpenses = [];
+        let editingExpenseId = null;
+
+        // Load expenses from localStorage
+        function loadExpenses() {
+            try {
+                storedExpenses = JSON.parse(localStorage.getItem('healthcareExpenses') || '[]');
+            } catch (error) {
+                console.error('Error loading expenses:', error);
+                storedExpenses = [];
+            }
+        }
+
+        // Save expenses to localStorage
+        function saveExpenses() {
+            localStorage.setItem('healthcareExpenses', JSON.stringify(storedExpenses));
+        }
+
+        // Calculate total expenses for today
+        function calculateTodayExpenses() {
+            loadExpenses();
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+            
+            const todayExpenses = storedExpenses.filter(expense => {
+                const expenseDate = new Date(expense.date).toISOString().split('T')[0];
+                return expenseDate === todayStr;
+            });
+            
+            return todayExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+        }
+
+        // Update expenses display in cabinet cash card
+        function updateExpensesDisplay() {
+            const totalExpenses = calculateTodayExpenses();
+            const expensesDisplay = document.querySelector('#cabinetCashDisplay .font-semibold.text-gray-800');
+            const allExpenseDisplays = document.querySelectorAll('#cabinetCashDisplay .font-semibold.text-gray-800');
+            
+            if (allExpenseDisplays.length >= 2) {
+                allExpenseDisplays[1].textContent = totalExpenses.toFixed(2) + ' TND';
+            }
+        }
+
+        // Show expenses modal
+        window.showExpensesModal = function() {
+            const modal = document.getElementById('expensesModal');
+            if (modal) {
+                loadExpenses();
+                switchExpenseTab('add');
+                modal.classList.add('active');
+                updateModalTranslations();
+            }
+        };
+
+        // Close expenses modal
+        window.closeExpensesModal = function() {
+            const modal = document.getElementById('expensesModal');
+            if (modal) {
+                modal.classList.remove('active');
+                // Reset form
+                const form = document.getElementById('expenseForm');
+                if (form) form.reset();
+                editingExpenseId = null;
+                // Update button text
+                const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
+                if (submitBtn) submitBtn.textContent = window.t ? window.t('add_expense', 'Add Expense') : 'Add Expense';
+            }
+        };
+
+        // Switch between add and view tabs
+        window.switchExpenseTab = function(tab) {
+            const addContent = document.getElementById('addExpenseContent');
+            const viewContent = document.getElementById('viewExpensesContent');
+            const addTab = document.getElementById('addExpenseTab');
+            const viewTab = document.getElementById('viewExpensesTab');
+
+            if (tab === 'add') {
+                addContent.style.display = 'block';
+                viewContent.style.display = 'none';
+                addTab.className = 'btn btn-primary';
+                viewTab.className = 'btn btn-secondary';
+            } else {
+                addContent.style.display = 'none';
+                viewContent.style.display = 'block';
+                addTab.className = 'btn btn-secondary';
+                viewTab.className = 'btn btn-primary';
+                loadExpensesList();
+            }
+        };
+
+        // Load expenses list
+        function loadExpensesList() {
+            loadExpenses();
+            const expenseList = document.getElementById('expenseList');
+            
+            if (!expenseList) return;
+            
+            if (storedExpenses.length === 0) {
+                expenseList.innerHTML = '<p class="text-gray-500 text-center py-8" data-translate="no_expenses_found">No expenses found.</p>';
+                return;
+            }
+            
+            // Sort by date (newest first)
+            const sortedExpenses = [...storedExpenses].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            expenseList.innerHTML = sortedExpenses.map(expense => `
+                <div class="card p-4 mb-3 expense-item" data-expense-id="${expense.id}">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <div class="font-semibold text-gray-900 mb-1">${expense.description}</div>
+                            <div class="text-sm text-gray-600">${new Date(expense.date).toLocaleDateString()}</div>
+                        </div>
+                        <div class="text-right ml-4">
+                            <div class="text-lg font-bold text-gray-900">${expense.amount.toFixed(2)} TND</div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 mt-3">
+                        <button class="btn btn-sm btn-outline" onclick="editExpense('${expense.id}')" data-translate="edit">${window.t ? window.t('edit', 'Edit') : 'Edit'}</button>
+                        <button class="btn btn-sm btn-outline text-red-600" onclick="deleteExpense('${expense.id}')" data-translate="delete">${window.t ? window.t('delete', 'Delete') : 'Delete'}</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Edit expense
+        window.editExpense = function(expenseId) {
+            const expense = storedExpenses.find(e => e.id === expenseId);
+            if (!expense) return;
+            
+            editingExpenseId = expenseId;
+            
+            // Fill form
+            document.getElementById('expenseDescription').value = expense.description;
+            document.getElementById('expenseAmount').value = expense.amount;
+            
+            // Switch to add tab and update button
+            switchExpenseTab('add');
+            const submitBtn = document.querySelector('#expenseForm button[type="submit"]');
+            if (submitBtn) submitBtn.textContent = window.t ? window.t('save_changes', 'Save Changes') : 'Save Changes';
+        };
+
+        // Delete expense
+        window.deleteExpense = function(expenseId) {
+            if (!showTranslatedConfirm('confirm_delete_expense')) return;
+            
+            storedExpenses = storedExpenses.filter(e => e.id !== expenseId);
+            saveExpenses();
+            loadExpensesList();
+            updateExpensesDisplay();
+            updateCabinetCashDisplay();
+            
+            showTranslatedAlert('expense_deleted');
+        };
+
+        // Filter expenses
+        window.filterExpenses = function() {
+            const searchTerm = document.getElementById('expenseSearch').value.toLowerCase();
+            const expenseItems = document.querySelectorAll('.expense-item');
+            
+            expenseItems.forEach(item => {
+                const description = item.querySelector('.font-semibold').textContent.toLowerCase();
+                const matches = description.includes(searchTerm);
+                item.style.display = matches ? 'block' : 'none';
+            });
+        };
+
+        // Handle expense form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const expenseForm = document.getElementById('expenseForm');
+            if (expenseForm) {
+                expenseForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const description = document.getElementById('expenseDescription').value.trim();
+                    const amount = parseFloat(document.getElementById('expenseAmount').value);
+                    
+                    if (!description || !amount || amount <= 0) {
+                        alert('Please fill in all fields with valid values.');
+                        return;
+                    }
+                    
+                    loadExpenses();
+                    
+                    if (editingExpenseId) {
+                        // Update existing expense
+                        const index = storedExpenses.findIndex(e => e.id === editingExpenseId);
+                        if (index !== -1) {
+                            storedExpenses[index].description = description;
+                            storedExpenses[index].amount = amount;
+                            storedExpenses[index].updatedAt = new Date().toISOString();
+                            saveExpenses();
+                            showTranslatedAlert('expense_updated');
+                        }
+                        editingExpenseId = null;
+                    } else {
+                        // Add new expense
+                        const newExpense = {
+                            id: 'EXP-' + Date.now(),
+                            description: description,
+                            amount: amount,
+                            date: new Date().toISOString(),
+                            createdAt: new Date().toISOString()
+                        };
+                        storedExpenses.push(newExpense);
+                        saveExpenses();
+                        showTranslatedAlert('expense_added');
+                    }
+                    
+                    // Reset form
+                    expenseForm.reset();
+                    const submitBtn = expenseForm.querySelector('button[type="submit"]');
+                    if (submitBtn) submitBtn.textContent = window.t ? window.t('add_expense', 'Add Expense') : 'Add Expense';
+                    
+                    // Reload expenses list
+                    loadExpensesList();
+                    
+                    // Update displays
+                    updateExpensesDisplay();
+                    updateCabinetCashDisplay();
+                    
+                    // Switch back to view tab
+                    switchExpenseTab('view');
+                });
+            }
+            
+            // Initialize expenses on page load
+            loadExpenses();
+        });

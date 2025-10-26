@@ -532,5 +532,16 @@
   "export_credentials": "Exporter les identifiants",
   "doctor": "Médecin",
   "cabinet_cash": "Trésorerie du Cabinet",
-  "bills_today": "factures aujourd'hui"
+  "bills_today": "factures aujourd'hui",
+  "cash_entry": "Entrée de Caisse",
+  "checkout": "Encaissement",
+  "expenses": "Dépenses",
+  "add_expense": "Ajouter une Dépense",
+  "view_expenses": "Voir les Dépenses",
+  "amount": "Montant",
+  "expense_added": "Dépense ajoutée avec succès !",
+  "expense_updated": "Dépense mise à jour avec succès !",
+  "expense_deleted": "Dépense supprimée avec succès !",
+  "confirm_delete_expense": "Êtes-vous sûr de vouloir supprimer cette dépense ?",
+  "no_expenses_found": "Aucune dépense trouvée."
 }
