@@ -1041,7 +1041,7 @@
                 clientPhone: appointmentData.patientPhone,
                 clientEmail: appointmentData.patientEmail || '',
                 type: appointmentData.appointmentType,
-                status: 'confirmed',
+                status: 'pre-validation',
                 notes: appointmentData.appointmentNotes || '',
                 doctor: appointmentData.doctorName,
                 date: formattedDate
@@ -1059,7 +1059,64 @@
                 updateCabinetCashDisplay();
             }
             
+            // Update today's summary after adding appointment
+            if (typeof updateTodaySummary === 'function') {
+                updateTodaySummary();
+            }
+            
+            // Update waiting room after adding appointment
+            if (typeof updateWaitingRoom === 'function') {
+                updateWaitingRoom();
+            }
+            
             return newAppointment;
+        };
+
+        // Function to get consultations count for a specific date
+        const getConsultationsForDate = (date) => {
+            const dateStr = formatDateForStorage(date);
+            const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+            
+            const consultationsForDate = consultations.filter(consultation => {
+                const consultationDate = new Date(consultation.createdAt);
+                const consultationDateStr = consultationDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+                return consultationDateStr === dateStr;
+            });
+            
+            return consultationsForDate.length;
+        };
+
+        // Function to get cash entry (bills total) for a specific date
+        const getCashEntryForDate = (date) => {
+            const dateStr = formatDateForStorage(date);
+            const bills = JSON.parse(localStorage.getItem('healthcareBills') || '[]');
+            
+            const billsForDate = bills.filter(bill => bill.billDate === dateStr);
+            const totalCashEntry = billsForDate.reduce((sum, bill) => sum + (parseFloat(bill.total) || 0), 0);
+            
+            return totalCashEntry;
+        };
+
+        // Function to get expenses for a specific date
+        const getExpensesForDate = (date) => {
+            const dateStr = formatDateForStorage(date);
+            const expenses = JSON.parse(localStorage.getItem('healthcareExpenses') || '[]');
+            
+            const expensesForDate = expenses.filter(expense => {
+                // Handle both date formats (ISO string and date string)
+                const expenseDate = expense.date ? expense.date.split('T')[0] : null;
+                return expenseDate === dateStr;
+            });
+            const totalExpenses = expensesForDate.reduce((sum, expense) => sum + (parseFloat(expense.amount) || 0), 0);
+            
+            return totalExpenses;
+        };
+
+        // Function to get net cabinet cash for a specific date
+        const getCabinetCashForDate = (date) => {
+            const cashEntry = getCashEntryForDate(date);
+            const expenses = getExpensesForDate(date);
+            return cashEntry - expenses;
         };
 
         // Get appointments for a specific date
@@ -1107,8 +1164,8 @@
 
         const getStatusColor = (status) => {
             switch (status) {
-                case 'confirmed': return 'bg-green-100 text-green-800';
-                case 'completed': return 'bg-blue-100 text-blue-800';
+                case 'pre-validation': return 'bg-orange-100 text-orange-800';
+                case 'validated': return 'bg-green-100 text-green-800';
                 case 'cancelled': return 'bg-red-100 text-red-800';
                 default: return 'bg-gray-100 text-gray-800';
             }
@@ -1129,14 +1186,14 @@
             const actions = [];
 
             switch (appointment.status) {
-                case 'confirmed':
+                case 'pre-validation':
                     actions.push(`
-                        <button onclick="updateAppointmentStatus('${appointment.id}', 'completed')" 
-                                class="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white">
+                        <button onclick="updateAppointmentStatus('${appointment.id}', 'validated')" 
+                                class="btn btn-sm bg-green-600 hover:bg-green-700 text-white">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
-                            ${window.t ? window.t('complete', 'Complete') : 'Complete'}
+                            ${window.t ? window.t('confirm', 'Confirm') : 'Confirm'}
                         </button>
                     `);
                     actions.push(`
@@ -1150,16 +1207,20 @@
                     `);
                     break;
 
-                case 'completed':
+                case 'validated':
+
                     actions.push(`
-                        <span class="text-sm text-green-600 font-medium">
-                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        <button onclick="updateAppointmentStatus('${appointment.id}', 'cancelled')" 
+                                class="btn btn-sm bg-red-600 hover:bg-red-700 text-white">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
-                            ${window.t ? window.t('completed', 'Completed') : 'Completed'}
-                        </span>
+                            ${window.t ? window.t('cancel', 'Cancel') : 'Cancel'}
+                        </button>
                     `);
                     break;
+
+
 
                 case 'cancelled':
                     actions.push(`
@@ -1184,6 +1245,48 @@
                 slots.push(`${hour}:30`);
             }
             return slots;
+        };
+
+        // Return a set of unavailable times for a given date (exclude cancelled)
+        const getUnavailableTimesForDate = (dateStr) => {
+            if (!dateStr) return new Set();
+            const unavailable = new Set(
+                (storedAppointments || [])
+                    .filter(apt => apt.date === dateStr && apt.status !== 'cancelled')
+                    .map(apt => apt.time)
+            );
+            return unavailable;
+        };
+
+        // Populate the time select with only available slots for the selected date
+        const populateAvailableTimes = () => {
+            const dateInput = document.getElementById('appointmentDate');
+            const timeSelect = document.getElementById('appointmentTime');
+            if (!dateInput || !timeSelect) return;
+
+            // Compute selected date string
+            const selectedDateStr = dateInput.value || (selectedDate ? formatDateForStorage(selectedDate) : '');
+
+            // Generate options
+            const allSlots = generateTimeSlots();
+            const unavailable = getUnavailableTimesForDate(selectedDateStr);
+
+            // Rebuild options list
+            timeSelect.innerHTML = '';
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = window.t ? window.t('select_time', 'Select time') : 'Select time';
+            timeSelect.appendChild(placeholder);
+
+            allSlots
+                .filter(slot => !unavailable.has(slot))
+                .forEach(slot => {
+                    const opt = document.createElement('option');
+                    opt.value = slot;
+                    // Display in HH:MM (24h) to match agenda; keep as-is
+                    opt.textContent = slot;
+                    timeSelect.appendChild(opt);
+                });
         };
 
         // Create appointment card HTML
@@ -1268,9 +1371,13 @@
             const timeSlots = generateTimeSlots();
 
             const appointmentCount = appointments.length;
-            const confirmedCount = appointments.filter(apt => apt.status === 'confirmed').length;
-            const completedCount = appointments.filter(apt => apt.status === 'completed').length;
+            const preValidationCount = appointments.filter(apt => apt.status === 'pre-validation').length;
+            const confirmedCount = appointments.filter(apt => apt.status === 'validated').length;
             const cancelledCount = appointments.filter(apt => apt.status === 'cancelled').length;
+            const consultationsCount = getConsultationsForDate(selectedDate);
+            const cashEntryAmount = getCashEntryForDate(selectedDate);
+            const expensesAmount = getExpensesForDate(selectedDate);
+            const cabinetCashAmount = getCabinetCashForDate(selectedDate);
 
             let agendaHTML = `
                 <div class="space-y-4">
@@ -1303,11 +1410,39 @@
                             </button>
                             </div>
                         </div>
-                        <div class="flex gap-2 mt-2">
-                            <span class="badge badge-secondary">${appointmentCount} ${window.t ? window.t('total', 'Total') : 'Total'}</span>
-                            <span class="badge bg-green-100 text-green-800">${confirmedCount} ${window.t ? window.t('confirmed', 'Confirmed') : 'Confirmed'}</span>
-                            <span class="badge bg-blue-100 text-blue-800">${completedCount} ${window.t ? window.t('completed', 'Completed') : 'Completed'}</span>
-                            <span class="badge bg-red-100 text-red-800">${cancelledCount} ${window.t ? window.t('cancelled', 'Cancelled') : 'Cancelled'}</span>
+                        <div class="flex gap-2 mt-2 flex-wrap">
+                            <span class="badge badge-secondary text-sm px-3 py-2 flex flex-col items-center rounded-none">
+                                <span class="text-xs">${window.t ? window.t('total', 'Total') : 'Total'}</span>
+                                <span class="font-semibold">${appointmentCount}</span>
+                            </span>
+                            <span class="badge bg-orange-100 text-orange-800 text-sm px-3 py-2 flex flex-col items-center rounded-none">
+                                <span class="text-xs">${window.t ? window.t('pre_validation', 'Pre-validation') : 'Pre-validation'}</span>
+                                <span class="font-semibold">${preValidationCount}</span>
+                            </span>
+                            <span class="badge bg-green-100 text-green-800 text-sm px-3 py-2 flex flex-col items-center rounded-none">
+                                <span class="text-xs">${window.t ? window.t('validated', 'Validated') : 'Validated'}</span>
+                                <span class="font-semibold">${confirmedCount}</span>
+                            </span>
+                            <span class="badge bg-red-100 text-red-800 text-sm px-3 py-2 flex flex-col items-center rounded-none">
+                                <span class="text-xs">${window.t ? window.t('cancelled', 'Cancelled') : 'Cancelled'}</span>
+                                <span class="font-semibold">${cancelledCount}</span>
+                            </span>
+                            <span class="badge bg-purple-100 text-purple-800 text-sm px-3 py-2 flex flex-col items-center rounded-none">
+                                <span class="text-xs">${window.t ? window.t('consultations_done', 'Consultations Done') : 'Consultations Done'}</span>
+                                <span class="font-semibold">${consultationsCount}</span>
+                            </span>
+                            <span class="badge bg-blue-100 text-blue-800 text-sm px-3 py-2 flex flex-col items-center rounded-none">
+                                <span class="text-xs">${window.t ? window.t('cash_entry', 'Cash Entry') : 'Cash Entry'}</span>
+                                <span class="font-semibold">${cashEntryAmount.toFixed(2)} TND</span>
+                            </span>
+                            <span class="badge bg-gray-100 text-gray-800 text-sm px-3 py-2 flex flex-col items-center rounded-none">
+                                <span class="text-xs">${window.t ? window.t('expenses', 'Expenses') : 'Expenses'}</span>
+                                <span class="font-semibold">${expensesAmount.toFixed(2)} TND</span>
+                            </span>
+                            <span class="badge bg-indigo-100 text-indigo-800 text-sm px-3 py-2 flex flex-col items-center rounded-none">
+                                <span class="text-xs">${window.t ? window.t('cabinet_cash', 'Cabinet Cash') : 'Cabinet Cash'}</span>
+                                <span class="font-semibold">${cabinetCashAmount.toFixed(2)} TND</span>
+                            </span>
                         </div>
                     </div>
             `;
@@ -1375,17 +1510,86 @@
                     if (window.__currentTimeInterval) clearInterval(window.__currentTimeInterval);
                 }
             } catch {}
+        };
+
+        // Function to update today's summary with today's data only
+        const updateTodaySummary = () => {
+            const today = new Date();
+            const todayStr = formatDateForStorage(today);
+            
+            // Get all appointments for today only
+            const todayAppointments = storedAppointments.filter(apt => apt.date === todayStr);
+            
+            const appointmentCount = todayAppointments.length;
+            const preValidationCount = todayAppointments.filter(apt => apt.status === 'pre-validation').length;
+            const confirmedCount = todayAppointments.filter(apt => apt.status === 'validated').length;
+            const cancelledCount = todayAppointments.filter(apt => apt.status === 'cancelled').length;
 
             // Update stats
             document.getElementById('totalAppointments').textContent = appointmentCount;
+            document.getElementById('preValidationAppointments').textContent = preValidationCount;
             document.getElementById('confirmedAppointments').textContent = confirmedCount;
-            document.getElementById('pendingAppointments').textContent = completedCount;
             const cancelledEl = document.getElementById('cancelledAppointments');
             if (cancelledEl) cancelledEl.textContent = cancelledCount;
         };
 
-        // Expose renderDailyAgenda to global scope for language switching
-        window.renderDailyAgenda = renderDailyAgenda;
+        // Expose updateTodaySummary to global scope
+        window.updateTodaySummary = updateTodaySummary;
+
+        // Function to update waiting room with today's validated appointments
+        const updateWaitingRoom = () => {
+            const today = new Date();
+            const todayStr = formatDateForStorage(today);
+            
+            // Get all validated appointments for today only
+            const waitingAppointments = storedAppointments.filter(apt => 
+                apt.date === todayStr && apt.status === 'validated'
+            );
+            
+            const waitingRoomCountEl = document.getElementById('waitingRoomCount');
+            const waitingRoomListEl = document.getElementById('waitingRoomList');
+            
+            if (waitingRoomCountEl) {
+                waitingRoomCountEl.textContent = waitingAppointments.length;
+            }
+            
+            if (waitingRoomListEl) {
+                if (waitingAppointments.length === 0) {
+                    waitingRoomListEl.innerHTML = `
+                        <p class="text-gray-500 text-center py-4" data-translate="no_patients_waiting">
+                            ${window.t ? window.t('no_patients_waiting', 'No patients waiting') : 'No patients waiting'}
+                        </p>
+                    `;
+                } else {
+                    waitingRoomListEl.innerHTML = waitingAppointments.map(appointment => `
+                        <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">${appointment.clientName}</div>
+                                    <div class="text-sm text-gray-500">${appointment.time}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="badge bg-green-100 text-green-800 text-xs">${window.t ? window.t('validated', 'Validated') : 'Validated'}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+                
+                // Apply translations to the newly added content
+                if (typeof applyTranslations === 'function') {
+                    applyTranslations(waitingRoomListEl);
+                }
+            }
+        };
+
+        // Expose updateWaitingRoom to global scope
+        window.updateWaitingRoom = updateWaitingRoom;
 
         function isSameDay(a, b) {
             return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
@@ -1515,12 +1719,12 @@
             try {
                 const bills = JSON.parse(localStorage.getItem('healthcareBills') || '[]');
                 const today = new Date();
-                const todayStr = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+                // Use local date string format (YYYY-MM-DD) instead of UTC
+                const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
                 
                 const todayBills = bills.filter(bill => {
-                    const billDate = new Date(bill.createdAt || bill.date);
-                    const billDateStr = billDate.toISOString().split('T')[0];
-                    return billDateStr === todayStr;
+                    // Use billDate (set on bill creation) instead of createdAt
+                    return bill.billDate === todayStr;
                 });
                 
                 const todayTotal = todayBills.reduce((sum, bill) => sum + (bill.total || 0), 0);
@@ -1630,6 +1834,16 @@
             // Populate patient dropdown
             populatePatientDropdown();
 
+            // If a date is already selected in the agenda, default the modal date and times
+            try {
+                if (!dateInput.value && selectedDate) {
+                    dateInput.value = formatDateForStorage(selectedDate);
+                }
+            } catch {}
+
+            // Populate available times for the selected date
+            populateAvailableTimes();
+
             // Update modal translations
             updateModalTranslations();
 
@@ -1725,6 +1939,8 @@
             document.getElementById('appointmentForm').reset();
             document.getElementById('selectedPatientDetails').classList.add('hidden');
             clearPatientData();
+            // Reset time options to current date availability
+            populateAvailableTimes();
         }
 
 
@@ -1890,6 +2106,14 @@
             closeAddAppointmentModal();
         });
 
+        // Update available times when the appointment date changes
+        document.addEventListener('DOMContentLoaded', function () {
+            const dateInput = document.getElementById('appointmentDate');
+            if (dateInput) {
+                dateInput.addEventListener('change', populateAvailableTimes);
+            }
+        });
+
         function validateAppointmentForm(data) {
             // Check if patient is selected
             const patientSelect = document.getElementById('patientSelection');
@@ -1964,12 +2188,12 @@
             // Scroll to success message
             successDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-            // Remove success message after 8 seconds
+            // Remove success message after 1 second
             setTimeout(() => {
                 if (successDiv.parentElement) {
                     successDiv.remove();
                 }
-            }, 8000);
+            }, 1000);
 
             // Refresh the agenda to show the new appointment
             renderDailyAgenda();
@@ -1994,6 +2218,16 @@
 
                 // Refresh the agenda
                 renderDailyAgenda();
+                
+                // Update today's summary after status change
+                if (typeof updateTodaySummary === 'function') {
+                    updateTodaySummary();
+                }
+                
+                // Update waiting room after status change
+                if (typeof updateWaitingRoom === 'function') {
+                    updateWaitingRoom();
+                }
             } else {
                 console.error('Appointment not found:', appointmentId);
                 showTranslatedAlert('appointment_not_found');
@@ -2003,14 +2237,12 @@
         // Show status update success message
         function showStatusUpdateMessage(appointment, newStatus) {
             const statusMessages = {
-                'confirmed': window.t ? window.t('appointment_confirmed_successfully', 'Appointment confirmed successfully!') : 'Appointment confirmed successfully!',
-                'completed': window.t ? window.t('appointment_marked_completed', 'Appointment marked as completed!') : 'Appointment marked as completed!',
+                'validated': window.t ? window.t('appointment_validated_successfully', 'Appointment validated successfully!') : 'Appointment validated successfully!',
                 'cancelled': window.t ? window.t('appointment_cancelled_successfully', 'Appointment cancelled successfully!') : 'Appointment cancelled successfully!'
             };
 
             const statusColors = {
-                'confirmed': '#059669',
-                'completed': '#2563eb',
+                'validated': '#059669',
                 'cancelled': '#dc2626'
             };
 
@@ -5376,6 +5608,11 @@
             if (typeof updateCabinetCashDisplay === 'function') {
                 updateCabinetCashDisplay();
             }
+            
+            // Update daily agenda to refresh cash entry badge
+            if (typeof renderDailyAgenda === 'function') {
+                renderDailyAgenda();
+            }
 
             return newBill;
         }
@@ -6295,6 +6532,19 @@
             if (typeof updateCabinetCashDisplay === 'function') {
                 updateCabinetCashDisplay();
             }
+            // Update today's summary with today's data only
+            if (typeof updateTodaySummary === 'function') {
+                updateTodaySummary();
+            }
+            // Update waiting room with today's validated appointments
+            if (typeof updateWaitingRoom === 'function') {
+                updateWaitingRoom();
+            }
+            
+            // Apply translations to static elements
+            if (typeof applyTranslations === 'function') {
+                applyTranslations(document);
+            }
             };
             
             // If i18n is available, wait for it to initialize
@@ -6307,6 +6557,9 @@
             
             // Apply permission-based UI
             applyPermissionBasedUI();
+
+            // Re-apply doctor dashboard visibility after permissions
+            loadDoctorDashboard();
 
             // Role-based UI
             let session = null;
@@ -6688,8 +6941,7 @@
                             const idx = appointments.findIndex(a => a.id === currentConsultationAppointmentId);
                             if (idx !== -1) {
                                 // Mark as completed and remove from today's pending list
-                                appointments[idx].status = 'completed';
-                                appointments[idx].completedAt = new Date().toISOString();
+                                appointments[idx].status = 'validated';
                                 // Remove from the array to ensure it disappears from today's list
                                 appointments.splice(idx, 1);
                                 localStorage.setItem('healthcareAppointments', JSON.stringify(appointments));
@@ -6709,6 +6961,21 @@
                         if (typeof loadTodayAppointments === 'function') loadTodayAppointments();
                         if (typeof loadTodayConsultations === 'function') loadTodayConsultations();
                     }
+                    
+                    // Update today's summary after consultation completion
+                    if (typeof updateTodaySummary === 'function') {
+                        updateTodaySummary();
+                    }
+                    
+                    // Update waiting room after consultation completion
+                    if (typeof updateWaitingRoom === 'function') {
+                        updateWaitingRoom();
+                    }
+                    
+                    // Update daily agenda to refresh consultation badge
+                    if (typeof renderDailyAgenda === 'function') {
+                        renderDailyAgenda();
+                    }
 
                     window.closeConsultationModal();
                 });
@@ -6720,20 +6987,82 @@
             const session = JSON.parse(localStorage.getItem('medconnect_session') || '{}');
             const isDoctor = session && session.role === 'doctor';
             
+            console.log('loadDoctorDashboard called');
+            console.log('Session:', session);
+            console.log('Is Doctor:', isDoctor);
+            
             if (isDoctor) {
                 // Show doctor dashboard menu links
                 const dashboardLink = document.getElementById('doctorDashboardLink');
                 const dashboardLinkMobile = document.getElementById('doctorDashboardLinkMobile');
+                console.log('Dashboard link found:', dashboardLink);
+                console.log('Mobile dashboard link found:', dashboardLinkMobile);
                 if (dashboardLink) dashboardLink.style.display = '';
                 if (dashboardLinkMobile) dashboardLinkMobile.style.display = '';
+                console.log('Doctor dashboard links shown');
             } else {
                 // Hide doctor dashboard menu links
                 const dashboardLink = document.getElementById('doctorDashboardLink');
                 const dashboardLinkMobile = document.getElementById('doctorDashboardLinkMobile');
+                console.log('Dashboard link found:', dashboardLink);
+                console.log('Mobile dashboard link found:', dashboardLinkMobile);
                 if (dashboardLink) dashboardLink.style.display = 'none';
                 if (dashboardLinkMobile) dashboardLinkMobile.style.display = 'none';
+                console.log('Doctor dashboard links hidden');
             }
         }
+
+        // Debug function to check session
+        window.debugSession = function() {
+            const session = JSON.parse(localStorage.getItem('medconnect_session') || '{}');
+            console.log('Current session:', session);
+            console.log('Role:', session.role);
+            console.log('Is Doctor:', session && session.role === 'doctor');
+            return session;
+        };
+
+        // Debug function to manually show consultation menu
+        window.showConsultationMenu = function() {
+            const dashboardLink = document.getElementById('doctorDashboardLink');
+            const dashboardLinkMobile = document.getElementById('doctorDashboardLinkMobile');
+            if (dashboardLink) dashboardLink.style.display = '';
+            if (dashboardLinkMobile) dashboardLinkMobile.style.display = '';
+            console.log('Consultation menu manually shown');
+        };
+
+        // Comprehensive debug function
+        window.debugConsultationMenu = function() {
+            console.log('=== CONSULTATION MENU DEBUG ===');
+            
+            // Check session
+            const session = JSON.parse(localStorage.getItem('medconnect_session') || '{}');
+            console.log('Session:', session);
+            console.log('Role:', session.role);
+            console.log('Is Doctor:', session && session.role === 'doctor');
+            
+            // Check permissions
+            const permissions = getUserPermissions();
+            console.log('Permissions:', permissions);
+            console.log('Has view_consultations:', permissions.view_consultations);
+            
+            // Check elements
+            const dashboardLink = document.getElementById('doctorDashboardLink');
+            const dashboardLinkMobile = document.getElementById('doctorDashboardLinkMobile');
+            console.log('Desktop link found:', !!dashboardLink);
+            console.log('Mobile link found:', !!dashboardLinkMobile);
+            
+            if (dashboardLink) {
+                console.log('Desktop link display:', dashboardLink.style.display);
+                console.log('Desktop link computed display:', window.getComputedStyle(dashboardLink).display);
+            }
+            
+            if (dashboardLinkMobile) {
+                console.log('Mobile link display:', dashboardLinkMobile.style.display);
+                console.log('Mobile link computed display:', window.getComputedStyle(dashboardLinkMobile).display);
+            }
+            
+            console.log('=== END DEBUG ===');
+        };
 
         window.showDoctorDashboard = function() {
             const session = JSON.parse(localStorage.getItem('medconnect_session') || '{}');
@@ -6901,9 +7230,9 @@
             const todayStr = formatDateForStorage(today);
             const allAppointments = getAppointmentsForDate(today);
             
-            // Filter only confirmed appointments for doctor dashboard
+            // Filter only validated appointments for doctor dashboard
             const appointments = allAppointments.filter(appointment => 
-                appointment.status && appointment.status.toLowerCase() === 'confirmed'
+                appointment.status && appointment.status.toLowerCase() === 'validated'
             );
             
             const appointmentCountEl = document.getElementById('appointmentCount');
@@ -7827,10 +8156,12 @@
         function calculateTodayExpenses() {
             loadExpenses();
             const today = new Date();
-            const todayStr = today.toISOString().split('T')[0];
+            // Use local date string format (YYYY-MM-DD) instead of UTC
+            const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
             
             const todayExpenses = storedExpenses.filter(expense => {
-                const expenseDate = new Date(expense.date).toISOString().split('T')[0];
+                // Handle both ISO string and date string formats
+                const expenseDate = expense.date ? expense.date.split('T')[0] : null;
                 return expenseDate === todayStr;
             });
             
@@ -7956,6 +8287,11 @@
             updateExpensesDisplay();
             updateCabinetCashDisplay();
             
+            // Update daily agenda to refresh expenses badge
+            if (typeof renderDailyAgenda === 'function') {
+                renderDailyAgenda();
+            }
+            
             showTranslatedAlert('expense_deleted');
         };
 
@@ -8024,6 +8360,11 @@
                     // Update displays
                     updateExpensesDisplay();
                     updateCabinetCashDisplay();
+                    
+                    // Update daily agenda to refresh expenses badge
+                    if (typeof renderDailyAgenda === 'function') {
+                        renderDailyAgenda();
+                    }
                     
                     // Switch back to view tab
                     switchExpenseTab('view');
