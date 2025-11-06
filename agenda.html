@@ -122,8 +122,8 @@
                         onclick="showDoctorDashboard()" data-translate="consultation" data-permission="view_consultations">Consultation</a>
                     <a href="#" class="nav-link" id="nav-billing" onclick="showBillingOrReadyBills()" 
                         data-translate="billing" data-permission="view_bills">Billing</a>
-                    <a href="#" class="nav-link" id="nav-expenses" onclick="showExpensesModal()" 
-                        data-translate="expenses">Expenses</a>
+                    <a href="#" class="nav-link" id="nav-expenses" onclick="showExpensesModal(); return false;" 
+                        data-translate="expenses" data-permission="view_expenses">Expenses</a>
                     <a href="#" class="nav-link" id="nav-reports" onclick="showReportsModal()" 
                         data-translate="reports" data-permission="view_reports">Reports</a>
                     <a href="#" class="nav-link" id="nav-settings" onclick="showSettingsMenu()" 
@@ -165,8 +165,8 @@
                     onclick="showDoctorDashboard()" data-translate="consultation" data-permission="view_consultations">Consultation</a>
                 <a href="#" class="mobile-nav-link" id="nav-billing-mobile" onclick="showBillingOrReadyBills()" 
                     data-translate="billing" data-permission="view_bills">Billing</a>
-                <a href="#" class="mobile-nav-link" id="nav-expenses-mobile" onclick="showExpensesModal()" 
-                    data-translate="expenses">Expenses</a>
+                <a href="#" class="mobile-nav-link" id="nav-expenses-mobile" onclick="showExpensesModal(); return false;" 
+                    data-translate="expenses" data-permission="view_expenses">Expenses</a>
                 <a href="#" class="mobile-nav-link" id="nav-reports-mobile" onclick="showReportsModal()" 
                     data-translate="reports" data-permission="view_reports">Reports</a>
                 <a href="#" class="mobile-nav-link" id="nav-settings-mobile" onclick="showSettingsMenu()"
@@ -299,30 +299,48 @@
 
     <!-- Consultation Modal (Doctor Only) -->
     <div class="modal" id="consultationModal">
-        <div class="modal-content" style="max-width: 700px;">
+        <div class="modal-content" style="max-width: 1000px;">
             <div class="modal-header">
                 <h2 class="modal-title" data-translate="new_consultation">New Consultation</h2>
                 <button class="modal-close" onclick="closeConsultationModal()">&times;</button>
             </div>
             <form id="consultationForm">
                 <div class="form-group">
-                    <label class="form-label" for="consultPatient" data-translate="select_patient">Select Patient *</label>
-                    <select id="consultPatient" class="form-input" required></select>
+                    <input type="text" id="consultPatient" class="form-input" disabled readonly>
+                    <input type="hidden" id="consultPatientId" name="consultPatientId">
                 </div>
-                <!-- Selected Patient Info -->
-                <div id="consultPatientInfo" class="card p-3 mb-4 hidden">
-                    <h4 class="font-semibold mb-2" data-translate="patient_info">Patient Info</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm mb-2">
-                        <div><strong data-translate="name">Name:</strong> <span id="consultPatientName">-</span></div>
-                        <div><strong data-translate="phone">Phone:</strong> <span id="consultPatientPhone">-</span></div>
-                        <div><strong data-translate="age_gender">Age/Gender:</strong> <span id="consultPatientAgeGender">-</span></div>
-                        <div><strong data-translate="address">Address:</strong> <span id="consultPatientAddress">-</span></div>
+                
+                <!-- Menu Buttons Bar -->
+                <div class="consult-menu-bar mb-4 flex flex-nowrap gap-2">
+                    <button type="button" class="consult-menu-btn" onclick="showConsultSection('patient')" data-section="patient" style="background: #3b82f6; color: white; padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-weight: 500; font-size: 0.7rem; border: none; cursor: pointer; opacity: 0.8; flex: 1; line-height: 1.3; text-align: center; white-space: nowrap;" data-translate="patient_information">Patient Information</button>
+                    <button type="button" class="consult-menu-btn active" onclick="showConsultSection('consultation')" data-section="consultation" style="background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-weight: 500; font-size: 0.7rem; border: none; cursor: pointer; opacity: 1; flex: 1; line-height: 1.3; text-align: center; white-space: nowrap;" data-translate="consultation">Consultation</button>
+                    <button type="button" class="consult-menu-btn" onclick="showConsultSection('lab')" data-section="lab" style="background: #86efac; color: white; padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-weight: 500; font-size: 0.7rem; border: none; cursor: pointer; opacity: 0.8; flex: 1; line-height: 1.3; text-align: center; white-space: nowrap;" data-translate="lab_assessment">Lab Assessment</button>
+                    <button type="button" class="consult-menu-btn" onclick="showConsultSection('radiology')" data-section="radiology" style="background: #ef4444; color: white; padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-weight: 500; font-size: 0.7rem; border: none; cursor: pointer; opacity: 0.8; flex: 1; line-height: 1.3; text-align: center; white-space: nowrap;" data-translate="radiology_results">Radiology Results</button>
+                    <button type="button" class="consult-menu-btn" onclick="showConsultSection('prescription')" data-section="prescription" style="background: #06b6d4; color: white; padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-weight: 500; font-size: 0.7rem; border: none; cursor: pointer; opacity: 0.8; flex: 1; line-height: 1.3; text-align: center; white-space: nowrap;" data-translate="medical_prescription">Medical Prescription</button>
+                    <button type="button" class="consult-menu-btn" onclick="showConsultSection('certificate')" data-section="certificate" style="background: #86efac; color: white; padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-weight: 500; font-size: 0.7rem; border: none; cursor: pointer; opacity: 0.8; flex: 1; line-height: 1.3; text-align: center; white-space: nowrap;" data-translate="work_certificate">Work Certificate</button>
                     </div>
-                    <div class="text-sm">
-                        <strong data-translate="medical_history">Medical History:</strong>
-                        <div id="consultPatientHistory" class="mt-1 text-gray-700" data-translate="no_history_available">No history available.</div>
+                
+                <!-- Patient Details Section -->
+                <div id="consultSectionPatient" class="consult-section hidden">
+                    <div id="consultPatientDetails" class="card p-6 mb-4">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center">
+                            <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            <span data-translate="patient_details_title">Patient Details</span>
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="consultPatientDetailsInfo">
+                            <!-- Patient details will be loaded here -->
+                    </div>
+                        <div class="mt-4 pt-4 border-t border-gray-200">
+                            <h4 class="font-semibold mb-2" data-translate="medical_history">Medical History</h4>
+                            <div id="consultPatientHistory" class="text-gray-700 text-sm" data-translate="no_history_available">No history available.</div>
+                </div>
                     </div>
                 </div>
+                
+                <!-- Consultation Section -->
+                <div id="consultSectionConsultation" class="consult-section">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="form-group">
                         <label class="form-label" for="consultHeight" data-translate="height_cm">Height (cm)</label>
@@ -361,52 +379,9 @@
                     <input type="text" id="consultBloodPressure" class="form-input" placeholder="e.g., 120/80" data-translate-placeholder="blood_pressure_example" />
                 </div>
                 
-                <!-- Action Buttons -->
                 <div class="form-group">
-                    <label class="form-label">Consultation Actions</label>
-                    <div class="flex gap-2 flex-wrap">
-                        <button type="button" class="btn btn-outline" onclick="openReasonModal()" data-translate="reason">
-                            <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                            Reason
-                        </button>
-                        <button type="button" class="btn btn-outline" onclick="openDiagnosisModal()" data-translate="diagnosis">
-                            <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
-                            </svg>
-                            Diagnosis
-                        </button>
-                        <button type="button" class="btn btn-outline" onclick="openClinicalExamModal()" data-translate="clinical_examination">
-                            <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            Clinical Examination
-                        </button>
-                        <button type="button" class="btn btn-outline" onclick="openLabAssessmentFromConsultation()" data-translate="add_lab_assessment">
-                            <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
-                            </svg>
-                            Lab Assessment
-                        </button>
-                        <button type="button" class="btn btn-outline" onclick="openMedicalCertificateFromConsultation()" data-translate="medical_certificate">
-                            <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                            Medical Certificate
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label" for="consultNotes" data-translate="clinical_notes">Clinical Notes *</label>
-                    <textarea id="consultNotes" class="form-input form-textarea" placeholder="Enter notes" data-translate-placeholder="enter_notes"
-                        required></textarea>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="consultPrescription" data-translate="prescription">Prescription</label>
-                    <textarea id="consultPrescription" class="form-input form-textarea"
-                        placeholder="Drugs, dosage, duration" data-translate-placeholder="drugs_dosage"></textarea>
+                    <label class="form-label" for="consultVitalNotes" data-translate="vital_notes">Vital Notes</label>
+                    <textarea id="consultVitalNotes" class="form-input form-textarea" rows="3" placeholder="Enter vital notes..." data-translate-placeholder="enter_vital_notes"></textarea>
                 </div>
                 
                 <!-- Payment Status -->
@@ -421,6 +396,205 @@
                             <input type="radio" name="paymentStatus" value="non-paying" id="nonPayingPatient" class="form-radio">
                             <span data-translate="non_paying_patient">Non-Paying Patient</span>
                         </label>
+                    </div>
+                    </div>
+                </div>
+                
+                <!-- Lab Assessment Section -->
+                <div id="consultSectionLab" class="consult-section hidden">
+                    <div class="mb-4">
+                        <!-- Lab Results Input -->
+                        <div class="mb-4">
+                            <div class="flex items-center justify-between bg-blue-600 text-white px-4 py-2 rounded-t-lg">
+                                <h3 class="font-semibold" data-translate="lab_results">Lab Results</h3>
+                                <button type="button" onclick="editLabResults()" class="w-8 h-8 rounded-full bg-purple-600 hover:bg-purple-700 flex items-center justify-center transition-colors">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <textarea id="labResults" class="w-full border border-gray-300 rounded-b-lg p-4 min-h-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter lab results..." data-translate-placeholder="enter_lab_results"></textarea>
+                        </div>
+                        
+                        <!-- Lab Notes/Observations Input -->
+                        <div>
+                            <div class="flex items-center justify-between bg-blue-600 text-white px-4 py-2 rounded-t-lg">
+                                <h3 class="font-semibold" data-translate="lab_notes">Lab Notes</h3>
+                                <button type="button" onclick="editLabNotes()" class="w-8 h-8 rounded-full bg-purple-600 hover:bg-purple-700 flex items-center justify-center transition-colors">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <textarea id="labNotes" class="w-full border border-gray-300 rounded-b-lg p-4 min-h-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter lab notes and observations..." data-translate-placeholder="enter_lab_notes"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Radiology Results Section -->
+                <div id="consultSectionRadiology" class="consult-section hidden">
+                    <div class="mb-4">
+                        <!-- Radiology Result Input -->
+                        <div class="mb-4">
+                            <div class="flex items-center justify-between bg-blue-600 text-white px-4 py-2 rounded-t-lg">
+                                <h3 class="font-semibold" data-translate="radiology_result">Radiology Result</h3>
+                                <button type="button" onclick="editRadiologyResult()" class="w-8 h-8 rounded-full bg-purple-600 hover:bg-purple-700 flex items-center justify-center transition-colors">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <textarea id="radiologyResult" class="w-full border border-gray-300 rounded-b-lg p-4 min-h-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter radiology result..." data-translate-placeholder="enter_radiology_result"></textarea>
+                        </div>
+                        
+                        <!-- Diagnostics Input -->
+                        <div>
+                            <div class="flex items-center justify-between bg-blue-600 text-white px-4 py-2 rounded-t-lg">
+                                <h3 class="font-semibold" data-translate="diagnostics">Diagnostics</h3>
+                                <button type="button" onclick="editDiagnostics()" class="w-8 h-8 rounded-full bg-purple-600 hover:bg-purple-700 flex items-center justify-center transition-colors">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <textarea id="radiologyDiagnostics" class="w-full border border-gray-300 rounded-b-lg p-4 min-h-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter diagnostics..." data-translate-placeholder="enter_diagnostics"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Prescription Section -->
+                <div id="consultSectionPrescription" class="consult-section hidden">
+                    <!-- Clinical Note Card -->
+                    <div class="card p-6 mb-4">
+                        <h3 class="text-lg font-semibold mb-4" data-translate="clinical_notes">Clinical Note</h3>
+                        <div class="form-group">
+                            <textarea id="consultNotes" class="form-input form-textarea" placeholder="Enter notes" data-translate-placeholder="enter_notes"></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Medical Prescription Card -->
+                    <div class="card p-6 mb-4">
+                        <h3 class="text-lg font-semibold mb-4" data-translate="medical_prescription">Medical Prescription</h3>
+                        
+                        <!-- Add Medicine -->
+                        <div class="mb-4">
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3 items-end">
+                                <div class="form-group">
+                                    <label class="form-label" for="prescriptionMedicineSelect" data-translate="select_medicine">Select Medicine</label>
+                                    <select id="prescriptionMedicineSelect" class="form-input">
+                                        <option value="" data-translate="select_medicine">Select medicine...</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="prescriptionDosage" data-translate="dosage">Dosage</label>
+                                    <select id="prescriptionDosage" class="form-input">
+                                        <option value="">Select dosage...</option>
+                                        <option value="once daily">1x daily</option>
+                                        <option value="twice daily">2x daily</option>
+                                        <option value="three times daily">3x daily</option>
+                                        <option value="four times daily">4x daily</option>
+                                        <option value="every 6 hours">Every 6 hours</option>
+                                        <option value="every 8 hours">Every 8 hours</option>
+                                        <option value="every 12 hours">Every 12 hours</option>
+                                        <option value="once weekly">Once weekly</option>
+                                        <option value="as needed">As needed (PRN)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="prescriptionInstructions" data-translate="instructions">Instructions</label>
+                                    <input type="text" id="prescriptionInstructions" class="form-input" placeholder="e.g., after meals">
+                                </div>
+                                <div class="form-group flex items-end">
+                                    <button type="button" id="addMedicineToPrescriptionBtn" class="btn btn-primary w-full whitespace-nowrap flex items-center justify-center">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                        </svg>
+                                        <span data-translate="add_medicine">Add Medicine</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Prescription List -->
+                        <div id="prescriptionListContainer" class="space-y-2 mb-4">
+                            <!-- Medicines will be added here -->
+                        </div>
+                        
+                        <!-- Prescription Text Area (for manual entry or combined view) -->
+                        <div class="form-group">
+                            <label class="form-label" for="consultPrescription" data-translate="prescription">Prescription</label>
+                            <textarea id="consultPrescription" class="form-input form-textarea" rows="6"
+                                placeholder="Drugs, dosage, duration" data-translate-placeholder="drugs_dosage"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Documents Section -->
+                <div id="consultSectionDocuments" class="consult-section hidden">
+                    <div class="card p-6 mb-4">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center">
+                            <svg class="w-6 h-6 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <span data-translate="documents">Documents</span>
+                        </h3>
+                        <div id="consultDocumentsList" class="space-y-3">
+                            <!-- Documents will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Work Certificate Section -->
+                <div id="consultSectionCertificate" class="consult-section hidden">
+                    <div id="consultCertificateForm">
+                        <input type="hidden" id="consultCertConsultationId">
+                        
+                        <!-- Certificate Type -->
+                        <div class="form-group">
+                            <label class="form-label font-semibold" for="consultCertType" data-translate="certificate_type">Certificate Type</label>
+                            <select id="consultCertType" class="form-input">
+                                <option value="" data-translate="select_type">Select type...</option>
+                                <option value="sick_leave" data-translate="sick_leave_certificate">Sick Leave Certificate</option>
+                                <option value="fitness" data-translate="fitness_certificate">Fitness Certificate</option>
+                                <option value="medical_report" data-translate="medical_report_certificate">Medical Report Certificate</option>
+                                <option value="disability" data-translate="disability_certificate">Disability Certificate</option>
+                                <option value="other" data-translate="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Rest Period (for sick leave) -->
+                        <div class="form-group">
+                            <label class="form-label font-semibold" data-translate="rest_period">Rest Period (Days)</label>
+                            <input type="number" id="consultCertRestPeriod" class="form-input" min="1" max="365" data-translate-placeholder="rest_period_placeholder" placeholder="e.g., 7">
+                        </div>
+                        
+                        <!-- Start Date -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="form-group">
+                                <label class="form-label font-semibold" for="consultCertStartDate" data-translate="start_date">Start Date</label>
+                                <input type="date" id="consultCertStartDate" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label font-semibold" for="consultCertEndDate" data-translate="end_date">End Date</label>
+                                <input type="date" id="consultCertEndDate" class="form-input">
+                            </div>
+                        </div>
+                        
+                        
+                        
+                        <!-- Preview/Print Option -->
+                        <div class="card p-3 bg-yellow-50 border-yellow-200 mb-4">
+                            <div class="flex items-start gap-2">
+                                <svg class="w-5 h-5 text-yellow-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div class="text-sm text-yellow-800">
+                                    <p class="font-semibold mb-1" data-translate="certificate_info">Certificate Information</p>
+                                    <p data-translate="certificate_info_text">After saving, you can view and print the certificate from the consultation details.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
                     </div>
                 </div>
                 
@@ -573,9 +747,9 @@
                     <div class="form-group">
                         <label class="form-label" for="editPatientFileNumber"
                             data-translate="patient_file_number">Patient File Number *</label>
-                        <input type="text" id="editPatientFileNumber" class="form-input"
+                        <input type="text" id="editPatientFileNumber" class="form-input bg-gray-100 cursor-not-allowed" readonly disabled
                             data-translate-placeholder="file_number_example"
-                            placeholder="Enter patient file number (e.g., P-2024-001)" required>
+                            placeholder="Enter patient file number (e.g., P-2024-001)" title="Auto-generated; not editable" required>
                     </div>
 
                     <div class="form-group">
@@ -684,27 +858,61 @@
 
                 <!-- Past Consultations Section -->
                 <div class="card p-6">
-                    <h3 class="text-lg font-semibold mb-4 flex items-center">
-                        <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                    <h3 class="text-lg font-semibold mb-4 flex items-center justify-between cursor-pointer" onclick="toggleAccordion('consultationsAccordion')">
+                        <div class="flex items-center">
+                            <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                            </svg>
+                            <span data-translate="past_consultations">Past Consultations</span>
+                        </div>
+                        <svg id="consultationsAccordionIcon" class="w-5 h-5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
-                        <span data-translate="past_consultations">Past Consultations</span>
                     </h3>
-                    <div id="patientConsultationsList" class="space-y-4">
-                        <!-- Consultations will be loaded here -->
+                    <div id="consultationsAccordion" class="hidden space-y-4">
+                        <div id="patientConsultationsList" class="space-y-4">
+                            <!-- Consultations will be loaded here -->
+                        </div>
                     </div>
                 </div>
 
                 <!-- Past Bills Section -->
                 <div class="card p-6">
-                    <h3 class="text-lg font-semibold mb-4 flex items-center">
-                        <svg class="w-6 h-6 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z"></path>
+                    <h3 class="text-lg font-semibold mb-4 flex items-center justify-between cursor-pointer" onclick="toggleAccordion('billsAccordion')">
+                        <div class="flex items-center">
+                            <svg class="w-6 h-6 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z"></path>
+                            </svg>
+                            <span data-translate="past_bills">Past Bills</span>
+                        </div>
+                        <svg id="billsAccordionIcon" class="w-5 h-5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
-                        <span data-translate="past_bills">Past Bills</span>
                     </h3>
-                    <div id="patientBillsList" class="space-y-4">
-                        <!-- Bills will be loaded here -->
+                    <div id="billsAccordion" class="hidden space-y-4">
+                        <div id="patientBillsList" class="space-y-4">
+                            <!-- Bills will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Patient Documents Section -->
+                <div class="card p-6">
+                    <h3 class="text-lg font-semibold mb-4 flex items-center justify-between cursor-pointer" onclick="toggleAccordion('documentsAccordion')">
+                        <div class="flex items-center">
+                            <svg class="w-6 h-6 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <span data-translate="patient_documents">Patient Documents</span>
+                        </div>
+                        <svg id="documentsAccordionIcon" class="w-5 h-5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </h3>
+                    <div id="documentsAccordion" class="hidden space-y-4">
+                        <div id="patientDocumentsList">
+                            <!-- Patient documents will be loaded here -->
+                        </div>
                     </div>
                 </div>
 
@@ -729,6 +937,24 @@
         </div>
     </div>
 
+    <!-- Patient Document Preview Modal -->
+    <div class="modal" id="patientDocumentPreviewModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 class="modal-title" data-translate="document_preview">Document Preview</h2>
+                <button class="modal-close" onclick="closePatientDocumentPreviewModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="patientDocumentPreviewContent">
+                    <!-- Document content will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closePatientDocumentPreviewModal()" data-translate="close">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Billing Modal -->
     <div class="modal" id="billingModal">
         <div class="modal-content" style="max-width: 900px;">
@@ -738,17 +964,12 @@
             </div>
 
             <form id="billingForm">
-                <div class="form-group">
-                    <label class="form-label" for="billPatientSelection" data-translate="select_patient">Select Patient
-                        *</label>
-                    <select id="billPatientSelection" class="form-input" required
-                        onchange="handleBillPatientSelection()">
-                        <option value="">Choose a patient...</option>
-                    </select>
-                </div>
-
                 <!-- Patient Details Display (Read-only) -->
-                <div id="billPatientDetails" class="hidden">
+                <div id="billPatientDetails">
+                    <div class="form-group">
+                        <label class="form-label" data-translate="patient">Patient</label>
+                        <input type="text" id="billPatientDisplay" class="form-input bg-gray-100 cursor-not-allowed" disabled readonly placeholder="Patient name will appear here...">
+                    </div>
                     <div class="card p-4 mb-4">
                         <h4 class="font-semibold mb-2">Patient Information</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
@@ -765,6 +986,7 @@
                 <input type="hidden" id="billPatientFullName" name="patientName">
                 <input type="hidden" id="billPatientEmailAddress" name="patientEmail">
                 <input type="hidden" id="billPatientPhoneNumber" name="patientPhone">
+                <input type="hidden" id="billConsultationId" name="consultationId">
 
 
                 <div class="form-group">
@@ -807,7 +1029,7 @@
                             </div>
                         </div>
                     </div>
-                    <button type="button" class="btn btn-outline btn-sm mt-3" onclick="addBillItem()">
+                    <button type="button" class="btn btn-primary btn-sm mt-3" onclick="addBillItem()">
                         <svg class="icon-sm mr-1" viewBox="0 0 24 24">
                             <path d="M12 4v16m8-8H4" />
                         </svg>
@@ -922,6 +1144,21 @@
                             <div>
                                 <div class="font-semibold" data-translate="bill_descriptions">Bill Descriptions</div>
                                 <div class="text-sm text-gray-500" data-translate="manage_bill_descriptions">Manage billing service items</div>
+                            </div>
+                        </div>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </button>
+
+                    <button class="w-full btn btn-outline text-left flex items-center justify-between p-4 hover:bg-gray-50" onclick="showMedicinesModal()">
+                        <div class="flex items-center gap-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                            </svg>
+                            <div>
+                                <div class="font-semibold" data-translate="medicines_management">Medicines Management</div>
+                                <div class="text-sm text-gray-500" data-translate="manage_medicines">Manage medicines list for prescriptions</div>
                             </div>
                         </div>
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1084,6 +1321,89 @@
 
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeEditDescriptionModal()"
+                        data-translate="cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary" data-translate="save_changes">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Medicines Management Modal -->
+    <div class="modal" id="medicinesModal">
+        <div class="modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h2 class="modal-title" data-translate="medicines_management">Medicines Management</h2>
+                <button class="modal-close" onclick="closeMedicinesModal()">&times;</button>
+            </div>
+
+            <div class="p-6">
+                <!-- Add New Medicine Form -->
+                <div class="card p-4 mb-6">
+                    <h3 class="font-semibold mb-4" data-translate="add_new_medicine">Add New Medicine</h3>
+                    <form id="addMedicineForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="form-group">
+                            <label class="form-label" for="newMedicineName" data-translate="medicine_name">Medicine Name *</label>
+                            <input type="text" id="newMedicineName" class="form-input" required placeholder="e.g., Paracetamol">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="newMedicineDosage" data-translate="dosage">Dosage (Optional)</label>
+                            <input type="text" id="newMedicineDosage" class="form-input" placeholder="e.g., 500mg, 2x daily">
+                        </div>
+                        <div class="form-group flex items-end">
+                            <button type="submit" class="btn btn-primary w-full">
+                                <svg class="icon-sm mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                <span data-translate="add_medicine">Add Medicine</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Existing Medicines List -->
+                <div class="card p-4">
+                    <h3 class="font-semibold mb-4" data-translate="existing_medicines">Existing Medicines</h3>
+                    <div class="mb-3">
+                        <input type="text" id="medicineSearch" class="form-input" 
+                            placeholder="Search medicines..."
+                            onkeyup="searchMedicines()" data-translate-placeholder="search_medicines">
+                    </div>
+                    <div id="medicinesListContainer" class="space-y-2">
+                        <!-- List will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeMedicinesModal()"
+                    data-translate="close">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Medicine Modal -->
+    <div class="modal" id="editMedicineModal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 class="modal-title" data-translate="edit_medicine">Edit Medicine</h2>
+                <button class="modal-close" onclick="closeEditMedicineModal()">&times;</button>
+            </div>
+
+            <form id="editMedicineForm" class="p-6">
+                <input type="hidden" id="editMedicineId">
+                
+                <div class="form-group">
+                    <label class="form-label" for="editMedicineName" data-translate="medicine_name">Medicine Name *</label>
+                    <input type="text" id="editMedicineName" class="form-input" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="editMedicineDosage" data-translate="dosage">Dosage (Optional)</label>
+                    <input type="text" id="editMedicineDosage" class="form-input">
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditMedicineModal()"
                         data-translate="cancel">Cancel</button>
                     <button type="submit" class="btn btn-primary" data-translate="save_changes">Save Changes</button>
                 </div>
@@ -1587,6 +1907,19 @@
                             </label>
                         </div>
 
+                        <!-- Expenses Permissions -->
+                        <div class="space-y-2">
+                            <h4 class="font-semibold text-sm text-gray-700" data-translate="expenses_module">Expenses Module</h4>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" id="editPerm_view_expenses" class="mr-2">
+                                <span class="text-sm" data-translate="perm_view_expenses">View Expenses</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" id="editPerm_manage_expenses" class="mr-2">
+                                <span class="text-sm" data-translate="perm_manage_expenses">Manage Expenses</span>
+                            </label>
+                        </div>
+
                         <!-- Consultations Permissions -->
                         <div class="space-y-2">
                             <h4 class="font-semibold text-sm text-gray-700" data-translate="consultations_module">Consultations Module</h4>
@@ -1904,189 +2237,6 @@
                 <button type="button" class="btn btn-secondary" onclick="closeClinicalExamModal()">Close</button>
                 <button type="button" class="btn btn-primary" onclick="saveClinicalExam()">Save</button>
             </div>
-        </div>
-    </div>
-
-    <!-- Laboratory Assessment Modal -->
-    <div class="modal" id="laboratoryAssessmentModal">
-        <div class="modal-content" style="max-width: 700px;">
-            <div class="modal-header">
-                <h2 class="modal-title" data-translate="laboratory_assessment">Laboratory Assessment Examination</h2>
-                <button class="modal-close" onclick="closeLaboratoryAssessmentModal()">&times;</button>
-            </div>
-            <form id="laboratoryAssessmentForm">
-                <input type="hidden" id="labAssessmentConsultationId">
-                
-                <div class="modal-body">
-                    <p class="text-gray-600 mb-4" data-translate="lab_assessment_desc">Upload laboratory assessment documents and add notes about the examination results.</p>
-                    
-                    <!-- Patient Info Display -->
-                    <div class="card p-4 mb-4 bg-blue-50 border-blue-200">
-                        <div class="flex items-center gap-2 mb-2">
-                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                            </svg>
-                            <span class="font-semibold text-gray-700" data-translate="patient">Patient:</span>
-                            <span id="labAssessmentPatientName" class="text-gray-900 font-medium">-</span>
-                        </div>
-                        <div class="text-sm text-gray-600">
-                            <span data-translate="consultation_date">Consultation Date:</span>
-                            <span id="labAssessmentConsultationDate">-</span>
-                        </div>
-                    </div>
-                    
-                    <!-- File Upload Section -->
-                    <div class="form-group">
-                        <label class="form-label font-semibold" data-translate="upload_documents">Upload Laboratory Documents</label>
-                        <p class="text-sm text-gray-500 mb-2" data-translate="upload_documents_hint">You can upload multiple files (PDF, images, etc.)</p>
-                        <input type="file" id="labAssessmentFiles" class="form-input" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
-                        <div id="uploadedFilesList" class="mt-3 space-y-2">
-                            <!-- Uploaded files will be listed here -->
-                        </div>
-                    </div>
-                    
-                    <!-- Notes/Comments Section -->
-                    <div class="form-group">
-                        <label class="form-label font-semibold" for="labAssessmentNotes" data-translate="lab_notes">Laboratory Assessment Notes</label>
-                        <p class="text-sm text-gray-500 mb-2" data-translate="lab_notes_hint">Add notes, observations, or interpretations of the laboratory results</p>
-                        <textarea id="labAssessmentNotes" class="form-input form-textarea" rows="6" data-translate-placeholder="lab_notes_placeholder" placeholder="Enter laboratory assessment notes, observations, and interpretations..."></textarea>
-                    </div>
-                    
-                    <!-- Existing Assessments Display -->
-                    <div id="existingAssessmentsSection" class="hidden">
-                        <hr class="my-4">
-                        <h4 class="font-semibold text-gray-700 mb-3" data-translate="previous_assessments">Previous Assessments</h4>
-                        <div id="existingAssessmentsList" class="space-y-3">
-                            <!-- Previous assessments will be listed here -->
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeLaboratoryAssessmentModal()" data-translate="cancel">Cancel</button>
-                    <button type="submit" class="btn btn-primary" data-translate="save_assessment">Save Assessment</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Medical Certificate Modal -->
-    <div class="modal" id="medicalCertificateModal">
-        <div class="modal-content" style="max-width: 800px;">
-            <div class="modal-header">
-                <h2 class="modal-title" data-translate="medical_certificate">Medical Certificate</h2>
-                <button class="modal-close" onclick="closeMedicalCertificateModal()">&times;</button>
-            </div>
-            <form id="medicalCertificateForm">
-                <input type="hidden" id="certConsultationId">
-                
-                <div class="modal-body">
-                    <!-- Patient & Doctor Info Display -->
-                    <div class="card p-4 mb-4 bg-blue-50 border-blue-200">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                            <div class="flex items-center gap-2">
-                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                </svg>
-                                <div>
-                                    <span class="font-semibold text-gray-700" data-translate="patient">Patient:</span>
-                                    <span id="certPatientName" class="text-gray-900 font-medium ml-1">-</span>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
-                                <div>
-                                    <span class="font-semibold text-gray-700" data-translate="date">Date:</span>
-                                    <span id="certDate" class="text-gray-900 font-medium ml-1">-</span>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <div>
-                                    <span class="font-semibold text-gray-700" data-translate="doctor_name">Doctor:</span>
-                                    <span id="certDoctorName" class="text-gray-900 font-medium ml-1">-</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Certificate Type -->
-                    <div class="form-group">
-                        <label class="form-label font-semibold" for="certType" data-translate="certificate_type">Certificate Type *</label>
-                        <select id="certType" class="form-input" required>
-                            <option value="" data-translate="select_type">Select type...</option>
-                            <option value="sick_leave" data-translate="sick_leave_certificate">Sick Leave Certificate</option>
-                            <option value="fitness" data-translate="fitness_certificate">Fitness Certificate</option>
-                            <option value="medical_report" data-translate="medical_report_certificate">Medical Report Certificate</option>
-                            <option value="disability" data-translate="disability_certificate">Disability Certificate</option>
-                            <option value="other" data-translate="other">Other</option>
-                        </select>
-                    </div>
-                    
-                    <!-- Rest Period (for sick leave) -->
-                    <div class="form-group">
-                        <label class="form-label font-semibold" data-translate="rest_period">Rest Period (Days)</label>
-                        <input type="number" id="certRestPeriod" class="form-input" min="1" max="365" data-translate-placeholder="rest_period_placeholder" placeholder="e.g., 7">
-                    </div>
-                    
-                    <!-- Start Date -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="form-group">
-                            <label class="form-label font-semibold" for="certStartDate" data-translate="start_date">Start Date *</label>
-                            <input type="date" id="certStartDate" class="form-input" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label font-semibold" for="certEndDate" data-translate="end_date">End Date</label>
-                            <input type="date" id="certEndDate" class="form-input">
-                        </div>
-                    </div>
-                    
-                    <!-- Diagnosis/Condition -->
-                    <div class="form-group">
-                        <label class="form-label font-semibold" for="certDiagnosis" data-translate="diagnosis_condition">Diagnosis / Medical Condition *</label>
-                        <textarea id="certDiagnosis" class="form-input form-textarea" rows="3" data-translate-placeholder="diagnosis_placeholder" placeholder="Brief description of the medical condition" required></textarea>
-                    </div>
-                    
-                    <!-- Recommendations -->
-                    <div class="form-group">
-                        <label class="form-label font-semibold" for="certRecommendations" data-translate="recommendations">Recommendations</label>
-                        <textarea id="certRecommendations" class="form-input form-textarea" rows="3" data-translate-placeholder="recommendations_placeholder" placeholder="Medical recommendations and restrictions (optional)"></textarea>
-                    </div>
-                    
-                    <!-- Additional Notes -->
-                    <div class="form-group">
-                        <label class="form-label font-semibold" for="certNotes" data-translate="additional_notes">Additional Notes</label>
-                        <textarea id="certNotes" class="form-input form-textarea" rows="2" data-translate-placeholder="additional_notes_placeholder" placeholder="Any additional information"></textarea>
-                    </div>
-                    
-                    <!-- Preview/Print Option -->
-                    <div class="card p-3 bg-yellow-50 border-yellow-200">
-                        <div class="flex items-start gap-2">
-                            <svg class="w-5 h-5 text-yellow-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <div class="text-sm text-yellow-800">
-                                <p class="font-semibold mb-1" data-translate="certificate_info">Certificate Information</p>
-                                <p data-translate="certificate_info_text">After saving, you can view and print the certificate from the consultation details.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeMedicalCertificateModal()" data-translate="cancel">Cancel</button>
-                    <button type="submit" class="btn btn-primary">
-                        <svg class="icon-sm mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
-                        </svg>
-                        <span data-translate="save_certificate">Save Certificate</span>
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
 

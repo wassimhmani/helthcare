@@ -5,6 +5,7 @@
         let currentConsultationAppointmentId = null;
         // Track current consultation being worked on (for lab assessments from consultation form)
         let currentConsultationPatientId = null;
+        let editingConsultationId = null; // when set, the consultation form saves as update
 
         // Appointment storage system
         let storedAppointments = [];
@@ -126,6 +127,10 @@
                 settings_module: 'Settings Module',
                 perm_access_settings: 'Access Settings',
                 perm_manage_users: 'Manage Users',
+                // Expenses
+                expenses_module: 'Expenses Module',
+                perm_view_expenses: 'View Expenses',
+                perm_manage_expenses: 'Manage Expenses',
 
                 // Main Header
                 secretary_agenda: 'Secretary Agenda',
@@ -205,10 +210,11 @@
                 heart_rate_bpm: 'Heart Rate (bpm)',
                 blood_sugar_mgdl: 'Blood Sugar (mg/dL)',
                 blood_pressure_mmhg: 'Blood Pressure (mmHg)',
+                vital_notes: 'Vital Notes',
                 reason: 'Reason for Visit',
                 diagnosis: 'Diagnosis',
                 clinical_examination: 'Clinical Examination',
-                clinical_notes: 'Additional Clinical Notes',
+                clinical_notes: 'Clinical Note',
                 prescription: 'Prescription',
                 payment_status: 'Payment Status',
                 paying_patient: 'Paying Patient',
@@ -228,6 +234,7 @@
                 heart_rate_example: 'e.g., 72',
                 blood_sugar_example: 'e.g., 95',
                 blood_pressure_example: 'e.g., 120/80',
+                enter_vital_notes: 'Enter vital notes...',
                 enter_reason: 'Enter reason for consultation',
                 enter_diagnosis: 'Enter diagnosis',
                 enter_clinical_exam: 'Enter clinical examination findings',
@@ -299,14 +306,23 @@
                 consultation_date: 'Consultation Date',
                 upload_documents: 'Upload Laboratory Documents',
                 upload_documents_hint: 'You can upload multiple files (PDF, images, etc.)',
+                lab_results: 'Lab Results',
                 lab_notes: 'Laboratory Assessment Notes',
                 lab_notes_hint: 'Add notes, observations, or interpretations of the laboratory results',
+                enter_lab_results: 'Enter lab results...',
+                enter_lab_notes: 'Enter lab notes and observations...',
                 previous_assessments: 'Previous Assessments',
                 save_assessment: 'Save Assessment',
                 assessment_saved: 'Laboratory assessment saved successfully!',
                 no_files_selected: 'No files selected',
                 file_uploaded: 'File uploaded',
                 remove_file: 'Remove file',
+                
+                // Radiology
+                radiology_result: 'Radiology Result',
+                diagnostics: 'Diagnostics',
+                enter_radiology_result: 'Enter radiology result...',
+                enter_diagnostics: 'Enter diagnostics...',
                 
                 // Medical Certificate
                 medical_certificate: 'Medical Certificate',
@@ -432,6 +448,10 @@
                 settings_module: 'Module Paramètres',
                 perm_access_settings: 'Accéder aux paramètres',
                 perm_manage_users: 'Gérer les utilisateurs',
+                // Expenses
+                expenses_module: 'Module Dépenses',
+                perm_view_expenses: 'Voir les dépenses',
+                perm_manage_expenses: 'Gérer les dépenses',
 
                 // Main Header
                 secretary_agenda: 'Agenda de secrétaire',
@@ -511,10 +531,11 @@
                 heart_rate_bpm: 'Fréquence Cardiaque (bpm)',
                 blood_sugar_mgdl: 'Glycémie (mg/dL)',
                 blood_pressure_mmhg: 'Pression Artérielle (mmHg)',
+                vital_notes: 'Notes Vitales',
                 reason: 'Motif de la visite',
                 diagnosis: 'Diagnostic',
                 clinical_examination: 'Examen Clinique',
-                clinical_notes: 'Notes Cliniques Supplémentaires',
+                clinical_notes: 'Notes clinique',
                 prescription: 'Prescription',
                 payment_status: 'Statut de Paiement',
                 paying_patient: 'Patient Payant',
@@ -534,6 +555,7 @@
                 heart_rate_example: 'ex., 72',
                 blood_sugar_example: 'ex., 95',
                 blood_pressure_example: 'ex., 120/80',
+                enter_vital_notes: 'Entrez les notes vitales...',
                 enter_reason: 'Entrez le motif de la consultation',
                 enter_diagnosis: 'Entrez le diagnostic',
                 enter_clinical_exam: 'Entrez les résultats de l\'examen clinique',
@@ -605,11 +627,20 @@
                 consultation_date: 'Date de consultation',
                 upload_documents: 'Télécharger les documents de laboratoire',
                 upload_documents_hint: 'Vous pouvez télécharger plusieurs fichiers (PDF, images, etc.)',
+                lab_results: 'Résultats de Laboratoire',
                 lab_notes: 'Notes d\'évaluation de laboratoire',
                 lab_notes_hint: 'Ajoutez des notes, observations ou interprétations des résultats de laboratoire',
+                enter_lab_results: 'Entrez les résultats de laboratoire...',
+                enter_lab_notes: 'Entrez les notes et observations de laboratoire...',
                 previous_assessments: 'Évaluations précédentes',
                 save_assessment: 'Enregistrer l\'évaluation',
                 assessment_saved: 'Évaluation de laboratoire enregistrée avec succès!',
+                
+                // Radiology
+                radiology_result: 'Résultat de Radiologie',
+                diagnostics: 'Diagnostics',
+                enter_radiology_result: 'Entrez le résultat de radiologie...',
+                enter_diagnostics: 'Entrez les diagnostics...',
                 no_files_selected: 'Aucun fichier sélectionné',
                 file_uploaded: 'Fichier téléchargé',
                 remove_file: 'Supprimer le fichier',
@@ -738,6 +769,10 @@
                 settings_module: 'وحدة الإعدادات',
                 perm_access_settings: 'الوصول إلى الإعدادات',
                 perm_manage_users: 'إدارة المستخدمين',
+                // Expenses
+                expenses_module: 'وحدة المصروفات',
+                perm_view_expenses: 'عرض المصروفات',
+                perm_manage_expenses: 'إدارة المصروفات',
 
                 // Main Header
                 secretary_agenda: 'جدول أعمال السكرتير',
@@ -817,10 +852,11 @@
                 heart_rate_bpm: 'معدل النبض (نبضة/دقيقة)',
                 blood_sugar_mgdl: 'سكر الدم (ملغ/دل)',
                 blood_pressure_mmhg: 'ضغط الدم (ملم زئبق)',
+                vital_notes: 'ملاحظات حيوية',
                 reason: 'سبب الزيارة',
                 diagnosis: 'التشخيص',
                 clinical_examination: 'الفحص السريري',
-                clinical_notes: 'ملاحظات سريرية إضافية',
+                clinical_notes: 'ملاحظات سريرية',
                 prescription: 'الوصفة الطبية',
                 payment_status: 'حالة الدفع',
                 paying_patient: 'مريض يدفع',
@@ -840,6 +876,7 @@
                 heart_rate_example: 'مثال: 72',
                 blood_sugar_example: 'مثال: 95',
                 blood_pressure_example: 'مثال: 120/80',
+                enter_vital_notes: 'أدخل الملاحظات الحيوية...',
                 enter_reason: 'أدخل سبب الاستشارة',
                 enter_diagnosis: 'أدخل التشخيص',
                 enter_clinical_exam: 'أدخل نتائج الفحص السريري',
@@ -910,6 +947,15 @@
                 patient: 'المريض',
                 consultation_date: 'تاريخ الاستشارة',
                 upload_documents: 'تحميل المستندات المخبرية',
+                lab_results: 'نتائج المختبر',
+                enter_lab_results: 'أدخل نتائج المختبر...',
+                enter_lab_notes: 'أدخل ملاحظات وملاحظات المختبر...',
+                
+                // Radiology
+                radiology_result: 'نتيجة الأشعة',
+                diagnostics: 'التشخيص',
+                enter_radiology_result: 'أدخل نتيجة الأشعة...',
+                enter_diagnostics: 'أدخل التشخيص...',
                 upload_documents_hint: 'يمكنك تحميل ملفات متعددة (PDF، صور، إلخ.)',
                 lab_notes: 'ملاحظات التقييم المخبري',
                 lab_notes_hint: 'أضف ملاحظات أو ملاحظات أو تفسيرات لنتائج المختبر',
@@ -2406,6 +2452,28 @@
         // Patient Details Modal Functions
         let currentPatientDetailsId = null;
 
+        // Toggle accordion function
+        window.toggleAccordion = function(accordionId) {
+            const accordion = document.getElementById(accordionId);
+            if (!accordion) return;
+            
+            const isHidden = accordion.classList.contains('hidden');
+            
+            if (isHidden) {
+                accordion.classList.remove('hidden');
+                // Rotate icon
+                const iconId = accordionId + 'Icon';
+                const icon = document.getElementById(iconId);
+                if (icon) icon.style.transform = 'rotate(180deg)';
+            } else {
+                accordion.classList.add('hidden');
+                // Reset icon rotation
+                const iconId = accordionId + 'Icon';
+                const icon = document.getElementById(iconId);
+                if (icon) icon.style.transform = 'rotate(0deg)';
+            }
+        };
+
         function viewPatientDetails(patientId) {
             currentPatientDetailsId = patientId;
             const modal = document.getElementById('patientDetailsModal');
@@ -2416,6 +2484,10 @@
                 alert('Patient not found.');
                 return;
             }
+
+            // Calculate number of visits (consultations)
+            const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+            const visitsCount = consultations.filter(c => c.patientId === patientId).length;
 
             // Load patient information
             const patientDetailsInfo = document.getElementById('patientDetailsInfo');
@@ -2462,6 +2534,10 @@
                         <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('address', 'Address') : 'Address'}:</span>
                         <span class="text-gray-900">${patient.address || 'N/A'}</span>
                     </div>
+                    <div class="flex items-start">
+                        <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('number_of_visits', 'Number of Visits') : 'Number of Visits'}:</span>
+                        <span class="font-bold text-blue-600">${visitsCount}</span>
+                    </div>
                     ${patient.medicalHistory ? `
                     <div class="flex items-start">
                         <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('medical_history', 'Medical History') : 'Medical History'}:</span>
@@ -2480,6 +2556,9 @@
 
             // Load past bills
             loadPatientBills(patientId);
+
+            // Load patient documents
+            loadPatientDocuments(patientId);
 
             // Load medical files if any
             if (filesCount > 0) {
@@ -2746,6 +2825,346 @@
             }
         }
 
+        function loadPatientDocuments(patientId) {
+            const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+            const certificates = JSON.parse(localStorage.getItem('medical_certificates') || '[]');
+            const labAssessments = JSON.parse(localStorage.getItem('lab_assessments') || '[]');
+            const documentsList = document.getElementById('patientDocumentsList');
+            
+            if (!documentsList) return;
+            
+            // Collect all documents for this patient
+            const allDocuments = [];
+            
+            // Get certificates for this patient
+            const patientCertificates = certificates.filter(cert => cert.patientId === patientId);
+            patientCertificates.forEach(cert => {
+                const certType = cert.certType ? cert.certType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Medical Certificate';
+                allDocuments.push({
+                    type: 'certificate',
+                    title: certType,
+                    id: cert.id,
+                    date: cert.createdAt,
+                    data: cert,
+                    consultationId: cert.consultationId || ''
+                });
+            });
+            
+            // Get lab assessments from consultations
+            const patientConsultations = consultations.filter(c => c.patientId === patientId);
+            patientConsultations.forEach(consultation => {
+                // Get lab assessments linked to this consultation
+                const consultationLabAssessments = labAssessments.filter(lab => lab.consultationId === consultation.id);
+                consultationLabAssessments.forEach(lab => {
+                    allDocuments.push({
+                        type: 'lab',
+                        title: 'Lab Result',
+                        id: lab.id,
+                        date: lab.createdAt,
+                        consultationId: consultation.id,
+                        data: lab
+                    });
+                });
+                
+                // Only include prescription as a patient document (exclude consultation notes)
+                if (consultation.prescription) {
+                    allDocuments.push({
+                        type: 'prescription',
+                        title: 'Prescription',
+                        id: `consultation-${consultation.id}`,
+                        date: consultation.createdAt,
+                        consultationId: consultation.id,
+                        data: consultation
+                    });
+                }
+            });
+            
+            // Sort by date (newest first)
+            allDocuments.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            if (allDocuments.length === 0) {
+                documentsList.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <p data-translate="no_documents_found">No documents found for this patient.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            documentsList.innerHTML = allDocuments.map(doc => {
+                const docDate = new Date(doc.date);
+                let docIcon = '';
+                let bgColor = 'bg-gray-50';
+                
+                switch(doc.type) {
+                    case 'certificate':
+                        docIcon = '<svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>';
+                        bgColor = 'bg-blue-50';
+                        break;
+                    case 'lab':
+                        docIcon = '<svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>';
+                        bgColor = 'bg-green-50';
+                        break;
+                    case 'prescription':
+                        docIcon = '<svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>';
+                        bgColor = 'bg-purple-50';
+                        break;
+                    case 'notes':
+                        docIcon = '<svg class="w-5 h-5 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>';
+                        bgColor = 'bg-orange-50';
+                        break;
+                }
+                
+                return `
+                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow ${bgColor} cursor-pointer" onclick="previewPatientDocument('${doc.type}', '${doc.id}', '${doc.consultationId || ''}')">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex items-center">
+                                ${docIcon}
+                                <span class="font-semibold text-gray-900">${doc.title}</span>
+                            </div>
+                            <span class="text-xs text-gray-500">${docDate.toLocaleDateString()} ${docDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                        <div class="text-sm text-gray-600 mt-2 flex justify-between items-center">
+                            <span>
+                                <strong data-translate="document_id">Document ID:</strong> ${doc.id}
+                            </span>
+                            <span class="text-blue-600 text-xs font-medium" data-translate="click_to_preview">Click to preview</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Update translations after rendering
+            if (window.I18n && window.I18n.walkAndTranslate) {
+                window.I18n.walkAndTranslate();
+            }
+        }
+
+        // Preview patient document
+        window.previewPatientDocument = function(docType, docId, consultIdFromDoc) {
+            const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+            const certificates = JSON.parse(localStorage.getItem('medical_certificates') || '[]');
+            const labAssessments = JSON.parse(localStorage.getItem('lab_assessments') || '[]');
+            const modal = document.getElementById('patientDocumentPreviewModal');
+            const previewContent = document.getElementById('patientDocumentPreviewContent');
+            
+            if (!modal || !previewContent) {
+                alert('Preview feature not available.');
+                return;
+            }
+            
+            let documentData = null;
+            let documentTitle = '';
+            let documentHTML = '';
+            
+            // Get document based on type
+            switch(docType) {
+                case 'certificate':
+                    documentData = certificates.find(cert => cert.id === docId);
+                    if (documentData) {
+                        const certType = documentData.certType ? documentData.certType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Medical Certificate';
+                        documentTitle = certType;
+                        // Extract certificate details
+                        documentHTML = `
+                            <div class="space-y-4">
+                                <div class="border-b pb-3">
+                                    <h4 class="font-semibold text-lg mb-2">${documentTitle}</h4>
+                                    <div class="text-sm text-gray-600">
+                                        <strong>ID:</strong> ${documentData.id}<br>
+                                        <strong>Date:</strong> ${new Date(documentData.createdAt).toLocaleString()}
+                                    </div>
+                                </div>
+                                
+                                ${documentData.patientName ? `
+                                    <div>
+                                        <strong class="text-gray-700">Patient Name:</strong>
+                                        <p class="text-gray-900">${documentData.patientName}</p>
+                                    </div>
+                                ` : ''}
+                                
+                                ${documentData.certType ? `
+                                    <div>
+                                        <strong class="text-gray-700">Certificate Type:</strong>
+                                        <p class="text-gray-900">${certType}</p>
+                                    </div>
+                                ` : ''}
+                                
+                                ${documentData.restPeriod ? `
+                                    <div>
+                                        <strong class="text-gray-700">Rest Period:</strong>
+                                        <p class="text-gray-900">${documentData.restPeriod} ${window.t ? window.t('days', 'days') : 'days'}</p>
+                                    </div>
+                                ` : ''}
+                                
+                                ${documentData.startDate || documentData.endDate ? `
+                                    <div class="grid grid-cols-2 gap-4">
+                                        ${documentData.startDate ? `
+                                    <div>
+                                                <strong class="text-gray-700">Start Date:</strong>
+                                                <p class="text-gray-900">${new Date(documentData.startDate).toLocaleDateString()}</p>
+                                    </div>
+                                ` : ''}
+                                        ${documentData.endDate ? `
+                                    <div>
+                                                <strong class="text-gray-700">End Date:</strong>
+                                                <p class="text-gray-900">${new Date(documentData.endDate).toLocaleDateString()}</p>
+                                    </div>
+                                ` : ''}
+                                    </div>
+                                ` : ''}
+                                
+                                ${documentData.notes ? `
+                                    <div>
+                                        <strong class="text-gray-700">Notes:</strong>
+                                        <p class="text-gray-900">${documentData.notes}</p>
+                                    </div>
+                                ` : ''}
+                                
+                                ${documentData.doctorName ? `
+                                    <div class="mt-4 pt-3 border-t">
+                                        <strong class="text-gray-700">Doctor:</strong>
+                                        <p class="text-gray-900">${documentData.doctorName}</p>
+                                    </div>
+                                ` : ''}
+                                
+                                <div class="mt-4 pt-3 border-t">
+                                    <button onclick="printMedicalCertificate('${documentData.id}')" class="btn btn-primary">
+                                        <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                                        </svg>
+                                        ${window.t ? window.t('print_certificate', 'Print Certificate') : 'Print Certificate'}
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    break;
+                    
+                case 'lab':
+                    documentData = labAssessments.find(lab => lab.id === docId);
+                    if (documentData) {
+                        documentTitle = 'Lab Result';
+                        const labDate = new Date(documentData.createdAt).toLocaleString();
+                        documentHTML = `
+                            <div class="space-y-4">
+                                <div class="border-b pb-3">
+                                    <h4 class="font-semibold text-lg mb-2">${documentTitle}</h4>
+                                    <div class="text-sm text-gray-600">
+                                        <strong>ID:</strong> ${documentData.id}<br>
+                                        <strong>Date:</strong> ${labDate}
+                                    </div>
+                                </div>
+                                
+                                ${documentData.testName ? `
+                                    <div>
+                                        <strong class="text-gray-700">Test Name:</strong>
+                                        <p class="text-gray-900">${documentData.testName}</p>
+                                    </div>
+                                ` : ''}
+                                
+                                ${documentData.results ? `
+                                    <div>
+                                        <strong class="text-gray-700">Results:</strong>
+                                        <div class="bg-gray-50 p-3 rounded mt-2">
+                                            <pre class="text-sm text-gray-900 whitespace-pre-wrap">${documentData.results}</pre>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                                
+                                ${documentData.referenceRange ? `
+                                    <div>
+                                        <strong class="text-gray-700">Reference Range:</strong>
+                                        <p class="text-gray-900">${documentData.referenceRange}</p>
+                                    </div>
+                                ` : ''}
+                                
+                                ${documentData.notes ? `
+                                    <div>
+                                        <strong class="text-gray-700">Notes:</strong>
+                                        <p class="text-gray-900">${documentData.notes}</p>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    }
+                    break;
+                    
+                case 'prescription':
+                case 'notes':
+                    // Get consultation data
+                    const consultationId = docId.replace('consultation-', '');
+                    documentData = consultations.find(c => c.id === consultationId);
+                    if (documentData) {
+                        documentTitle = docType === 'prescription' ? 'Prescription' : 'Consultation Notes';
+                        const consultDate = new Date(documentData.createdAt).toLocaleString();
+                        documentHTML = `
+                            <div class="space-y-4">
+                                <div class="border-b pb-3">
+                                    <h4 class="font-semibold text-lg mb-2">${documentTitle}</h4>
+                                    <div class="text-sm text-gray-600">
+                                        <strong>Consultation ID:</strong> ${documentData.id}<br>
+                                        <strong>Date:</strong> ${consultDate}
+                                    </div>
+                                </div>
+                                
+                                ${docType === 'prescription' && documentData.prescription ? `
+                                    <div>
+                                        <strong class="text-gray-700">Prescription:</strong>
+                                        <div class="bg-gray-50 p-3 rounded mt-2">
+                                            <pre class="text-sm text-gray-900 whitespace-pre-wrap">${documentData.prescription}</pre>
+                                        </div>
+                                        <div class="mt-4 pt-3 border-t">
+                                            <button class="btn btn-primary" onclick="printPrescription('${documentData.id}')">
+                                                <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                                                </svg>
+                                                ${window.t ? window.t('print_prescription', 'Print Prescription') : 'Print Prescription'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                                
+                                ${docType === 'notes' && documentData.notes ? `
+                                    <div>
+                                        <strong class="text-gray-700">Notes:</strong>
+                                        <div class="bg-gray-50 p-3 rounded mt-2">
+                                            <pre class="text-sm text-gray-900 whitespace-pre-wrap">${documentData.notes}</pre>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                                
+                                ${documentData.doctor ? `
+                                    <div class="mt-4 pt-3 border-t">
+                                        <strong class="text-gray-700">Doctor:</strong>
+                                        <p class="text-gray-900">${documentData.doctor}</p>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    }
+                    break;
+            }
+            
+            if (!documentData) {
+                alert('Document not found.');
+                return;
+            }
+            
+            previewContent.innerHTML = documentHTML;
+            modal.classList.add('active');
+        };
+
+        // Close patient document preview modal
+        window.closePatientDocumentPreviewModal = function() {
+            const modal = document.getElementById('patientDocumentPreviewModal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        };
+
         function viewBillDetails(billId) {
             const bills = JSON.parse(localStorage.getItem('healthcareBills') || '[]');
             const bill = bills.find(b => b.id === billId);
@@ -2851,7 +3270,8 @@
 
             // Get form data
             const formData = {
-                fileNumber: document.getElementById('editPatientFileNumber').value,
+                // File number is immutable; always use the original value
+                fileNumber: (editingPatient && editingPatient.fileNumber) || document.getElementById('editPatientFileNumber').value,
                 cinPassport: document.getElementById('editPatientCinPassport').value,
                 fullName: document.getElementById('editPatientFullName').value,
                 email: document.getElementById('editPatientEmailAddress').value,
@@ -3212,7 +3632,7 @@
                             Edit
                         </button>
                         ` : ''}
-                        ${canDelete ? `
+                        ${false && canDelete ? `
                         <button onclick="deletePatient('${patient.id}')" class="btn btn-sm bg-red-600 hover:bg-red-700 text-white" data-translate="delete">
                             Delete
                         </button>
@@ -3401,6 +3821,12 @@
             // Populate form with patient data
             document.getElementById('editPatientId').value = patient.id;
             document.getElementById('editPatientFileNumber').value = patient.fileNumber || '';
+            // Ensure file number is not editable in Edit mode
+            const editFileNumEl = document.getElementById('editPatientFileNumber');
+            if (editFileNumEl) {
+                editFileNumEl.readOnly = true;
+                editFileNumEl.disabled = true;
+            }
             document.getElementById('editPatientCinPassport').value = patient.cinPassport || '';
             document.getElementById('editPatientFullName').value = patient.fullName;
             document.getElementById('editPatientEmailAddress').value = patient.email;
@@ -3662,9 +4088,6 @@
             const mobileMenu = document.getElementById('mobile-menu');
             mobileMenu.classList.add('hidden');
 
-            // Load patients for billing
-            loadPatientsForBilling();
-
             // Update modal translations
             updateModalTranslations();
 
@@ -3677,10 +4100,6 @@
 
             // Reset form
             resetBillingForm();
-
-            // Ensure patient selection is enabled for fresh forms
-            const patientSelectInit = document.getElementById('billPatientSelection');
-            if (patientSelectInit) patientSelectInit.disabled = false;
 
             // Refresh bill description selects with managed descriptions
             refreshBillDescriptionSelects();
@@ -3767,10 +4186,18 @@
 
             const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
             const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
+            const bills = JSON.parse(localStorage.getItem('healthcareBills') || '[]');
 
-            // Filter out consultations where patient no longer exists
+            // Get all consultation IDs that already have bills
+            const consultationIdsWithBills = new Set(
+                bills.filter(b => b.consultationId).map(b => b.consultationId)
+            );
+
+            // Filter out consultations where patient no longer exists OR where a bill already exists
             const validConsultations = consultations.filter(c => {
-                return patients.some(p => p.id === c.patientId);
+                const patientExists = patients.some(p => p.id === c.patientId);
+                const hasBill = consultationIdsWithBills.has(c.id);
+                return patientExists && !hasBill;
             });
 
             // Show most recent first
@@ -4021,20 +4448,20 @@
                 closeReadyBillsModal();
                 showBillingModal();
 
+                // Store the consultation ID for linking the bill to this consultation
+                const consultationIdField = document.getElementById('billConsultationId');
+                if (consultationIdField) {
+                    consultationIdField.value = consultationId;
+                }
+
                 const patient = patients.find(p => p.id === c.patientId);
                 if (patient) {
-                    const select = document.getElementById('billPatientSelection');
-                    if (select) {
-                        // Ensure patients are loaded first
+                    // Set patient ID and populate the form
+                    document.getElementById('billPatientId').value = patient.id;
+                    if (typeof handleBillPatientSelection === 'function') {
                         setTimeout(() => {
-                            const opt = Array.from(select.options).find(o => o.value === patient.id);
-                            if (opt) {
-                                select.value = patient.id;
-                                if (typeof handleBillPatientSelection === 'function') handleBillPatientSelection();
-                                // Lock patient selection for consultation-derived bills
-                                select.disabled = true;
-                            }
-                        }, 0);
+                            handleBillPatientSelection();
+                        }, 100);
                     }
                 }
 
@@ -4088,6 +4515,14 @@
         }
 
         function updateModalTranslations() {
+            // Update consultation menu buttons if modal is open
+            const consultationModal = document.getElementById('consultationModal');
+            if (consultationModal && consultationModal.classList.contains('active')) {
+                setTimeout(() => {
+                    updateConsultMenuButtons();
+                }, 50);
+            }
+            
             // Use i18n system if available, otherwise fallback to legacy system
             if (window.I18n && window.I18n.walkAndTranslate) {
                 // Use the i18n system to translate all elements
@@ -4098,7 +4533,10 @@
             modalElements.forEach(element => {
                 const key = element.getAttribute('data-translate');
                 if (translations[currentLanguage] && translations[currentLanguage][key]) {
+                    // Skip elements with spans inside (like menu buttons) - they are handled separately
+                    if (element.querySelector('span') === null) {
                     element.textContent = translations[currentLanguage][key];
+                    }
                 }
             });
 
@@ -4394,6 +4832,7 @@
                 'view_bills', 'create_bills', 'manage_bills',
                 'view_consultations', 'add_consultations', 'delete_consultations',
                 'view_reports', 'export_reports',
+                'view_expenses', 'manage_expenses',
                 'access_settings', 'manage_users'
             ];
             
@@ -4712,6 +5151,130 @@
         }
 
         // ========================================
+        // Medicines Management Functions
+        // ========================================
+        
+        function getMedicines() {
+            const stored = localStorage.getItem('medicines');
+            if (!stored) {
+                const defaults = [];
+                saveMedicines(defaults);
+                return defaults;
+            }
+            return JSON.parse(stored);
+        }
+
+        function saveMedicines(medicines) {
+            localStorage.setItem('medicines', JSON.stringify(medicines));
+        }
+
+        function showMedicinesModal() {
+            const modal = document.getElementById('medicinesModal');
+            if (modal) {
+                modal.classList.add('active');
+                
+                // Close mobile menu if open
+                const mobileMenu = document.getElementById('mobile-menu');
+                if (mobileMenu) mobileMenu.classList.add('hidden');
+                
+                renderMedicinesList();
+                updateModalTranslations();
+            }
+        }
+
+        function closeMedicinesModal() {
+            const modal = document.getElementById('medicinesModal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        function renderMedicinesList(searchTerm = '') {
+            const container = document.getElementById('medicinesListContainer');
+            if (!container) return;
+            
+            const medicines = getMedicines();
+            
+            const filtered = searchTerm
+                ? medicines.filter(m => m.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                : medicines;
+            
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        <p>${window.t ? window.t('no_medicines_found', 'No medicines found') : 'No medicines found'}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = filtered.map(med => `
+                <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <div class="flex-1">
+                        <div class="font-semibold text-gray-900">${med.name}</div>
+                        ${med.dosage ? `<div class="text-sm text-gray-600">${window.t ? window.t('dosage', 'Dosage') : 'Dosage'}: ${med.dosage}</div>` : ''}
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="editMedicine(${med.id})" class="btn btn-sm btn-outline">
+                            <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                            <span data-translate="edit">${window.t ? window.t('edit', 'Edit') : 'Edit'}</span>
+                        </button>
+                        <button onclick="deleteMedicine(${med.id})" class="btn btn-sm btn-outline text-red-600 hover:bg-red-50">
+                            <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                            <span data-translate="delete">${window.t ? window.t('delete', 'Delete') : 'Delete'}</span>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function searchMedicines() {
+            const searchTerm = document.getElementById('medicineSearch')?.value || '';
+            renderMedicinesList(searchTerm);
+        }
+
+        window.editMedicine = function(id) {
+            const medicines = getMedicines();
+            const med = medicines.find(m => m.id === id);
+            if (!med) return;
+            
+            const editIdInput = document.getElementById('editMedicineId');
+            const editNameInput = document.getElementById('editMedicineName');
+            const editDosageInput = document.getElementById('editMedicineDosage');
+            
+            if (editIdInput) editIdInput.value = med.id;
+            if (editNameInput) editNameInput.value = med.name;
+            if (editDosageInput) editDosageInput.value = med.dosage || '';
+            
+            const modal = document.getElementById('editMedicineModal');
+            if (modal) {
+                modal.classList.add('active');
+                updateModalTranslations();
+            }
+        }
+
+        function closeEditMedicineModal() {
+            const modal = document.getElementById('editMedicineModal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        window.deleteMedicine = function(id) {
+            const confirmMessage = window.t ? window.t('confirm_delete_medicine', 'Are you sure you want to delete this medicine?') : 'Are you sure you want to delete this medicine?';
+            if (!confirm(confirmMessage)) return;
+            
+            const medicines = getMedicines();
+            const filtered = medicines.filter(m => m.id !== id);
+            saveMedicines(filtered);
+            
+            renderMedicinesList();
+            
+            const successMessage = window.t ? window.t('medicine_deleted', 'Medicine deleted successfully!') : 'Medicine deleted successfully!';
+            showTranslatedAlert('medicine_deleted', successMessage);
+        }
+
+        // ========================================
         // Doctor Profit Reports Functions
         // ========================================
 
@@ -4858,6 +5421,23 @@
             };
         }
 
+        // Get total expenses within a date range [startDate, endDate]
+        function getExpensesForPeriod(startDate, endDate) {
+            try {
+                const expenses = JSON.parse(localStorage.getItem('healthcareExpenses') || '[]');
+                const inRange = expenses.filter(exp => {
+                    const raw = exp.date || exp.createdAt;
+                    if (!raw) return false;
+                    const d = new Date(raw);
+                    return d >= startDate && d <= endDate;
+                });
+                const total = inRange.reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
+                return { list: inRange, total };
+            } catch {
+                return { list: [], total: 0 };
+            }
+        }
+
         function renderDailyReport() {
             const dateInput = document.getElementById('dailyReportDate');
             const selectedDate = new Date(dateInput.value);
@@ -4869,6 +5449,7 @@
             endDate.setHours(23, 59, 59, 999);
 
             const data = getDoctorBillsForPeriod(startDate, endDate);
+            const expenseData = getExpensesForPeriod(startDate, endDate);
             currentReportData = data;
 
             const container = document.getElementById('dailyReportContainer');
@@ -4885,13 +5466,15 @@
                 return;
             }
 
-            const totalProfit = data.bills.reduce((sum, bill) => sum + bill.total, 0);
+            const totalRevenue = data.bills.reduce((sum, bill) => sum + bill.total, 0);
+            const totalExpenses = expenseData.total;
+            const netProfit = totalRevenue - totalExpenses;
             const totalConsultations = data.consultations.length;
             const totalBills = data.bills.length;
 
             container.innerHTML = `
                 <!-- Summary Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                     <div class="card p-4 bg-blue-50">
                         <div class="flex items-center justify-between">
                             <div>
@@ -4919,11 +5502,35 @@
                     <div class="card p-4 bg-yellow-50">
                         <div class="flex items-center justify-between">
                             <div>
-                                <div class="text-sm text-gray-600" data-translate="total_profit">${window.t ? window.t('total_profit', 'Total Profit') : 'Total Profit'}</div>
-                                <div class="text-2xl font-bold text-yellow-600">${totalProfit.toFixed(2)} TND</div>
+                                <div class="text-sm text-gray-600">${window.t ? window.t('total_revenue', 'Total Revenue') : 'Total Revenue'}</div>
+                                <div class="text-2xl font-bold text-yellow-600">${totalRevenue.toFixed(2)} TND</div>
                             </div>
                             <svg class="w-10 h-10 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="card p-4 bg-red-50">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm text-gray-600">${window.t ? window.t('total_expenses', 'Total Expenses') : 'Total Expenses'}</div>
+                                <div class="text-2xl font-bold text-red-600">${totalExpenses.toFixed(2)} TND</div>
+                            </div>
+                            <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m4-4H8M12 4a8 8 0 100 16 8 8 0 000-16z" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="card p-4 bg-teal-50">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm text-gray-600">${window.t ? window.t('net_profit', 'Net Profit') : 'Net Profit'}</div>
+                                <div class="text-2xl font-bold text-teal-600">${netProfit.toFixed(2)} TND</div>
+                            </div>
+                            <svg class="w-10 h-10 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                         </div>
                     </div>
@@ -4970,6 +5577,7 @@
             endDate.setHours(23, 59, 59, 999);
 
             const data = getDoctorBillsForPeriod(startDate, endDate);
+            const expenseData = getExpensesForPeriod(startDate, endDate);
             currentReportData = data;
 
             const container = document.getElementById('weeklyReportContainer');
@@ -4986,7 +5594,9 @@
                 return;
             }
 
-            const totalProfit = data.bills.reduce((sum, bill) => sum + bill.total, 0);
+            const totalRevenue = data.bills.reduce((sum, bill) => sum + bill.total, 0);
+            const totalExpenses = expenseData.total;
+            const netProfit = totalRevenue - totalExpenses;
             const totalConsultations = data.consultations.length;
             const totalBills = data.bills.length;
 
@@ -5006,7 +5616,7 @@
 
             container.innerHTML = `
                 <!-- Summary Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                     <div class="card p-4 bg-blue-50">
                         <div class="flex items-center justify-between">
                             <div>
@@ -5034,11 +5644,35 @@
                     <div class="card p-4 bg-yellow-50">
                         <div class="flex items-center justify-between">
                             <div>
-                                <div class="text-sm text-gray-600" data-translate="total_profit">${window.t ? window.t('total_profit', 'Total Profit') : 'Total Profit'}</div>
-                                <div class="text-2xl font-bold text-yellow-600">${totalProfit.toFixed(2)} TND</div>
+                                <div class="text-sm text-gray-600">${window.t ? window.t('total_revenue', 'Total Revenue') : 'Total Revenue'}</div>
+                                <div class="text-2xl font-bold text-yellow-600">${totalRevenue.toFixed(2)} TND</div>
                             </div>
                             <svg class="w-10 h-10 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="card p-4 bg-red-50">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm text-gray-600">${window.t ? window.t('total_expenses', 'Total Expenses') : 'Total Expenses'}</div>
+                                <div class="text-2xl font-bold text-red-600">${totalExpenses.toFixed(2)} TND</div>
+                            </div>
+                            <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m4-4H8M12 4a8 8 0 100 16 8 8 0 000-16z" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="card p-4 bg-teal-50">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm text-gray-600">${window.t ? window.t('net_profit', 'Net Profit') : 'Net Profit'}</div>
+                                <div class="text-2xl font-bold text-teal-600">${netProfit.toFixed(2)} TND</div>
+                            </div>
+                            <svg class="w-10 h-10 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                         </div>
                     </div>
@@ -5080,6 +5714,7 @@
             const endDate = new Date(year, month + 1, 0, 23, 59, 59, 999);
 
             const data = getDoctorBillsForPeriod(startDate, endDate);
+            const expenseData = getExpensesForPeriod(startDate, endDate);
             currentReportData = data;
 
             const container = document.getElementById('monthlyReportContainer');
@@ -5096,10 +5731,12 @@
                 return;
             }
 
-            const totalProfit = data.bills.reduce((sum, bill) => sum + bill.total, 0);
+            const totalRevenue = data.bills.reduce((sum, bill) => sum + bill.total, 0);
             const totalConsultations = data.consultations.length;
             const totalBills = data.bills.length;
-            const averagePerBill = totalProfit / totalBills;
+            const totalExpenses = expenseData.total;
+            const netProfit = totalRevenue - totalExpenses;
+            const averagePerBill = totalRevenue / totalBills;
 
             // Group bills by week
             const billsByWeek = {};
@@ -5122,7 +5759,7 @@
 
             container.innerHTML = `
                 <!-- Summary Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
                     <div class="card p-4 bg-blue-50">
                         <div class="flex items-center justify-between">
                             <div>
@@ -5150,11 +5787,35 @@
                     <div class="card p-4 bg-yellow-50">
                         <div class="flex items-center justify-between">
                             <div>
-                                <div class="text-sm text-gray-600" data-translate="total_profit">${window.t ? window.t('total_profit', 'Total Profit') : 'Total Profit'}</div>
-                                <div class="text-2xl font-bold text-yellow-600">${totalProfit.toFixed(2)} TND</div>
+                                <div class="text-sm text-gray-600">${window.t ? window.t('total_revenue', 'Total Revenue') : 'Total Revenue'}</div>
+                                <div class="text-2xl font-bold text-yellow-600">${totalRevenue.toFixed(2)} TND</div>
                             </div>
                             <svg class="w-10 h-10 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="card p-4 bg-red-50">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm text-gray-600">${window.t ? window.t('total_expenses', 'Total Expenses') : 'Total Expenses'}</div>
+                                <div class="text-2xl font-bold text-red-600">${totalExpenses.toFixed(2)} TND</div>
+                            </div>
+                            <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m4-4H8M12 4a8 8 0 100 16 8 8 0 000-16z" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="card p-4 bg-teal-50">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm text-gray-600">${window.t ? window.t('net_profit', 'Net Profit') : 'Net Profit'}</div>
+                                <div class="text-2xl font-bold text-teal-600">${netProfit.toFixed(2)} TND</div>
+                            </div>
+                            <svg class="w-10 h-10 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                         </div>
                     </div>
@@ -5213,8 +5874,33 @@
 
             reportText += `Summary:\n`;
             reportText += `Total Consultations: ${currentReportData.consultations.length}\n`;
+            const now = new Date();
+            let rangeStart, rangeEnd;
+            if (currentReportTab === 'daily') {
+                rangeStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+                rangeEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+            } else if (currentReportTab === 'weekly') {
+                const day = now.getDay();
+                rangeStart = new Date(now);
+                rangeStart.setDate(now.getDate() - day);
+                rangeStart.setHours(0,0,0,0);
+                rangeEnd = new Date(rangeStart);
+                rangeEnd.setDate(rangeStart.getDate() + 6);
+                rangeEnd.setHours(23,59,59,999);
+            } else {
+                const m = document.getElementById('monthlyReportMonth') ? parseInt(document.getElementById('monthlyReportMonth').value) : now.getMonth();
+                const y = document.getElementById('monthlyReportYear') ? parseInt(document.getElementById('monthlyReportYear').value) : now.getFullYear();
+                rangeStart = new Date(y, m, 1, 0,0,0,0);
+                rangeEnd = new Date(y, m + 1, 0, 23,59,59,999);
+            }
+            const expensesForRange = getExpensesForPeriod(rangeStart, rangeEnd).total;
+            const totalRevenueForRange = currentReportData.bills.reduce((sum, b) => sum + b.total, 0);
+            const netProfitForRange = totalRevenueForRange - expensesForRange;
+
             reportText += `Total Bills: ${currentReportData.bills.length}\n`;
-            reportText += `Total Profit: $${currentReportData.bills.reduce((sum, b) => sum + b.total, 0).toFixed(2)}\n`;
+            reportText += `Total Revenue: ${totalRevenueForRange.toFixed(2)} TND\n`;
+            reportText += `Total Expenses: ${expensesForRange.toFixed(2)} TND\n`;
+            reportText += `Net Profit: ${netProfitForRange.toFixed(2)} TND\n`;
             reportText += `\n==========================================\n\n`;
 
             reportText += `Bill Details:\n`;
@@ -5355,25 +6041,20 @@
             });
         }
 
-        function loadPatientsForBilling() {
-            const patientSelect = document.getElementById('billPatientSelection');
-            patientSelect.innerHTML = `<option value="">${window.t ? window.t('choose_patient', 'Choose a patient...') : 'Choose a patient...'}</option>`;
-
-            storedPatients.forEach(patient => {
-                const option = document.createElement('option');
-                option.value = patient.id;
-                option.textContent = `${patient.fullName} (${patient.email})`;
-                patientSelect.appendChild(option);
-            });
-        }
 
         function handleBillPatientSelection() {
-            const patientId = document.getElementById('billPatientSelection').value;
+            const patientId = document.getElementById('billPatientId').value;
+            const patientDisplay = document.getElementById('billPatientDisplay');
             const patientDetails = document.getElementById('billPatientDetails');
 
             if (patientId) {
                 const patient = storedPatients.find(p => p.id === patientId);
                 if (patient) {
+                    // Set display field
+                    if (patientDisplay) {
+                        patientDisplay.value = patient.fullName + (patient.email ? ' (' + patient.email + ')' : '');
+                    }
+                    
                     // Show patient details
                     document.getElementById('billPatientName').textContent = patient.fullName;
                     document.getElementById('billPatientEmail').textContent = patient.email;
@@ -5381,7 +6062,6 @@
                     document.getElementById('billPatientAddress').textContent = patient.address || 'Not provided';
 
                     // Set hidden inputs
-                    document.getElementById('billPatientId').value = patient.id;
                     document.getElementById('billPatientFullName').value = patient.fullName;
                     document.getElementById('billPatientEmailAddress').value = patient.email;
                     document.getElementById('billPatientPhoneNumber').value = patient.phone;
@@ -5389,6 +6069,9 @@
                     patientDetails.classList.remove('hidden');
                 }
             } else {
+                if (patientDisplay) {
+                    patientDisplay.value = '';
+                }
                 patientDetails.classList.add('hidden');
             }
         }
@@ -5539,8 +6222,6 @@
         function resetBillingForm() {
             document.getElementById('billingForm').reset();
             document.getElementById('billPatientDetails').classList.add('hidden');
-            const patientSelect = document.getElementById('billPatientSelection');
-            if (patientSelect) patientSelect.disabled = false;
 
             // Reset bill items to just one
             resetBillItems();
@@ -5596,8 +6277,9 @@
                 tax: tax,
                 total: total,
                 notes: formData.notes || '',
-                status: 'Pending',
-                createdAt: new Date().toISOString()
+                status: 'Paid',
+                createdAt: new Date().toISOString(),
+                consultationId: formData.consultationId || null // Link to consultation if bill came from consultation
             };
 
             console.log('Creating bill:', newBill);
@@ -5637,10 +6319,25 @@
             const billDate = new Date(bill.billDate).toLocaleDateString();
             const dueDate = new Date(bill.dueDate).toLocaleDateString();
             const createdDate = new Date(bill.createdAt).toLocaleDateString();
+            
+            // Get current language
+            const lang = currentLanguage || 'en';
+            
+            // Define translation function for the bill
+            const t = (key, fallback) => {
+                if (window.t) {
+                    return window.t(key, fallback);
+                }
+                // Fallback to inline translations if window.t is not available
+                if (translations[lang] && translations[lang][key]) {
+                    return translations[lang][key];
+                }
+                return fallback || key;
+            };
 
             const billHTML = `
                 <!DOCTYPE html>
-                <html lang="en">
+                <html lang="${lang}">
                 <head>
                     <meta charset="UTF-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -5823,17 +6520,17 @@
                         
                         <div class="bill-info">
                             <div class="bill-section">
-                                <h3>Bill To:</h3>
+                                <h3>${t('bill_to', 'Bill To:')}</h3>
                                 <p><strong>${bill.patientName}</strong></p>
                                 <p>${bill.patientEmail}</p>
                                 <p>${bill.patientPhone}</p>
                             </div>
                             
                             <div class="bill-section">
-                                <h3>Bill Information:</h3>
-                                <p><strong>Bill ID:</strong> ${bill.id}</p>
-                                <p><strong>Bill Date:</strong> ${billDate}</p>
-                                <p><strong>Due Date:</strong> ${dueDate}</p>
+                                <h3>${t('bill_information', 'Bill Information:')}</h3>
+                                <p><strong>${t('bill_id', 'Bill ID')}:</strong> ${bill.id}</p>
+                                <p><strong>${t('bill_date', 'Bill Date')}:</strong> ${billDate}</p>
+                                <p><strong>${t('due_date', 'Due Date')}:</strong> ${dueDate}</p>
                                 <p><strong>Status:</strong> ${bill.status}</p>
                             </div>
                         </div>
@@ -5841,19 +6538,15 @@
                         <table class="bill-items-table">
                             <thead>
                                 <tr>
-                                    <th>Description</th>
-                                    <th class="text-center">Quantity</th>
-                                    <th class="text-right">Price</th>
-                                    <th class="text-right">Total</th>
+                                    <th>${t('description', 'Description')}</th>
+                                    <th class="text-right">${t('price', 'Price')}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 ${bill.items.map(item => `
                                     <tr>
                                         <td>${item.description}</td>
-                                        <td class="text-center">${item.quantity}</td>
                                         <td class="text-right">${item.price.toFixed(2)} TND</td>
-                                        <td class="text-right">${item.total.toFixed(2)} TND</td>
                                     </tr>
                                 `).join('')}
                             </tbody>
@@ -5861,36 +6554,36 @@
                         
                         <div class="bill-totals">
                             <div class="bill-total-row">
-                                <span>Subtotal:</span>
+                                <span>${t('subtotal', 'Subtotal')}:</span>
                                 <span>${bill.subtotal.toFixed(2)} TND</span>
                             </div>
                             <div class="bill-total-row">
-                                <span>Tax (8%):</span>
+                                <span>${t('tax', 'Tax')} (8%):</span>
                                 <span>${bill.tax.toFixed(2)} TND</span>
                             </div>
                             <div class="bill-total-row final">
-                                <span>Total Amount:</span>
+                                <span>${t('total_amount', 'Total Amount')}:</span>
                                 <span>${bill.total.toFixed(2)} TND</span>
                             </div>
                         </div>
                         
                         ${bill.notes ? `
                             <div class="bill-notes">
-                                <h4>Notes:</h4>
+                                <h4>${t('notes', 'Notes')}:</h4>
                                 <p>${bill.notes}</p>
                             </div>
                         ` : ''}
                         
                         <div class="bill-footer">
-                            <p>Thank you for choosing our healthcare services.</p>
-                            <p>For questions about this bill, please contact us at (555) 123-4567</p>
-                            <p>Generated on ${createdDate}</p>
+                            <p>${t('thank_you_message', 'Thank you for choosing our healthcare services.')}</p>
+                            <p>${t('for_questions_contact', 'For questions about this bill, please contact us at')} (555) 123-4567</p>
+                            <p>${t('generated_on', 'Generated on')} ${createdDate}</p>
                         </div>
                     </div>
                     
                     <div class="print-actions">
-                        <button class="btn" onclick="window.print()">🖨️ Print Bill</button>
-                        <button class="btn btn-secondary" onclick="window.close()">Close</button>
+                        <button class="btn" onclick="window.print()">🖨️ ${t('print_bill', 'Print Bill')}</button>
+                        <button class="btn btn-secondary" onclick="window.close()">${t('close', 'Close')}</button>
                     </div>
                 </body>
                 </html>
@@ -5965,6 +6658,21 @@
             const billDate = new Date(bill.billDate).toLocaleDateString();
             const dueDate = new Date(bill.dueDate).toLocaleDateString();
             const createdDate = new Date(bill.createdAt).toLocaleDateString();
+            
+            // Get current language
+            const lang = currentLanguage || 'en';
+            
+            // Define translation function for the bill
+            const t = (key, fallback) => {
+                if (window.t) {
+                    return window.t(key, fallback);
+                }
+                // Fallback to inline translations if window.t is not available
+                if (translations[lang] && translations[lang][key]) {
+                    return translations[lang][key];
+                }
+                return fallback || key;
+            };
 
             return `
                 <div class="printable-bill">
@@ -5995,17 +6703,17 @@
                     
                     <div class="bill-info">
                         <div class="bill-section">
-                            <h3>Bill To:</h3>
+                            <h3>${t('bill_to', 'Bill To:')}</h3>
                             <p><strong>${bill.patientName}</strong></p>
                             <p>${bill.patientEmail}</p>
                             <p>${bill.patientPhone}</p>
                         </div>
                         
                         <div class="bill-section">
-                            <h3>Bill Information:</h3>
-                            <p><strong>Bill ID:</strong> ${bill.id}</p>
-                            <p><strong>Bill Date:</strong> ${billDate}</p>
-                            <p><strong>Due Date:</strong> ${dueDate}</p>
+                            <h3>${t('bill_information', 'Bill Information:')}</h3>
+                            <p><strong>${t('bill_id', 'Bill ID')}:</strong> ${bill.id}</p>
+                            <p><strong>${t('bill_date', 'Bill Date')}:</strong> ${billDate}</p>
+                            <p><strong>${t('due_date', 'Due Date')}:</strong> ${dueDate}</p>
                             <p><strong>Status:</strong> ${bill.status}</p>
                         </div>
                     </div>
@@ -6013,19 +6721,15 @@
                     <table class="bill-items-table">
                         <thead>
                             <tr>
-                                <th>Description</th>
-                                <th class="text-center">Quantity</th>
-                                <th class="text-right">Price</th>
-                                <th class="text-right">Total</th>
+                                <th>${t('description', 'Description')}</th>
+                                <th class="text-right">${t('price', 'Price')}</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${bill.items.map(item => `
                                 <tr>
                                     <td>${item.description}</td>
-                                    <td class="text-center">${item.quantity}</td>
                                     <td class="text-right">${item.price.toFixed(2)} TND</td>
-                                    <td class="text-right">${item.total.toFixed(2)} TND</td>
                                 </tr>
                             `).join('')}
                         </tbody>
@@ -6033,30 +6737,30 @@
                     
                     <div class="bill-totals">
                         <div class="bill-total-row">
-                            <span>Subtotal:</span>
+                            <span>${t('subtotal', 'Subtotal')}:</span>
                             <span>${bill.subtotal.toFixed(2)} TND</span>
                         </div>
                         <div class="bill-total-row">
-                            <span>Tax (8%):</span>
+                            <span>${t('tax', 'Tax')} (8%):</span>
                             <span>${bill.tax.toFixed(2)} TND</span>
                         </div>
                         <div class="bill-total-row final">
-                            <span>Total Amount:</span>
+                            <span>${t('total_amount', 'Total Amount')}:</span>
                             <span>${bill.total.toFixed(2)} TND</span>
                         </div>
                     </div>
                     
                     ${bill.notes ? `
                         <div class="bill-notes">
-                            <h4>Notes:</h4>
+                            <h4>${t('notes', 'Notes')}:</h4>
                             <p>${bill.notes}</p>
                         </div>
                     ` : ''}
                     
                     <div class="bill-footer">
-                        <p>Thank you for choosing our healthcare services.</p>
-                        <p>For questions about this bill, please contact us at (555) 123-4567</p>
-                        <p>Generated on ${createdDate}</p>
+                        <p>${t('thank_you_message', 'Thank you for choosing our healthcare services.')}</p>
+                        <p>${t('for_questions_contact', 'For questions about this bill, please contact us at')} (555) 123-4567</p>
+                        <p>${t('generated_on', 'Generated on')} ${createdDate}</p>
                     </div>
                 </div>
             `;
@@ -6113,7 +6817,8 @@
                 patientPhone: document.getElementById('billPatientPhoneNumber').value,
                 billDate: new Date().toISOString().split('T')[0],
                 dueDate: document.getElementById('billDueDate').value,
-                notes: document.getElementById('billNotes').value
+                notes: document.getElementById('billNotes').value,
+                consultationId: document.getElementById('billConsultationId').value || null
             };
 
             if (!formData.patientId) {
@@ -6139,6 +6844,14 @@
                 console.error('Error creating bill:', error);
                 showTranslatedAlert('error_creating_bill', error.message);
                 return;
+            }
+
+            // Refresh ready bills if the modal is open
+            const readyBillsModal = document.getElementById('readyBillsModal');
+            if (readyBillsModal && readyBillsModal.classList.contains('active')) {
+                if (typeof renderReadyBills === 'function') {
+                    renderReadyBills();
+                }
             }
 
             closeBillingModal();
@@ -6203,6 +6916,208 @@
                 showTranslatedAlert('service_updated', successMessage);
             }
         });
+
+        // Add Medicine Form Submission
+        const addMedicineForm = document.getElementById('addMedicineForm');
+        if (addMedicineForm) {
+            addMedicineForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const name = document.getElementById('newMedicineName').value.trim();
+                const dosage = document.getElementById('newMedicineDosage').value.trim();
+                
+                if (!name) {
+                    alert('Please provide medicine name.');
+                    return;
+                }
+                
+                const medicines = getMedicines();
+                const newId = medicines.length > 0 ? Math.max(...medicines.map(m => m.id)) + 1 : 1;
+                
+                medicines.push({
+                    id: newId,
+                    name: name,
+                    dosage: dosage || ''
+                });
+                
+                saveMedicines(medicines);
+                renderMedicinesList();
+                
+                // Clear form
+                document.getElementById('newMedicineName').value = '';
+                document.getElementById('newMedicineDosage').value = '';
+                
+                const successMessage = window.t ? window.t('medicine_added', 'Medicine added successfully!') : 'Medicine added successfully!';
+                showTranslatedAlert('medicine_added', successMessage);
+            });
+        }
+
+        // Edit Medicine Form Submission
+        const editMedicineForm = document.getElementById('editMedicineForm');
+        if (editMedicineForm) {
+            editMedicineForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const id = parseInt(document.getElementById('editMedicineId').value);
+                const name = document.getElementById('editMedicineName').value.trim();
+                const dosage = document.getElementById('editMedicineDosage').value.trim();
+                
+                if (!name) {
+                    alert('Please provide medicine name.');
+                    return;
+                }
+                
+                const medicines = getMedicines();
+                const index = medicines.findIndex(m => m.id === id);
+                
+                if (index !== -1) {
+                    medicines[index].name = name;
+                    medicines[index].dosage = dosage || '';
+                    saveMedicines(medicines);
+                    renderMedicinesList();
+                    closeEditMedicineModal();
+                    
+                    // Update prescription dropdown if it exists
+                    updatePrescriptionMedicineDropdown();
+                    
+                    const successMessage = window.t ? window.t('medicine_updated', 'Medicine updated successfully!') : 'Medicine updated successfully!';
+                    showTranslatedAlert('medicine_updated', successMessage);
+                }
+            });
+        }
+
+        // Prescription medicines list
+        let prescriptionMedicines = [];
+
+        // Function to update prescription medicine dropdown
+        function updatePrescriptionMedicineDropdown() {
+            const select = document.getElementById('prescriptionMedicineSelect');
+            if (!select) return;
+            
+            const medicines = getMedicines();
+            const currentValue = select.value;
+            
+            select.innerHTML = '<option value="" data-translate="select_medicine">Select medicine...</option>';
+            
+            medicines.forEach(med => {
+                const option = document.createElement('option');
+                option.value = med.id;
+                option.textContent = med.name + (med.dosage ? ` (${med.dosage})` : '');
+                select.appendChild(option);
+            });
+            
+            if (currentValue) {
+                select.value = currentValue;
+            }
+        }
+
+        // Function to render prescription medicines list
+        function renderPrescriptionMedicinesList() {
+            const container = document.getElementById('prescriptionListContainer');
+            if (!container) return;
+            
+            if (prescriptionMedicines.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            const medicines = getMedicines();
+            
+            container.innerHTML = prescriptionMedicines.map((item, index) => {
+                const med = medicines.find(m => m.id === item.medicineId);
+                const medName = med ? med.name : 'Unknown Medicine';
+                const dosage = item.dosage || med?.dosage || '';
+                const instructions = item.instructions || '';
+                
+                return `
+                    <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-gray-50">
+                        <div class="flex-1">
+                            <div class="font-semibold text-gray-900">${medName}</div>
+                            ${dosage ? `<div class=\"text-sm text-gray-600\">${window.t ? window.t('dosage', 'Dosage') : 'Dosage'}: ${dosage}</div>` : ''}
+                            ${instructions ? `<div class=\"text-sm text-gray-600\">${window.t ? window.t('instructions', 'Instructions') : 'Instructions'}: ${instructions}</div>` : ''}
+                        </div>
+                        <button type="button" onclick="removeMedicineFromPrescription(${index})" class="btn btn-sm btn-outline text-red-600 hover:bg-red-50">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                            <span data-translate="remove">${window.t ? window.t('remove', 'Remove') : 'Remove'}</span>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+            
+            // Update prescription textarea with formatted list
+            updatePrescriptionTextarea();
+        }
+
+        // Function to update prescription textarea
+        function updatePrescriptionTextarea() {
+            const textarea = document.getElementById('consultPrescription');
+            if (!textarea) return;
+            
+            const medicines = getMedicines();
+            
+            if (prescriptionMedicines.length > 0) {
+                const prescriptionText = prescriptionMedicines.map((item, index) => {
+                    const med = medicines.find(m => m.id === item.medicineId);
+                    const medName = med ? med.name : 'Unknown Medicine';
+                    const dosage = item.dosage || med?.dosage || '';
+                    const instructions = item.instructions || '';
+                    const details = [dosage, instructions].filter(Boolean).join('; ');
+                    return `${index + 1}. ${medName}${details ? ' - ' + details : ''}`;
+                }).join('\n');
+                
+                textarea.value = prescriptionText;
+            }
+        }
+
+        // Function to add medicine to prescription
+        window.addMedicineToPrescription = function() {
+            const select = document.getElementById('prescriptionMedicineSelect');
+            const dosageInput = document.getElementById('prescriptionDosage');
+            const instructionsInput = document.getElementById('prescriptionInstructions');
+            
+            if (!select || !dosageInput) return;
+            
+            const medicineId = parseInt(select.value);
+            const dosage = dosageInput.value.trim();
+            const instructions = instructionsInput ? instructionsInput.value.trim() : '';
+            
+            if (!medicineId) {
+                alert('Please select a medicine.');
+                return;
+            }
+            
+            prescriptionMedicines.push({
+                medicineId: medicineId,
+                dosage: dosage,
+                instructions: instructions
+            });
+            
+            renderPrescriptionMedicinesList();
+            
+            // Clear inputs
+            select.value = '';
+            dosageInput.value = '';
+            if (instructionsInput) instructionsInput.value = '';
+        }
+
+        // Function to remove medicine from prescription
+        window.removeMedicineFromPrescription = function(index) {
+            if (index >= 0 && index < prescriptionMedicines.length) {
+                prescriptionMedicines.splice(index, 1);
+                renderPrescriptionMedicinesList();
+            }
+        }
+
+        // Add event listener for add medicine button
+        const addMedicineToPrescriptionBtn = document.getElementById('addMedicineToPrescriptionBtn');
+        if (addMedicineToPrescriptionBtn) {
+            addMedicineToPrescriptionBtn.addEventListener('click', addMedicineToPrescription);
+        }
+
+        // Prescription dropdown will be updated when prescription section is shown
+        // This is handled in the showConsultSection function below
 
         // Cabinet Settings Form Submission
         document.getElementById('cabinetSettingsForm').addEventListener('submit', (e) => {
@@ -6297,6 +7212,7 @@
                 'view_bills', 'create_bills', 'manage_bills',
                 'view_consultations', 'add_consultations', 'delete_consultations',
                 'view_reports', 'export_reports',
+                'view_expenses', 'manage_expenses',
                 'access_settings', 'manage_users'
             ];
             
@@ -6407,6 +7323,21 @@
             
             saveSystemUsers(users);
             
+            // If the edited user is the one currently logged in, update the session permissions immediately
+            try {
+                const currentSession = JSON.parse(localStorage.getItem('medconnect_session') || '{}');
+                if (currentSession && currentSession.userId === userId) {
+                    currentSession.permissions = permissions;
+                    localStorage.setItem('medconnect_session', JSON.stringify(currentSession));
+                    // Re-apply permission-based UI so new menu items appear without reload
+                    if (typeof applyPermissionBasedUI === 'function') {
+                        applyPermissionBasedUI();
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to update session after saving user permissions:', e);
+            }
+            
             // Close modal
             closeEditUserModal();
             
@@ -6457,6 +7388,9 @@
                     delete_consultations: true,
                     view_reports: true,
                     export_reports: true,
+                    // Expenses
+                    view_expenses: true,
+                    manage_expenses: true,
                     access_settings: true,
                     manage_users: true
                 };
@@ -6465,6 +7399,25 @@
                 Object.keys(defaultPermissions).forEach(key => {
                     if (!(key in permissions)) {
                         permissions[key] = defaultPermissions[key];
+                    }
+                });
+            }
+
+            // Reasonable defaults for secretary role if permissions not explicitly set
+            if (session.role === 'secretary') {
+                const secretaryDefaults = {
+                    view_patients: true,
+                    add_appointments: true,
+                    view_appointments: true,
+                    view_bills: true,
+                    create_bills: true,
+                    view_reports: true,
+                    // Allow expenses by default for secretary
+                    view_expenses: true,
+                };
+                Object.keys(secretaryDefaults).forEach(key => {
+                    if (!(key in permissions)) {
+                        permissions[key] = secretaryDefaults[key];
                     }
                 });
             }
@@ -6616,40 +7569,42 @@
                     showTranslatedAlert('consultations_doctors_only');
                     return;
                 }
-                // Populate patients
-                const patientSelect = document.getElementById('consultPatient');
-                const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
-                patientSelect.innerHTML = `<option value="">${window.t ? window.t('choose_patient', 'Choose a patient...') : 'Choose a patient...'}</option>` +
-                    patients.map(p => `<option value="${p.id}">${p.fullName} (${p.fileNumber || 'No file#'}) - ${p.phone}</option>`).join('');
+                // Reset patient input
+                const patientInput = document.getElementById('consultPatient');
+                const patientIdInput = document.getElementById('consultPatientId');
+                if (patientInput) {
+                    patientInput.value = '';
+                }
+                // Clear prescription medicines list
+                prescriptionMedicines = [];
+                renderPrescriptionMedicinesList();
+                if (patientIdInput) {
+                    patientIdInput.value = '';
+                }
 
-                // Setup selected patient info section
-                const infoBox = document.getElementById('consultPatientInfo');
-                const nameEl = document.getElementById('consultPatientName');
-                const phoneEl = document.getElementById('consultPatientPhone');
-                const ageGenEl = document.getElementById('consultPatientAgeGender');
-                const addrEl = document.getElementById('consultPatientAddress');
-                const histEl = document.getElementById('consultPatientHistory');
-
-                const renderPatientInfo = () => {
-                    const id = patientSelect.value;
-                    const p = patients.find(x => x.id === id);
-                    if (!p) {
-                        if (infoBox) infoBox.classList.add('hidden');
-                        return;
+                // Hide all sections and show consultation by default
+                const allSections = document.querySelectorAll('.consult-section');
+                allSections.forEach(section => section.classList.add('hidden'));
+                
+                // Show consultation section by default
+                const consultSection = document.getElementById('consultSectionConsultation');
+                if (consultSection) consultSection.classList.remove('hidden');
+                
+                // Set consultation button as active
+                const menuButtons = document.querySelectorAll('.consult-menu-btn');
+                menuButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.style.opacity = '0.8';
+                    if (btn.getAttribute('data-section') === 'consultation') {
+                        btn.classList.add('active');
+                        btn.style.opacity = '1';
                     }
-                    if (nameEl) nameEl.textContent = p.fullName || '-';
-                    if (phoneEl) phoneEl.textContent = p.phone || '-';
-                    const age = p.dateOfBirth ? calculateAge(p.dateOfBirth) : null;
-                    if (ageGenEl) ageGenEl.textContent = `${age != null ? age + ' yrs' : 'N/A'}${p.gender ? ' • ' + p.gender : ''}`;
-                    if (addrEl) addrEl.textContent = p.address || '-';
-                    if (histEl) histEl.textContent = (p.medicalHistory && p.medicalHistory.trim()) ? p.medicalHistory : 'No history available.';
-                    if (infoBox) infoBox.classList.remove('hidden');
-                };
-
-                patientSelect.removeEventListener('change', renderPatientInfo);
-                patientSelect.addEventListener('change', renderPatientInfo);
-                // Initial state hidden
-                if (infoBox) infoBox.classList.add('hidden');
+                });
+                
+                // Update consultation menu buttons translation
+                setTimeout(() => {
+                    updateConsultMenuButtons();
+                }, 100);
 
                 // Setup live IMC (BMI) calculation
                 const heightInput = document.getElementById('consultHeight');
@@ -6724,6 +7679,14 @@
                 // Update modal translations
                 updateModalTranslations();
                 
+                // Check if dashboard modal is active and set higher z-index
+                const dashboardModal = document.getElementById('doctorDashboardModal');
+                if (dashboardModal && dashboardModal.classList.contains('active')) {
+                    consultationModal.style.zIndex = '3000';
+                } else {
+                    consultationModal.style.zIndex = '';
+                }
+                
                 // Show modal first
                 consultationModal.classList.add('active');
                 
@@ -6792,6 +7755,7 @@
 
             window.closeConsultationModal = function () {
                 consultationModal.classList.remove('active');
+                consultationModal.style.zIndex = ''; // Reset z-index when closing
                 if (consultationForm) consultationForm.reset();
                 const imcEl = document.getElementById('consultIMCValue');
                 if (imcEl) imcEl.textContent = '—';
@@ -6800,9 +7764,18 @@
                     bmiCatEl.textContent = '';
                     bmiCatEl.className = 'text-sm text-gray-500';
                 }
-                // Reset patient info box
-                const infoBox = document.getElementById('consultPatientInfo');
-                if (infoBox) infoBox.classList.add('hidden');
+                // Clear prescription medicines list
+                prescriptionMedicines = [];
+                if (typeof renderPrescriptionMedicinesList === 'function') {
+                    renderPrescriptionMedicinesList();
+                }
+                // Hide all sections
+                const allSections = document.querySelectorAll('.consult-section');
+                allSections.forEach(section => section.classList.add('hidden'));
+                
+                // Show consultation section by default
+                const consultSection = document.getElementById('consultSectionConsultation');
+                if (consultSection) consultSection.classList.remove('hidden');
             };
 
             if (consultationForm) {
@@ -6812,19 +7785,57 @@
                         showTranslatedAlert('consultations_doctors_only');
                         return;
                     }
-                    const patientId = document.getElementById('consultPatient').value;
+                    // Resolve patientId; if hidden field is empty, try to infer from displayed text
+                    let patientId = document.getElementById('consultPatientId')?.value || '';
+                    if (!patientId) {
+                        const display = (document.getElementById('consultPatient')?.value || '').trim();
+                        if (display) {
+                            try {
+                                const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
+                                // Extract name before '(' or ' - '
+                                const namePart = display.split('(')[0].split(' - ')[0].trim();
+                                const match = patients.find(p => (p.fullName || '').trim().toLowerCase() === namePart.toLowerCase());
+                                if (match) {
+                                    patientId = match.id;
+                                    const hidden = document.getElementById('consultPatientId');
+                                    if (hidden) hidden.value = patientId;
+                                }
+                            } catch {}
+                        }
+                        // Final fallback: use currentConsultationPatientId if available
+                        if (!patientId && currentConsultationPatientId) {
+                            patientId = currentConsultationPatientId;
+                            const hidden = document.getElementById('consultPatientId');
+                            if (hidden) hidden.value = patientId;
+                        }
+                    }
                     const heightVal = document.getElementById('consultHeight')?.value;
                     const weightVal = document.getElementById('consultWeight')?.value;
                     const tempVal = document.getElementById('consultTemperature')?.value;
                     const heartRateVal = document.getElementById('consultHeartRate')?.value;
                     const bloodSugarVal = document.getElementById('consultBloodSugar')?.value;
                     const bpInputVal = document.getElementById('consultBloodPressure')?.value;
+                    const vitalNotes = document.getElementById('consultVitalNotes')?.value.trim() || '';
                     const notes = document.getElementById('consultNotes').value.trim();
-                    const prescription = document.getElementById('consultPrescription').value.trim();
+                    const radiologyResult = document.getElementById('radiologyResult')?.value.trim() || '';
+                    const radiologyDiagnostics = document.getElementById('radiologyDiagnostics')?.value.trim() || '';
+                    const labResults = document.getElementById('labResults')?.value.trim() || '';
+                    const labNotes = document.getElementById('labNotes')?.value.trim() || '';
+                    // Get prescription from textarea or generate from medicines list
+                    let prescription = document.getElementById('consultPrescription').value.trim();
+                    if (!prescription && prescriptionMedicines.length > 0) {
+                        const medicines = getMedicines();
+                        prescription = prescriptionMedicines.map((item, index) => {
+                            const med = medicines.find(m => m.id === item.medicineId);
+                            const medName = med ? med.name : 'Unknown Medicine';
+                            const dosage = item.dosage || med?.dosage || '';
+                            return `${index + 1}. ${medName}${dosage ? ' - ' + dosage : ''}`;
+                        }).join('\n');
+                    }
                     const paymentStatus = document.querySelector('input[name="paymentStatus"]:checked')?.value || 'paying';
 
-                    if (!patientId || !notes) {
-                        showTranslatedAlert('fill_required_consultation');
+                    if (!patientId) {
+                        showTranslatedAlert('select_patient_first', 'Please select a patient first.');
                         return;
                     }
 
@@ -6854,7 +7865,39 @@
                     }
 
                     const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
-                    const id = 'CONS-' + Date.now();
+                    let id = editingConsultationId || ('CONS-' + Date.now());
+                    if (editingConsultationId) {
+                        const idx = consultations.findIndex(c => c.id === editingConsultationId);
+                        if (idx !== -1) {
+                            const existing = consultations[idx];
+                            // If updating from an appointment, update the createdAt date to today
+                            const shouldUpdateDate = currentConsultationAppointmentId || window.currentConsultationAppointmentId;
+                            consultations[idx] = {
+                                ...existing,
+                                patientId,
+                                height,
+                                weight,
+                                temperature,
+                                heartRate,
+                                bloodSugar,
+                                bpSystolic,
+                                bpDiastolic,
+                                imc,
+                                bmiCategory,
+                                vitalNotes,
+                                notes,
+                                radiologyResult,
+                                radiologyDiagnostics,
+                                labResults,
+                                labNotes,
+                                prescription,
+                                paymentStatus,
+                                doctor: session?.name || existing.doctor || 'Doctor',
+                                // Update createdAt to today if coming from appointment
+                                createdAt: shouldUpdateDate ? new Date().toISOString() : existing.createdAt
+                            };
+                        }
+                    } else {
                     consultations.push({
                         id,
                         patientId,
@@ -6867,13 +7910,27 @@
                         bpDiastolic,
                         imc,
                         bmiCategory,
+                        vitalNotes,
                         notes,
+                        radiologyResult,
+                        radiologyDiagnostics,
+                        labResults,
+                        labNotes,
                         prescription,
                         paymentStatus,
                         doctor: session?.name || 'Doctor',
                         createdAt: new Date().toISOString()
                     });
+                    }
                     localStorage.setItem('consultations', JSON.stringify(consultations));
+                    
+                    // Set consultation ID in certificate form for linking certificates
+                    const consultCertConsultationIdInput = document.getElementById('consultCertConsultationId');
+                    if (consultCertConsultationIdInput) {
+                        consultCertConsultationIdInput.value = id;
+                    }
+                    
+                    editingConsultationId = null;
                     
                     // Link any temporary lab assessments to this consultation
                     try {
@@ -6934,14 +7991,19 @@
 
                     showTranslatedAlert('consultation_saved');
 
+                    // Clear prescription medicines list after saving
+                    prescriptionMedicines = [];
+                    if (typeof renderPrescriptionMedicinesList === 'function') {
+                        renderPrescriptionMedicinesList();
+                    }
+
                     // If this consultation came from an appointment, mark/remove it
                     try {
-                        if (currentConsultationAppointmentId) {
+                        if (currentConsultationAppointmentId || window.currentConsultationAppointmentId) {
+                            const appointmentId = currentConsultationAppointmentId || window.currentConsultationAppointmentId;
                             const appointments = JSON.parse(localStorage.getItem('healthcareAppointments') || '[]');
-                            const idx = appointments.findIndex(a => a.id === currentConsultationAppointmentId);
+                            const idx = appointments.findIndex(a => a.id === appointmentId);
                             if (idx !== -1) {
-                                // Mark as completed and remove from today's pending list
-                                appointments[idx].status = 'validated';
                                 // Remove from the array to ensure it disappears from today's list
                                 appointments.splice(idx, 1);
                                 localStorage.setItem('healthcareAppointments', JSON.stringify(appointments));
@@ -6950,8 +8012,9 @@
                                     storedAppointments = appointments;
                                 }
                             }
-                            // Reset tracker
+                            // Reset trackers
                             currentConsultationAppointmentId = null;
+                            window.currentConsultationAppointmentId = null;
                         }
                     } catch {}
 
@@ -6977,7 +8040,83 @@
                         renderDailyAgenda();
                     }
 
+                    // Check if certificate fields are filled and automatically generate certificate
+                    const certTypeEl = document.getElementById('consultCertType');
+                    const certStartDateEl = document.getElementById('consultCertStartDate');
+                    const certEndDateEl = document.getElementById('consultCertEndDate');
+                    const certRestPeriodEl = document.getElementById('consultCertRestPeriod');
+                    const certNotesEl = document.getElementById('consultCertNotes');
+                    
+                    const certType = certTypeEl?.value || '';
+                    const certStartDate = certStartDateEl?.value || '';
+                    const certEndDate = certEndDateEl?.value || '';
+                    const certRestPeriod = certRestPeriodEl?.value || '';
+                    const certNotes = certNotesEl?.value.trim() || '';
+                    
+                    // If any certificate field is filled, automatically save and generate certificate
+                    if (certType || certStartDate || certEndDate || certRestPeriod) {
+                        // Use the saved consultation ID
+                        const consultCertConsultationIdInput = document.getElementById('consultCertConsultationId');
+                        if (consultCertConsultationIdInput) {
+                            consultCertConsultationIdInput.value = id;
+                        }
+                        
+                        // Save certificate directly (without needing to read form fields after closing)
+                        try {
+                            const certificates = JSON.parse(localStorage.getItem('medical_certificates') || '[]');
+                            
+                            // Get patient and doctor info for certificate
+                            const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
+                            const patient = patients.find(p => p.id === patientId);
+                            const session = JSON.parse(localStorage.getItem('medconnect_session') || '{}');
+                            
+                            // Check if a certificate already exists for this consultation
+                            const existingCertIndex = certificates.findIndex(cert => cert.consultationId === id);
+                            
+                            let certificateToSave;
+                            
+                            if (existingCertIndex !== -1) {
+                                // Update existing certificate
+                                certificateToSave = {
+                                    ...certificates[existingCertIndex],
+                                    certType: certType,
+                                    restPeriod: certRestPeriod ? parseInt(certRestPeriod) : null,
+                                    startDate: certStartDate,
+                                    endDate: certEndDate || null,
+                                    notes: certNotes,
+                                    patientName: patient ? patient.fullName : certificates[existingCertIndex].patientName || '-',
+                                    doctorName: session?.name || certificates[existingCertIndex].doctorName || 'Doctor'
+                                };
+                                certificates[existingCertIndex] = certificateToSave;
+                            } else {
+                                // Create new certificate
+                                certificateToSave = {
+                                    id: 'cert_' + Date.now(),
+                                    consultationId: id,
+                                    patientId: patientId,
+                                    patientName: patient ? patient.fullName : '-',
+                                    doctorName: session?.name || 'Doctor',
+                                    certType: certType,
+                                    restPeriod: certRestPeriod ? parseInt(certRestPeriod) : null,
+                                    startDate: certStartDate,
+                                    endDate: certEndDate || null,
+                                    notes: certNotes,
+                                    createdAt: new Date().toISOString()
+                                };
+                                certificates.push(certificateToSave);
+                            }
+                            
+                            localStorage.setItem('medical_certificates', JSON.stringify(certificates));
+                            
+                            // Close modal
                     window.closeConsultationModal();
+                        } catch (error) {
+                            console.error('Error saving certificate:', error);
+                            window.closeConsultationModal();
+                        }
+                    } else {
+                        window.closeConsultationModal();
+                    }
                 });
             }
         });
@@ -7112,20 +8251,25 @@
             // Open consultation modal directly
             const consultationModal = document.getElementById('consultationModal');
             if (consultationModal) {
-                // Populate patients dropdown
-                const patientSelect = document.getElementById('consultPatient');
-                const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
-                patientSelect.innerHTML = `<option value="">${window.t ? window.t('choose_patient', 'Choose a patient...') : 'Choose a patient...'}</option>` +
-                    patients.map(p => `<option value="${p.id}">${p.fullName} (${p.fileNumber || 'No file#'}) - ${p.phone}</option>`).join('');
-                
-                // Pre-select the patient
-                patientSelect.value = patient.id;
-                
-                // Disable the patient dropdown since patient is pre-selected
-                patientSelect.disabled = true;
+                // Set patient textbox value
+                const patientInput = document.getElementById('consultPatient');
+                const patientIdInput = document.getElementById('consultPatientId');
+                const age = patient.dateOfBirth ? calculateAge(patient.dateOfBirth) : null;
+                const patientDisplay = `${patient.fullName}${age !== null ? ` (${age})` : ''} - ${patient.phone || ''}`;
+                if (patientInput) {
+                    patientInput.value = patientDisplay;
+                }
+                if (patientIdInput) {
+                    patientIdInput.value = patient.id;
+                }
                 
                 // Update modal translations
                 updateModalTranslations();
+                
+                // Update consultation menu buttons translation
+                setTimeout(() => {
+                    updateConsultMenuButtons();
+                }, 100);
                 
                 // Show the modal
                 consultationModal.classList.add('active');
@@ -7194,13 +8338,286 @@
                     }
                 }, 200);
                 
-                // Trigger change event to load patient info
+                // Display patient details
                 setTimeout(() => {
-                    const event = new Event('change', { bubbles: true });
-                    patientSelect.dispatchEvent(event);
+                    const detailsBox = document.getElementById('consultPatientDetails');
+                    const detailsInfo = document.getElementById('consultPatientDetailsInfo');
+                    const histEl = document.getElementById('consultPatientHistory');
+                    
+                    if (detailsBox && detailsInfo) {
+                        // Calculate number of visits (consultations)
+                        const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+                        const visitsCount = consultations.filter(c => c.patientId === patient.id).length;
+                        
+                        const age = patient.dateOfBirth ? calculateAge(patient.dateOfBirth) : 'N/A';
+                        const genderText = patient.gender ? (window.t ? window.t(patient.gender.toLowerCase(), patient.gender) : patient.gender) : 'N/A';
+                        
+                        detailsInfo.innerHTML = `
+                            <div class="space-y-2">
+                                <div class="flex items-start">
+                                    <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('full_name', 'Full Name') : 'Full Name'}:</span>
+                                    <span class="text-gray-900">${patient.fullName || 'N/A'}</span>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('file_number', 'File Number') : 'File Number'}:</span>
+                                    <span class="text-gray-900">${patient.fileNumber || 'N/A'}</span>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('cin_passport', 'CIN/Passport') : 'CIN/Passport'}:</span>
+                                    <span class="text-gray-900">${patient.cinPassport || 'N/A'}</span>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('email', 'Email') : 'Email'}:</span>
+                                    <span class="text-gray-900">${patient.email || 'N/A'}</span>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('phone', 'Phone') : 'Phone'}:</span>
+                                    <span class="text-gray-900">${patient.phone || 'N/A'}</span>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex items-start">
+                                    <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('date_of_birth', 'Date of Birth') : 'Date of Birth'}:</span>
+                                    <span class="text-gray-900">${patient.dateOfBirth ? new Date(patient.dateOfBirth).toLocaleDateString() : 'N/A'}</span>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('age', 'Age') : 'Age'}:</span>
+                                    <span class="text-gray-900">${age}</span>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('gender', 'Gender') : 'Gender'}:</span>
+                                    <span class="text-gray-900">${genderText}</span>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('address', 'Address') : 'Address'}:</span>
+                                    <span class="text-gray-900">${patient.address || 'N/A'}</span>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('number_of_visits', 'Number of Visits') : 'Number of Visits'}:</span>
+                                    <span class="font-bold text-blue-600">${visitsCount}</span>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('registered', 'Registered') : 'Registered'}:</span>
+                                    <span class="text-gray-900">${patient.createdAt ? new Date(patient.createdAt).toLocaleDateString() : 'N/A'}</span>
+                                </div>
+                            </div>
+                        `;
+                        
+                        if (histEl) {
+                            histEl.textContent = (patient.medicalHistory && patient.medicalHistory.trim()) ? patient.medicalHistory : (window.t ? window.t('no_history_available', 'No history available.') : 'No history available.');
+                        }
+                        
+                        // Patient details are loaded but section remains hidden until user clicks the button
+                        // The section will show when user clicks "Patient Information" menu button
+                    }
                 }, 100);
             }
         };
+        
+        // Function to translate and update consultation menu buttons
+        function updateConsultMenuButtons() {
+            const buttonTranslations = {
+                'patient': 'patient_information',
+                'consultation': 'consultation',
+                'lab': 'lab_assessment',
+                'radiology': 'radiology_results',
+                'prescription': 'medical_prescription',
+                'documents': 'documents',
+                'certificate': 'work_certificate'
+            };
+            
+            Object.keys(buttonTranslations).forEach(section => {
+                const button = document.querySelector(`.consult-menu-btn[data-section="${section}"]`);
+                if (button) {
+                    const translationKey = buttonTranslations[section];
+                    const translatedText = window.t ? window.t(translationKey, button.textContent.trim()) : button.textContent.trim();
+                    
+                    // Split text into two lines if it contains multiple words
+                    const words = translatedText.split(' ');
+                    if (words.length > 1) {
+                        // For two words, split them
+                        if (words.length === 2) {
+                            button.innerHTML = `<span style="display: block;">${words[0]}</span><span style="display: block;">${words[1]}</span>`;
+                        } else {
+                            // For more words, try to split evenly or by common patterns
+                            const mid = Math.ceil(words.length / 2);
+                            const firstLine = words.slice(0, mid).join(' ');
+                            const secondLine = words.slice(mid).join(' ');
+                            button.innerHTML = `<span style="display: block;">${firstLine}</span><span style="display: block;">${secondLine}</span>`;
+                        }
+                    } else {
+                        // Single word - keep on one line
+                        button.innerHTML = `<span style="display: block;">${translatedText}</span>`;
+                    }
+                }
+            });
+        }
+        
+        // Function to show/hide consultation sections
+        window.showConsultSection = function(sectionName) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.consult-section');
+            sections.forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Remove active class from all menu buttons
+            const menuButtons = document.querySelectorAll('.consult-menu-btn');
+            menuButtons.forEach(btn => {
+                btn.classList.remove('active');
+                // Reset opacity for non-active buttons
+                btn.style.opacity = '0.8';
+                // Ensure button maintains size
+                btn.style.flex = '1';
+                btn.style.minWidth = '0';
+            });
+            
+            // Show selected section
+            const selectedSection = document.getElementById('consultSection' + sectionName.charAt(0).toUpperCase() + sectionName.slice(1));
+            if (selectedSection) {
+                selectedSection.classList.remove('hidden');
+                
+                // Update prescription dropdown when prescription section is shown
+                if (sectionName === 'prescription') {
+                    if (typeof updatePrescriptionMedicineDropdown === 'function') {
+                        updatePrescriptionMedicineDropdown();
+                    }
+                    if (typeof renderPrescriptionMedicinesList === 'function') {
+                        renderPrescriptionMedicinesList();
+                    }
+                }
+            }
+            
+            // Add active class to clicked button
+            const clickedButton = document.querySelector(`.consult-menu-btn[data-section="${sectionName}"]`);
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+                clickedButton.style.opacity = '1';
+                // Ensure active button maintains same size
+                clickedButton.style.flex = '1';
+                clickedButton.style.minWidth = '0';
+            }
+        };
+        
+        // Edit radiology result - focus on textarea
+        window.editRadiologyResult = function() {
+            const textarea = document.getElementById('radiologyResult');
+            if (textarea) {
+                textarea.focus();
+            }
+        };
+        
+        // Edit diagnostics - focus on textarea
+        window.editDiagnostics = function() {
+            const textarea = document.getElementById('radiologyDiagnostics');
+            if (textarea) {
+                textarea.focus();
+            }
+        };
+        
+        // Edit lab results - focus on textarea
+        window.editLabResults = function() {
+            const textarea = document.getElementById('labResults');
+            if (textarea) {
+                textarea.focus();
+            }
+        };
+        
+        // Edit lab notes - focus on textarea
+        window.editLabNotes = function() {
+            const textarea = document.getElementById('labNotes');
+            if (textarea) {
+                textarea.focus();
+            }
+        };
+        
+        // Load documents for the current consultation patient
+        function loadConsultationDocuments() {
+            const documentsList = document.getElementById('consultDocumentsList');
+            if (!documentsList) return;
+            
+            // Get patient ID from consultation form
+            const patientId = document.getElementById('consultPatientId')?.value || currentConsultationPatientId;
+            
+            if (!patientId) {
+                documentsList.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <p data-translate="select_patient_first">Please select a patient first.</p>
+                    </div>
+                `;
+                if (window.I18n && window.I18n.walkAndTranslate) {
+                    window.I18n.walkAndTranslate();
+                }
+                return;
+            }
+            
+            // Load certificates for this patient
+            const certificates = JSON.parse(localStorage.getItem('medical_certificates') || '[]');
+            const patientCertificates = certificates.filter(cert => cert.patientId === patientId);
+            
+            if (patientCertificates.length === 0) {
+                documentsList.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <p data-translate="no_documents_found">No documents found for this patient.</p>
+                    </div>
+                `;
+                if (window.I18n && window.I18n.walkAndTranslate) {
+                    window.I18n.walkAndTranslate();
+                }
+                return;
+            }
+            
+            // Sort by date (newest first)
+            patientCertificates.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            // Render certificates
+            documentsList.innerHTML = patientCertificates.map(cert => {
+                const certType = cert.certType ? cert.certType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Medical Certificate';
+                const certDate = new Date(cert.createdAt);
+                const dateStr = certDate.toLocaleDateString();
+                const timeStr = certDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                return `
+                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-blue-50 cursor-pointer" onclick="previewPatientDocument('certificate', '${cert.id}', '${cert.consultationId || ''}')">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <span class="font-semibold text-gray-900">${certType}</span>
+                            </div>
+                            <span class="text-xs text-gray-500">${dateStr} ${timeStr}</span>
+                        </div>
+                        <div class="text-sm text-gray-600 mt-2 flex justify-between items-center">
+                            <span>
+                                <strong data-translate="document_id">Document ID:</strong> ${cert.id}
+                            </span>
+                            <span class="text-blue-600 text-xs font-medium" data-translate="click_to_preview">Click to preview</span>
+                        </div>
+                        ${cert.restPeriod ? `
+                            <div class="mt-2 text-sm text-gray-600">
+                                <strong data-translate="rest_period">Rest Period:</strong> ${cert.restPeriod} ${window.t ? window.t('days', 'days') : 'days'}
+                            </div>
+                        ` : ''}
+                        ${cert.startDate || cert.endDate ? `
+                            <div class="mt-2 text-sm text-gray-600">
+                                ${cert.startDate ? `<strong data-translate="start_date">Start Date:</strong> ${new Date(cert.startDate).toLocaleDateString()}` : ''}
+                                ${cert.startDate && cert.endDate ? ' | ' : ''}
+                                ${cert.endDate ? `<strong data-translate="end_date">End Date:</strong> ${new Date(cert.endDate).toLocaleDateString()}` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+            
+            // Update translations after rendering
+            if (window.I18n && window.I18n.walkAndTranslate) {
+                window.I18n.walkAndTranslate();
+            }
+        }
 
         window.rejectConsultation = function(appointmentId) {
             if (showTranslatedConfirm('Are you sure you want to reject this consultation?')) {
@@ -7245,9 +8662,22 @@
                 return;
             }
             
+            // Get all consultations to check if patient has past consultations
+            const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+            
             appointmentsListEl.innerHTML = appointments.map(appointment => {
                 const patientName = appointment.clientName || 'Unknown Patient';
                 const statusColor = getStatusColor(appointment.status);
+                
+                // Find patient by name
+                const patient = storedPatients.find(p => p.fullName === patientName);
+                
+                // Check if patient has any consultations
+                let hasConsultations = false;
+                if (patient) {
+                    const patientConsultations = consultations.filter(c => c.patientId === patient.id);
+                    hasConsultations = patientConsultations.length > 0;
+                }
                 
                 return `
                     <div class="appointment-item">
@@ -7258,8 +8688,8 @@
                             ${appointment.notes ? `<span class="text-sm text-gray-600">${appointment.notes}</span>` : ''}
                         </div>
                         <div class="flex gap-2">
-                            <button class="btn btn-sm btn-primary" onclick="startConsultation('${appointment.id}', '${patientName}')" data-translate="consult">${window.t ? window.t('consult', 'Consult') : 'Consult'}</button>
-                            <button class="btn btn-sm btn-secondary" onclick="rejectConsultation('${appointment.id}')" data-translate="reject">${window.t ? window.t('reject', 'Reject') : 'Reject'}</button>
+                            <button class="btn btn-sm btn-primary" onclick="startConsultation('${appointment.id}', '${patientName}')" data-translate="new_consultation">${window.t ? window.t('new_consultation', 'New Consultation') : 'New Consultation'}</button>
+                            ${hasConsultations ? `<button class="btn btn-sm btn-secondary" onclick="updateLastConsultation('${appointment.id}', '${patientName}')" data-translate="update_last_consultation">${window.t ? window.t('update_last_consultation', 'Update Last Consultation') : 'Update Last Consultation'}</button>` : ''}
                         </div>
                     </div>
                 `;
@@ -7301,8 +8731,7 @@
                         <div class="consultation-notes">${consultation.notes.substring(0, 100)}${consultation.notes.length > 100 ? '...' : ''}</div>
                         <div class="flex gap-2 mt-3 flex-wrap">
                             <button class="btn btn-sm btn-primary" onclick="viewConsultationDetail('${consultation.id}')" data-translate="view_details">View Details</button>
-                            <button class="btn btn-sm btn-outline" onclick="openLaboratoryAssessmentModal('${consultation.id}')" data-translate="add_lab_assessment">Lab Assessment</button>
-                            <button class="btn btn-sm btn-outline" onclick="openMedicalCertificateModal('${consultation.id}')" data-translate="medical_certificate">Medical Certificate</button>
+                            <button class="btn btn-sm btn-secondary" onclick="editConsultation('${consultation.id}')" data-translate="update">${window.t ? window.t('update', 'Update') : 'Update'}</button>
                         </div>
                     </div>
                 `;
@@ -7352,109 +8781,81 @@
                         ${consultation.bloodSugar ? `<div><strong>${window.t ? window.t('blood_sugar', 'Blood Sugar') : 'Blood Sugar'}:</strong> ${consultation.bloodSugar} mg/dL</div>` : ''}
                         ${consultation.bpSystolic && consultation.bpDiastolic ? `<div><strong>${window.t ? window.t('blood_pressure', 'Blood Pressure') : 'Blood Pressure'}:</strong> ${consultation.bpSystolic}/${consultation.bpDiastolic} mmHg</div>` : ''}
                     </div>
+                    ${consultation.vitalNotes ? `
+                        <div class="mt-4 pt-4 border-t border-gray-200">
+                            <h4 class="text-sm font-semibold text-gray-700 mb-2">${window.t ? window.t('vital_notes', 'Vital Notes') : 'Vital Notes'}</h4>
+                            <div class="text-sm text-gray-700 whitespace-pre-wrap">${consultation.vitalNotes}</div>
+                        </div>
+                    ` : ''}
                 </div>
                 
                 <div class="card p-4">
-                    <h3 class="text-lg font-semibold mb-3 text-gray-900">${window.t ? window.t('clinical_notes', 'Clinical Notes') : 'Clinical Notes'}</h3>
+                    <h3 class="text-lg font-semibold mb-3 text-gray-900">${window.t ? window.t('clinical_notes', 'Clinical Note') : 'Clinical Note'}</h3>
                     <div class="text-sm text-gray-700 whitespace-pre-wrap">${consultation.notes || (window.t ? window.t('no_notes_provided', 'No notes provided.') : 'No notes provided.')}</div>
                 </div>
                 
+                ${consultation.radiologyResult || consultation.radiologyDiagnostics ? `
+                    <div class="card p-4">
+                        <h3 class="text-lg font-semibold mb-4 text-gray-900">${window.t ? window.t('radiology_results', 'Radiology Results') : 'Radiology Results'}</h3>
+                        ${consultation.radiologyResult ? `
+                            <div class="mb-4">
+                                <h4 class="text-sm font-semibold text-gray-700 mb-2">${window.t ? window.t('radiology_result', 'Radiology Result') : 'Radiology Result'}</h4>
+                                <div class="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 p-3 rounded border border-gray-200">${consultation.radiologyResult}</div>
+                            </div>
+                        ` : ''}
+                        ${consultation.radiologyDiagnostics ? `
+                            <div>
+                                <h4 class="text-sm font-semibold text-gray-700 mb-2">${window.t ? window.t('diagnostics', 'Diagnostics') : 'Diagnostics'}</h4>
+                                <div class="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 p-3 rounded border border-gray-200">${consultation.radiologyDiagnostics}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                ` : ''}
+                
+                ${consultation.labResults || consultation.labNotes ? `
+                    <div class="card p-4">
+                        <h3 class="text-lg font-semibold mb-4 text-gray-900">${window.t ? window.t('lab_assessment', 'Lab Assessment') : 'Lab Assessment'}</h3>
+                        ${consultation.labResults ? `
+                            <div class="mb-4">
+                                <h4 class="text-sm font-semibold text-gray-700 mb-2">${window.t ? window.t('lab_results', 'Lab Results') : 'Lab Results'}</h4>
+                                <div class="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 p-3 rounded border border-gray-200">${consultation.labResults}</div>
+                            </div>
+                        ` : ''}
+                        ${consultation.labNotes ? `
+                            <div>
+                                <h4 class="text-sm font-semibold text-gray-700 mb-2">${window.t ? window.t('lab_notes', 'Lab Notes') : 'Lab Notes'}</h4>
+                                <div class="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 p-3 rounded border border-gray-200">${consultation.labNotes}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                ` : ''}
+                
                 ${consultation.prescription ? `
                     <div class="card p-4">
-                        <h3 class="text-lg font-semibold mb-3 text-gray-900">Prescription</h3>
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-lg font-semibold text-gray-900">Prescription</h3>
+                            <button data-consultation-id="${consultationId}" class="btn-print-prescription btn btn-sm btn-primary" type="button">
+                                <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                                </svg>
+                                ${window.t ? window.t('print_prescription', 'Print Prescription') : 'Print Prescription'}
+                            </button>
+                        </div>
                         <div class="text-sm text-gray-700 whitespace-pre-wrap">${consultation.prescription}</div>
                     </div>
                 ` : ''}
             `;
             
-            // Add laboratory assessments section if any exist
-            const labAssessments = JSON.parse(localStorage.getItem('lab_assessments') || '[]');
-            const consultationAssessments = labAssessments.filter(a => a.consultationId === consultationId);
-            
-            if (consultationAssessments.length > 0) {
-                detailContent.innerHTML += `
-                    <div class="card p-4">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-semibold text-gray-900">${window.t ? window.t('laboratory_assessments', 'Laboratory Assessments') : 'Laboratory Assessments'}</h3>
-                            <button class="btn btn-sm btn-outline" onclick="openLaboratoryAssessmentModal('${consultationId}')">
-                                <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                </svg>
-                                <span data-translate="add_lab_assessment">Add New</span>
-                            </button>
-                        </div>
-                        <div class="space-y-3">
-                            ${consultationAssessments.map((assessment, index) => `
-                                <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="font-semibold text-sm text-gray-700">Assessment #${index + 1}</span>
-                                        <span class="text-xs text-gray-500">${new Date(assessment.createdAt).toLocaleString()}</span>
-                                    </div>
-                                    ${assessment.notes ? `
-                                        <div class="text-sm text-gray-600 mb-2">
-                                            <strong>Notes:</strong> ${assessment.notes}
-                                        </div>
-                                    ` : ''}
-                                    ${assessment.files && assessment.files.length > 0 ? `
-                                        <div class="text-sm">
-                                            <strong>Uploaded Files (${assessment.files.length}):</strong>
-                                            <div class="mt-2 space-y-1">
-                                                ${assessment.files.map(file => `
-                                                    <div class="flex items-center justify-between p-2 bg-white rounded border border-gray-200">
-                                                        <div class="flex items-center gap-2">
-                                                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                                            </svg>
-                                                            <span class="text-gray-700">${file.name}</span>
-                                                        </div>
-                                                        <button onclick="downloadLabFile('${assessment.id}', '${file.name}')" class="text-blue-600 hover:text-blue-800 text-xs">
-                                                            Download
-                                                        </button>
-                                                    </div>
-                                                `).join('')}
-                                            </div>
-                                        </div>
-                                    ` : ''}
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            } else {
-                // Show button to add first assessment
-                detailContent.innerHTML += `
-                    <div class="card p-4 border-dashed border-2 border-gray-300 bg-gray-50">
-                        <div class="text-center py-3">
-                            <svg class="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                            <p class="text-gray-600 mb-3">${window.t ? window.t('no_lab_assessments_yet', 'No laboratory assessments yet') : 'No laboratory assessments yet'}</p>
-                            <button class="btn btn-primary btn-sm" onclick="openLaboratoryAssessmentModal('${consultationId}')">
-                                <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                </svg>
-                                <span data-translate="add_lab_assessment">Add Laboratory Assessment</span>
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            // Add medical certificates section if any exist
+            // Add medical certificates section
             const medicalCertificates = JSON.parse(localStorage.getItem('medical_certificates') || '[]');
+            // Filter certificates that match THIS consultation ID only
             const consultationCertificates = medicalCertificates.filter(c => c.consultationId === consultationId);
             
             if (consultationCertificates.length > 0) {
                 detailContent.innerHTML += `
                     <div class="card p-4">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-semibold text-gray-900">Medical Certificates</h3>
-                            <button class="btn btn-sm btn-outline" onclick="openMedicalCertificateModal('${consultationId}')">
-                                <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                </svg>
-                                <span data-translate="medical_certificate">Create New</span>
-                            </button>
+                            <h3 class="text-lg font-semibold text-gray-900">${window.t ? window.t('medical_certificates', 'Medical Certificates') : 'Medical Certificates'}</h3>
                         </div>
                         <div class="space-y-3">
                             ${consultationCertificates.map((cert, index) => `
@@ -7464,47 +8865,49 @@
                                             <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                             </svg>
-                                            <span class="font-semibold text-gray-700">${cert.certType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                                            <span class="font-semibold text-gray-700">${cert.certType ? cert.certType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Medical Certificate'}</span>
                                         </div>
                                         <span class="text-xs text-gray-500">${new Date(cert.createdAt).toLocaleDateString()}</span>
                                     </div>
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm mb-3">
                                         ${cert.startDate ? `
-                                            <div><strong>Start Date:</strong> ${new Date(cert.startDate).toLocaleDateString()}</div>
+                                            <div><strong>${window.t ? window.t('start_date', 'Start Date') : 'Start Date'}:</strong> ${new Date(cert.startDate).toLocaleDateString()}</div>
                                         ` : ''}
                                         ${cert.endDate ? `
-                                            <div><strong>End Date:</strong> ${new Date(cert.endDate).toLocaleDateString()}</div>
+                                            <div><strong>${window.t ? window.t('end_date', 'End Date') : 'End Date'}:</strong> ${new Date(cert.endDate).toLocaleDateString()}</div>
                                         ` : ''}
                                         ${cert.restPeriod ? `
-                                            <div><strong>Rest Period:</strong> ${cert.restPeriod} days</div>
+                                            <div><strong>${window.t ? window.t('rest_period', 'Rest Period') : 'Rest Period'}:</strong> ${cert.restPeriod} ${window.t ? window.t('days', 'days') : 'days'}</div>
                                         ` : ''}
                                     </div>
-                                    <div class="text-sm mb-2">
-                                        <strong>Diagnosis:</strong>
-                                        <div class="mt-1 text-gray-700">${cert.diagnosis}</div>
-                                    </div>
-                                    ${cert.recommendations ? `
-                                        <div class="text-sm mb-2">
-                                            <strong>Recommendations:</strong>
-                                            <div class="mt-1 text-gray-700">${cert.recommendations}</div>
-                                        </div>
-                                    ` : ''}
                                     ${cert.notes ? `
-                                        <div class="text-sm">
-                                            <strong>Additional Notes:</strong>
+                                        <div class="text-sm mb-2">
+                                            <strong>${window.t ? window.t('notes', 'Notes') : 'Notes'}:</strong>
                                             <div class="mt-1 text-gray-600">${cert.notes}</div>
                                         </div>
                                     ` : ''}
                                     <div class="mt-3 pt-3 border-t border-green-200">
-                                        <button onclick="printMedicalCertificate('${cert.id}')" class="btn btn-sm btn-primary">
+                                        <button data-cert-id="${cert.id}" class="btn-print-certificate btn btn-sm btn-primary" type="button">
                                             <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
                                             </svg>
-                                            Print Certificate
+                                            ${window.t ? window.t('print_certificate', 'Print Certificate') : 'Print Certificate'}
                                         </button>
                                     </div>
                                 </div>
                             `).join('')}
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Show button to add first certificate
+                detailContent.innerHTML += `
+                    <div class="card p-4 border-dashed border-2 border-gray-300 bg-gray-50">
+                        <div class="text-center py-3">
+                            <svg class="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <p class="text-gray-600 mb-3">${window.t ? window.t('no_certificates_yet', 'No medical certificates yet') : 'No medical certificates yet'}</p>
                         </div>
                     </div>
                 `;
@@ -7522,6 +8925,266 @@
                 if (content && typeof content.focus === 'function') {
                     setTimeout(() => content.focus(), 0);
                 }
+                
+                // Add event delegation for print certificate and prescription buttons on the modal content
+                setTimeout(() => {
+                    const detailContent = document.getElementById('consultationDetailContent');
+                    if (detailContent) {
+                        // Remove any existing click listeners by cloning
+                        detailContent.removeEventListener('click', handlePrintCertificateClick);
+                        detailContent.removeEventListener('click', handlePrintPrescriptionClick);
+                        
+                        // Add new event listeners
+                        detailContent.addEventListener('click', handlePrintCertificateClick);
+                        detailContent.addEventListener('click', handlePrintPrescriptionClick);
+                    }
+                }, 100);
+            }
+        };
+        
+        // Event handler for print certificate buttons
+        function handlePrintCertificateClick(e) {
+            const printButton = e.target.closest('.btn-print-certificate');
+            if (printButton) {
+                e.preventDefault();
+                e.stopPropagation();
+                const certId = printButton.getAttribute('data-cert-id');
+                if (certId) {
+                    if (typeof window.printMedicalCertificate === 'function') {
+                        window.printMedicalCertificate(certId);
+                    } else {
+                        console.error('printMedicalCertificate function not available');
+                        alert('Print function is not available. Please refresh the page.');
+                    }
+                } else {
+                    console.error('Certificate ID not found');
+                }
+            }
+        }
+        
+        // Event handler for print prescription buttons
+        function handlePrintPrescriptionClick(e) {
+            const printButton = e.target.closest('.btn-print-prescription');
+            if (printButton) {
+                e.preventDefault();
+                e.stopPropagation();
+                const consultationId = printButton.getAttribute('data-consultation-id');
+                if (consultationId) {
+                    if (typeof window.printPrescription === 'function') {
+                        window.printPrescription(consultationId);
+                    } else {
+                        console.error('printPrescription function not available');
+                        alert('Print function is not available. Please refresh the page.');
+                    }
+                } else {
+                    console.error('Consultation ID not found');
+                }
+            }
+        }
+
+        // Open consultation modal pre-filled for editing
+        window.editConsultation = function(consultationId) {
+            try {
+                const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+                const c = consultations.find(x => x.id === consultationId);
+                if (!c) {
+                    showTranslatedAlert('Consultation not found.');
+                    return;
+                }
+                editingConsultationId = consultationId;
+
+                // Set patient display and hidden id
+                const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
+                const p = patients.find(pt => pt.id === c.patientId);
+                const patientInput = document.getElementById('consultPatient');
+                const patientIdInput = document.getElementById('consultPatientId');
+                if (p && patientInput) {
+                    const age = p.dateOfBirth ? calculateAge(p.dateOfBirth) : null;
+                    patientInput.value = `${p.fullName}${age != null ? ` (${age})` : ''} - ${p.phone || ''}`;
+                }
+                if (patientIdInput) patientIdInput.value = c.patientId;
+
+                // Set consultation ID in certificate form for linking certificates
+                const consultCertConsultationIdInput = document.getElementById('consultCertConsultationId');
+                if (consultCertConsultationIdInput) {
+                    consultCertConsultationIdInput.value = consultationId;
+                }
+
+                // Fill vitals and fields
+                const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = (val ?? '') }; 
+                set('consultHeight', c.height);
+                set('consultWeight', c.weight);
+                set('consultTemperature', c.temperature);
+                set('consultHeartRate', c.heartRate);
+                set('consultBloodSugar', c.bloodSugar);
+                set('consultBloodPressure', c.bpSystolic && c.bpDiastolic ? `${c.bpSystolic}/${c.bpDiastolic}` : '');
+                set('consultVitalNotes', c.vitalNotes || '');
+                set('consultNotes', c.notes);
+                set('consultPrescription', c.prescription);
+                set('radiologyResult', c.radiologyResult || '');
+                set('radiologyDiagnostics', c.radiologyDiagnostics || '');
+                set('labResults', c.labResults || '');
+                set('labNotes', c.labNotes || '');
+                
+                const payingRadio = document.getElementById('payingPatient');
+                const nonPayingRadio = document.getElementById('nonPayingPatient');
+                if (c.paymentStatus === 'non-paying') {
+                    if (nonPayingRadio) nonPayingRadio.checked = true;
+                } else {
+                    if (payingRadio) payingRadio.checked = true;
+                }
+
+                // Populate patient details section
+                if (p) {
+                    setTimeout(() => {
+                        const detailsBox = document.getElementById('consultPatientDetails');
+                        const detailsInfo = document.getElementById('consultPatientDetailsInfo');
+                        const histEl = document.getElementById('consultPatientHistory');
+                        
+                        if (detailsBox && detailsInfo) {
+                            // Calculate number of visits (consultations)
+                            const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+                            const visitsCount = consultations.filter(c => c.patientId === p.id).length;
+                            
+                            const age = p.dateOfBirth ? calculateAge(p.dateOfBirth) : 'N/A';
+                            const genderText = p.gender ? (window.t ? window.t(p.gender.toLowerCase(), p.gender) : p.gender) : 'N/A';
+                            
+                            detailsInfo.innerHTML = `
+                                <div class="space-y-2">
+                                    <div class="flex items-start">
+                                        <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('full_name', 'Full Name') : 'Full Name'}:</span>
+                                        <span class="text-gray-900">${p.fullName || 'N/A'}</span>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('file_number', 'File Number') : 'File Number'}:</span>
+                                        <span class="text-gray-900">${p.fileNumber || 'N/A'}</span>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('cin_passport', 'CIN/Passport') : 'CIN/Passport'}:</span>
+                                        <span class="text-gray-900">${p.cinPassport || 'N/A'}</span>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('email', 'Email') : 'Email'}:</span>
+                                        <span class="text-gray-900">${p.email || 'N/A'}</span>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('phone', 'Phone') : 'Phone'}:</span>
+                                        <span class="text-gray-900">${p.phone || 'N/A'}</span>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex items-start">
+                                        <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('date_of_birth', 'Date of Birth') : 'Date of Birth'}:</span>
+                                        <span class="text-gray-900">${p.dateOfBirth ? new Date(p.dateOfBirth).toLocaleDateString() : 'N/A'}</span>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('age', 'Age') : 'Age'}:</span>
+                                        <span class="text-gray-900">${age}</span>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('gender', 'Gender') : 'Gender'}:</span>
+                                        <span class="text-gray-900">${genderText}</span>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('address', 'Address') : 'Address'}:</span>
+                                        <span class="text-gray-900">${p.address || 'N/A'}</span>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('number_of_visits', 'Number of Visits') : 'Number of Visits'}:</span>
+                                        <span class="font-bold text-blue-600">${visitsCount}</span>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <span class="font-semibold text-gray-700 w-32">${window.t ? window.t('registered', 'Registered') : 'Registered'}:</span>
+                                        <span class="text-gray-900">${p.createdAt ? new Date(p.createdAt).toLocaleDateString() : 'N/A'}</span>
+                                    </div>
+                                </div>
+                            `;
+                            
+                            if (histEl) {
+                                histEl.textContent = (p.medicalHistory && p.medicalHistory.trim()) ? p.medicalHistory : (window.t ? window.t('no_history_available', 'No history available.') : 'No history available.');
+                            }
+                        }
+                    }, 100);
+                }
+
+                // Load existing certificate for this consultation if it exists
+                try {
+                    const certificates = JSON.parse(localStorage.getItem('medical_certificates') || '[]');
+                    const existingCertificate = certificates.find(cert => cert.consultationId === consultationId);
+                    
+                    if (existingCertificate) {
+                        // Populate certificate fields
+                        const setCert = (id, val) => { 
+                            const el = document.getElementById(id); 
+                            if (el && val !== null && val !== undefined) {
+                                // Format dates for date inputs
+                                if (id.includes('Date') && val) {
+                                    const date = new Date(val);
+                                    if (!isNaN(date.getTime())) {
+                                        el.value = date.toISOString().split('T')[0];
+                                    }
+                                } else {
+                                    el.value = val;
+                                }
+                            }
+                        };
+                        
+                        setCert('consultCertType', existingCertificate.certType);
+                        setCert('consultCertRestPeriod', existingCertificate.restPeriod);
+                        setCert('consultCertStartDate', existingCertificate.startDate);
+                        setCert('consultCertEndDate', existingCertificate.endDate);
+                        setCert('consultCertNotes', existingCertificate.notes);
+                    } else {
+                        // Clear certificate fields if no certificate exists
+                        const clearCert = (id) => { 
+                            const el = document.getElementById(id); 
+                            if (el && id !== 'consultCertConsultationId') el.value = ''; 
+                        };
+                        clearCert('consultCertType');
+                        clearCert('consultCertRestPeriod');
+                        clearCert('consultCertStartDate');
+                        clearCert('consultCertEndDate');
+                        clearCert('consultCertNotes');
+                    }
+                } catch (error) {
+                    console.error('Error loading certificate for consultation:', error);
+                }
+
+                // Update consultation menu buttons translation
+                setTimeout(() => {
+                    updateConsultMenuButtons();
+                }, 100);
+
+                // Show patient details section and modal
+                const allSections = document.querySelectorAll('.consult-section');
+                allSections.forEach(sec => sec.classList.add('hidden'));
+                const patientSection = document.getElementById('consultSectionPatient');
+                if (patientSection) patientSection.classList.remove('hidden');
+                
+                // Set patient information button as active
+                const menuButtons = document.querySelectorAll('.consult-menu-btn');
+                menuButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.style.opacity = '0.8';
+                    if (btn.getAttribute('data-section') === 'patient') {
+                        btn.classList.add('active');
+                        btn.style.opacity = '1';
+                    }
+                });
+                
+                const consultationModal = document.getElementById('consultationModal');
+                if (consultationModal) {
+                    // Check if dashboard modal is active and set higher z-index
+                    const dashboardModal = document.getElementById('doctorDashboardModal');
+                    if (dashboardModal && dashboardModal.classList.contains('active')) {
+                        consultationModal.style.zIndex = '3000';
+                    } else {
+                        consultationModal.style.zIndex = '';
+                    }
+                    consultationModal.classList.add('active');
+                }
+            } catch (e) {
+                console.error('editConsultation error', e);
             }
         };
         
@@ -7530,6 +9193,53 @@
             if (modal) {
                 modal.classList.remove('active');
                 modal.style.zIndex = '';
+            }
+        };
+
+        // Update last consultation for a patient from appointment
+        window.updateLastConsultation = function(appointmentId, patientName) {
+            try {
+                // Check if user is doctor
+                const session = JSON.parse(localStorage.getItem('medconnect_session') || '{}');
+                const isDoctor = session && session.role === 'doctor';
+                
+                if (!isDoctor) {
+                    showTranslatedAlert('consultations_doctors_only');
+                    return;
+                }
+
+                // Find the patient by name
+                const patient = storedPatients.find(p => p.fullName === patientName);
+                if (!patient) {
+                    showTranslatedAlert('Patient not found in system. Please add patient first.');
+                    return;
+                }
+
+                // Find all consultations for this patient
+                const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+                const patientConsultations = consultations.filter(c => c.patientId === patient.id);
+                
+                if (patientConsultations.length === 0) {
+                    showTranslatedAlert('No consultations found for this patient.');
+                    return;
+                }
+
+                // Sort by date (newest first) and get the last one
+                patientConsultations.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+                const lastConsultation = patientConsultations[0];
+
+                // Store appointment ID so we can mark it as completed after consultation is saved
+                window.currentConsultationAppointmentId = appointmentId;
+
+                // Use the existing editConsultation function to open the modal
+                if (lastConsultation && lastConsultation.id) {
+                    window.editConsultation(lastConsultation.id);
+                } else {
+                    showTranslatedAlert('Last consultation not found.');
+                }
+            } catch (e) {
+                console.error('updateLastConsultation error', e);
+                showTranslatedAlert('Error updating last consultation.');
             }
         };
 
@@ -7588,454 +9298,226 @@
             closeClinicalExamModal();
         };
 
-        // Laboratory Assessment Functions
-        let selectedLabFiles = [];
-        
-        window.openLaboratoryAssessmentModal = function(consultationId) {
-            const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
-            const consultation = consultations.find(c => c.id === consultationId);
-            
-            if (!consultation) {
-                showTranslatedAlert('Consultation not found.');
-                return;
-            }
-            
-            // Get patient info
-            const patient = storedPatients.find(p => p.id === consultation.patientId);
-            const patientName = patient ? patient.fullName : 'Unknown Patient';
-            const consultationDate = new Date(consultation.createdAt).toLocaleString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-            
-            // Populate modal
-            document.getElementById('labAssessmentConsultationId').value = consultationId;
-            document.getElementById('labAssessmentPatientName').textContent = patientName;
-            document.getElementById('labAssessmentConsultationDate').textContent = consultationDate;
-            document.getElementById('labAssessmentNotes').value = '';
-            document.getElementById('labAssessmentFiles').value = '';
-            document.getElementById('uploadedFilesList').innerHTML = '';
-            selectedLabFiles = [];
-            
-            // Load existing assessments
-            loadExistingAssessments(consultationId);
-            
-            // Open modal with high z-index
-            const modal = document.getElementById('laboratoryAssessmentModal');
-            if (modal) {
-                modal.style.zIndex = '11000'; // Higher than consultation detail modal
-                modal.classList.add('active');
-                updateModalTranslations();
-            }
-        };
-        
-        window.openLabAssessmentFromConsultation = function() {
-            // Get selected patient from consultation form
-            const patientId = document.getElementById('consultPatient').value;
-            
-            if (!patientId) {
-                alert('Please select a patient first.');
-                return;
-            }
-            
-            // Get patient info
-            const patient = storedPatients.find(p => p.id === patientId);
-            const patientName = patient ? patient.fullName : 'Unknown Patient';
-            
-            // Use a temporary ID for new consultations (not yet saved)
-            const tempConsultationId = 'temp_consult_' + Date.now();
-            
-            // Store the current patient ID for reference
-            currentConsultationPatientId = patientId;
-            
-            // Populate modal
-            document.getElementById('labAssessmentConsultationId').value = tempConsultationId;
-            document.getElementById('labAssessmentPatientName').textContent = patientName;
-            document.getElementById('labAssessmentConsultationDate').textContent = new Date().toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-            document.getElementById('labAssessmentNotes').value = '';
-            document.getElementById('labAssessmentFiles').value = '';
-            document.getElementById('uploadedFilesList').innerHTML = '';
-            selectedLabFiles = [];
-            
-            // Hide existing assessments section for new consultations
-            const section = document.getElementById('existingAssessmentsSection');
-            if (section) section.classList.add('hidden');
-            
-            // Open modal with high z-index to appear on top of consultation modal
-            const modal = document.getElementById('laboratoryAssessmentModal');
-            if (modal) {
-                modal.style.zIndex = '11000'; // Higher than consultation modal
-                modal.classList.add('active');
-                updateModalTranslations();
-            }
-        };
-        
-        window.closeLaboratoryAssessmentModal = function() {
-            const modal = document.getElementById('laboratoryAssessmentModal');
-            if (modal) {
-                modal.classList.remove('active');
-                modal.style.zIndex = ''; // Reset z-index
-            }
-            selectedLabFiles = [];
-        };
-        
-        function loadExistingAssessments(consultationId) {
-            const assessments = JSON.parse(localStorage.getItem('lab_assessments') || '[]');
-            const consultationAssessments = assessments.filter(a => a.consultationId === consultationId);
-            
-            const section = document.getElementById('existingAssessmentsSection');
-            const list = document.getElementById('existingAssessmentsList');
-            
-            if (consultationAssessments.length === 0) {
-                section.classList.add('hidden');
-                return;
-            }
-            
-            section.classList.remove('hidden');
-            list.innerHTML = consultationAssessments.map((assessment, index) => `
-                <div class="card p-3 bg-gray-50">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="font-semibold text-sm text-gray-700">Assessment #${index + 1}</span>
-                        <span class="text-xs text-gray-500">${new Date(assessment.createdAt).toLocaleString()}</span>
-                    </div>
-                    ${assessment.notes ? `
-                        <div class="text-sm text-gray-600 mb-2">
-                            <strong>Notes:</strong> ${assessment.notes}
-                        </div>
-                    ` : ''}
-                    ${assessment.files && assessment.files.length > 0 ? `
-                        <div class="text-sm">
-                            <strong>Files:</strong>
-                            <div class="mt-1 space-y-1">
-                                ${assessment.files.map(file => `
-                                    <div class="flex items-center text-blue-600">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                        </svg>
-                                        <span>${file.name}</span>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
-                </div>
-            `).join('');
-        }
-        
-        // Handle file selection
-        document.addEventListener('DOMContentLoaded', function() {
-            const fileInput = document.getElementById('labAssessmentFiles');
-            if (fileInput) {
-                fileInput.addEventListener('change', function(e) {
-                    const files = Array.from(e.target.files);
-                    
-                    // Process files
-                    files.forEach(file => {
-                        const reader = new FileReader();
-                        reader.onload = function(event) {
-                            selectedLabFiles.push({
-                                name: file.name,
-                                type: file.type,
-                                size: file.size,
-                                data: event.target.result
-                            });
-                            updateUploadedFilesList();
-                        };
-                        reader.readAsDataURL(file);
-                    });
-                });
-            }
-        });
-        
-        function updateUploadedFilesList() {
-            const container = document.getElementById('uploadedFilesList');
-            
-            if (selectedLabFiles.length === 0) {
-                container.innerHTML = '<p class="text-sm text-gray-500" data-translate="no_files_selected">No files selected</p>';
-                return;
-            }
-            
-            container.innerHTML = selectedLabFiles.map((file, index) => `
-                <div class="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-200">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        <div>
-                            <div class="text-sm font-medium text-gray-900">${file.name}</div>
-                            <div class="text-xs text-gray-500">${(file.size / 1024).toFixed(2)} KB</div>
-                        </div>
-                    </div>
-                    <button type="button" onclick="removeLabFile(${index})" class="text-red-600 hover:text-red-800">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-            `).join('');
-        }
-        
-        window.removeLabFile = function(index) {
-            selectedLabFiles.splice(index, 1);
-            updateUploadedFilesList();
-        };
-        
-        window.downloadLabFile = function(assessmentId, fileName) {
-            const assessments = JSON.parse(localStorage.getItem('lab_assessments') || '[]');
-            const assessment = assessments.find(a => a.id === assessmentId);
-            
-            if (!assessment) {
-                alert('Assessment not found.');
-                return;
-            }
-            
-            const file = assessment.files.find(f => f.name === fileName);
-            if (!file) {
-                alert('File not found.');
-                return;
-            }
-            
-            // Create download link
-            const link = document.createElement('a');
-            link.href = file.data;
-            link.download = file.name;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        };
-        
-        // Handle form submission
-        document.getElementById('laboratoryAssessmentForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const consultationId = document.getElementById('labAssessmentConsultationId').value;
-            const notes = document.getElementById('labAssessmentNotes').value.trim();
-            
-            if (!notes && selectedLabFiles.length === 0) {
-                alert('Please add notes or upload at least one file.');
-                return;
-            }
-            
-            // Save assessment
-            const assessments = JSON.parse(localStorage.getItem('lab_assessments') || '[]');
-            
-            const newAssessment = {
-                id: 'lab_' + Date.now(),
-                consultationId: consultationId,
-                notes: notes,
-                files: selectedLabFiles,
-                createdAt: new Date().toISOString()
-            };
-            
-            assessments.push(newAssessment);
-            localStorage.setItem('lab_assessments', JSON.stringify(assessments));
-            
-            // Show success message
-            const successMessage = translations[currentLanguage].assessment_saved || 'Laboratory assessment saved successfully!';
-            showTranslatedAlert('assessment_saved', successMessage);
-            
-            // Close modal
-            closeLaboratoryAssessmentModal();
-            
-            // Refresh consultation detail if it's open
-            const detailModal = document.getElementById('consultationDetailModal');
-            if (detailModal && detailModal.classList.contains('active')) {
-                viewConsultationDetail(consultationId);
-            }
-        });
+        // Laboratory Assessment Functions - REMOVED (modal removed)
 
         // ========================================
         // Medical Certificate Functions
         // ========================================
 
-        window.openMedicalCertificateModal = function(consultationId) {
-            const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
-            const consultation = consultations.find(c => c.id === consultationId);
-            
-            if (!consultation) {
-                showTranslatedAlert('Consultation not found.');
-                return;
-            }
-            
-            // Get patient and doctor info
-            const patient = storedPatients.find(p => p.id === consultation.patientId);
-            const patientName = patient ? patient.fullName : 'Unknown Patient';
-            const doctorName = consultation.doctor || 'Doctor';
-            const consultationDate = new Date(consultation.createdAt).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-            
-            // Populate modal
-            document.getElementById('certConsultationId').value = consultationId;
-            document.getElementById('certPatientName').textContent = patientName;
-            document.getElementById('certDate').textContent = consultationDate;
-            document.getElementById('certDoctorName').textContent = doctorName;
-            
-            // Set default start date to today
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('certStartDate').value = today;
-            
-            // Clear other fields
-            document.getElementById('certType').value = '';
-            document.getElementById('certRestPeriod').value = '';
-            document.getElementById('certEndDate').value = '';
-            document.getElementById('certDiagnosis').value = consultation.notes || '';
-            document.getElementById('certRecommendations').value = '';
-            document.getElementById('certNotes').value = '';
-            
-            // Open modal with high z-index
-            const modal = document.getElementById('medicalCertificateModal');
-            if (modal) {
-                modal.style.zIndex = '11000'; // Higher than other modals
-                modal.classList.add('active');
-                updateModalTranslations();
-            }
-        };
-        window.openMedicalCertificateFromConsultation = function() {
-            // Get selected patient from consultation form
-            const patientId = document.getElementById('consultPatient').value;
-            
+
+
+        // Consultation Certificate Form Submission
+        // Function to save and generate certificate
+        window.saveAndGenerateCertificate = function(showAlert = true) {
+            const patientId = document.getElementById('consultPatientId')?.value;
             if (!patientId) {
+                if (showAlert) {
                 alert('Please select a patient first.');
+                }
                 return;
             }
             
-            // Get patient info and session
-            const patient = storedPatients.find(p => p.id === patientId);
-            const patientName = patient ? patient.fullName : 'Unknown Patient';
-            const session = JSON.parse(localStorage.getItem('medconnect_session') || '{}');
-            const doctorName = session?.name || 'Doctor';
+            // Get consultation ID - check if we're editing an existing consultation first
+            let consultationId = document.getElementById('consultCertConsultationId')?.value || '';
             
-            // Use a temporary ID for new consultations
-            const tempConsultationId = 'temp_cert_consult_' + Date.now();
-            
-            // Store the current patient ID for reference
-            currentConsultationPatientId = patientId;
-            
-            // Populate modal
-            document.getElementById('certConsultationId').value = tempConsultationId;
-            document.getElementById('certPatientName').textContent = patientName;
-            document.getElementById('certDate').textContent = new Date().toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-            document.getElementById('certDoctorName').textContent = doctorName;
-            
-            // Set default start date to today
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('certStartDate').value = today;
-            
-            // Pre-fill diagnosis from consultation notes if available
-            const consultNotes = document.getElementById('consultNotes').value;
-            document.getElementById('certDiagnosis').value = consultNotes || '';
-            
-            // Clear other fields
-            document.getElementById('certType').value = '';
-            document.getElementById('certRestPeriod').value = '';
-            document.getElementById('certEndDate').value = '';
-            document.getElementById('certRecommendations').value = '';
-            document.getElementById('certNotes').value = '';
-            
-            // Open modal with high z-index to appear on top of consultation modal
-            const modal = document.getElementById('medicalCertificateModal');
-            if (modal) {
-                modal.style.zIndex = '11000'; // Higher than consultation modal
-                modal.classList.add('active');
-                updateModalTranslations();
+            // If no consultation ID set, check if we're editing a consultation
+            if (!consultationId && editingConsultationId) {
+                consultationId = editingConsultationId;
             }
-        };
-
-        window.closeMedicalCertificateModal = function() {
-            const modal = document.getElementById('medicalCertificateModal');
-            if (modal) {
-                modal.classList.remove('active');
-                modal.style.zIndex = ''; // Reset z-index
-            }
-        };
-
-        // Auto-calculate end date when rest period changes
-        document.addEventListener('DOMContentLoaded', function() {
-            const restPeriodInput = document.getElementById('certRestPeriod');
-            const startDateInput = document.getElementById('certStartDate');
-            const endDateInput = document.getElementById('certEndDate');
             
-            if (restPeriodInput && startDateInput && endDateInput) {
-                const updateEndDate = function() {
-                    const startDate = startDateInput.value;
-                    const restPeriod = parseInt(restPeriodInput.value);
-                    
-                    if (startDate && restPeriod > 0) {
-                        const start = new Date(startDate);
-                        start.setDate(start.getDate() + restPeriod);
-                        endDateInput.value = start.toISOString().split('T')[0];
+            // If still no ID, try to get from the most recent consultation for this patient
+            if (!consultationId) {
+                try {
+                    const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+                    const patientId = document.getElementById('consultPatientId')?.value;
+                    if (patientId) {
+                        const patientConsultations = consultations.filter(c => c.patientId === patientId);
+                        if (patientConsultations.length > 0) {
+                            // Get the most recent consultation
+                            const mostRecent = patientConsultations.sort((a, b) => new Date(b.createdAt || b.date || 0) - new Date(a.createdAt || a.date || 0))[0];
+                            consultationId = mostRecent.id;
+                            // Update the hidden input
+                            const consultCertConsultationIdInput = document.getElementById('consultCertConsultationId');
+                            if (consultCertConsultationIdInput) {
+                                consultCertConsultationIdInput.value = consultationId;
+                            }
+                        }
                     }
-                };
-                
-                restPeriodInput.addEventListener('input', updateEndDate);
-                startDateInput.addEventListener('change', updateEndDate);
+                } catch (error) {
+                    console.error('Error finding consultation ID:', error);
+                }
             }
-        });
-
-        // Medical Certificate Form Submission
-        document.getElementById('medicalCertificateForm').addEventListener('submit', function(e) {
-            e.preventDefault();
             
-            const consultationId = document.getElementById('certConsultationId').value;
-            const certType = document.getElementById('certType').value;
-            const restPeriod = document.getElementById('certRestPeriod').value;
-            const startDate = document.getElementById('certStartDate').value;
-            const endDate = document.getElementById('certEndDate').value;
-            const diagnosis = document.getElementById('certDiagnosis').value.trim();
-            const recommendations = document.getElementById('certRecommendations').value.trim();
-            const notes = document.getElementById('certNotes').value.trim();
+            // If still no ID, use temp ID (for new consultations not yet saved)
+            if (!consultationId) {
+                consultationId = 'temp_cert_consult_' + Date.now();
+            }
             
-            if (!certType || !startDate || !diagnosis) {
-                alert('Please fill in all required fields.');
+            const certType = document.getElementById('consultCertType').value;
+            const restPeriod = document.getElementById('consultCertRestPeriod').value;
+            const startDate = document.getElementById('consultCertStartDate').value;
+            const endDate = document.getElementById('consultCertEndDate').value;
+            const notes = document.getElementById('consultCertNotes')?.value.trim() || '';
+            
+            // Don't proceed if no certificate fields are filled
+            if (!certType && !startDate && !endDate && !restPeriod) {
                 return;
             }
             
             // Save certificate
             const certificates = JSON.parse(localStorage.getItem('medical_certificates') || '[]');
             
-            const newCertificate = {
+            // Get patient and doctor info for certificate
+            const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
+            const patient = patients.find(p => p.id === patientId);
+            const session = JSON.parse(localStorage.getItem('medconnect_session') || '{}');
+        
+            // Check if a certificate already exists for this consultation
+            const existingCertIndex = certificates.findIndex(cert => cert.consultationId === consultationId);
+            
+            let certificateToSave;
+            
+            if (existingCertIndex !== -1) {
+                // Update existing certificate
+                certificateToSave = {
+                    ...certificates[existingCertIndex],
+                    certType: certType,
+                    restPeriod: restPeriod ? parseInt(restPeriod) : null,
+                    startDate: startDate,
+                    endDate: endDate || null,
+                    notes: notes,
+                    patientName: patient ? patient.fullName : certificates[existingCertIndex].patientName || '-',
+                    doctorName: session?.name || certificates[existingCertIndex].doctorName || 'Doctor'
+                };
+                certificates[existingCertIndex] = certificateToSave;
+            } else {
+                // Create new certificate
+                certificateToSave = {
                 id: 'cert_' + Date.now(),
                 consultationId: consultationId,
-                patientName: document.getElementById('certPatientName').textContent,
-                doctorName: document.getElementById('certDoctorName').textContent,
+                    patientId: patientId,
+                    patientName: patient ? patient.fullName : '-',
+                    doctorName: session?.name || 'Doctor',
                 certType: certType,
                 restPeriod: restPeriod ? parseInt(restPeriod) : null,
                 startDate: startDate,
                 endDate: endDate || null,
-                diagnosis: diagnosis,
-                recommendations: recommendations,
                 notes: notes,
                 createdAt: new Date().toISOString()
             };
+                certificates.push(certificateToSave);
+            }
             
-            certificates.push(newCertificate);
             localStorage.setItem('medical_certificates', JSON.stringify(certificates));
             
-            // Show success message
+            // Show success message only if called manually (not automatically)
+            if (showAlert) {
             const successMessage = translations[currentLanguage].certificate_saved || 'Medical certificate saved successfully!';
             showTranslatedAlert('certificate_saved', successMessage);
+            }
             
-            // Close modal
-            closeMedicalCertificateModal();
+            // Don't automatically print certificate when saving from consultation form
+            // Certificate can be printed manually from the Documents section or consultation details
             
             // Refresh consultation detail if it's open
             const detailModal = document.getElementById('consultationDetailModal');
             if (detailModal && detailModal.classList.contains('active')) {
+                // Try to get consultation ID from the certificate
+            const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+            const consultation = consultations.find(c => c.id === consultationId);
+                if (consultation) {
+                    setTimeout(() => {
                 viewConsultationDetail(consultationId);
+                    }, 100);
+                }
             }
-        });
+            
+            // Reset form
+            const consultCertForm = document.getElementById('consultCertificateForm');
+            if (consultCertForm) {
+                const formInputs = consultCertForm.querySelectorAll('input, select, textarea');
+                formInputs.forEach(input => {
+                    if (input.id !== 'consultCertConsultationId') {
+                        input.value = '';
+                    }
+                });
+            }
+        };
+
+        // Certificate form submit handler removed - certificates are now generated automatically when consultation is saved
+        
+        // Auto-calculate end date for consultation certificate form
+        const consultCertForm = document.getElementById('consultCertificateForm');
+        if (consultCertForm) {
+            const consultRestPeriodInput = document.getElementById('consultCertRestPeriod');
+            const consultStartDateInput = document.getElementById('consultCertStartDate');
+            const consultEndDateInput = document.getElementById('consultCertEndDate');
+            
+            if (consultRestPeriodInput && consultStartDateInput && consultEndDateInput) {
+                let isUpdating = false; // Flag to prevent circular updates
+                
+                const updateConsultEndDate = function() {
+                    if (isUpdating) return; // Prevent circular updates
+                    const startDate = consultStartDateInput.value;
+                    const restPeriod = parseInt(consultRestPeriodInput.value);
+                    
+                    if (startDate && restPeriod > 0) {
+                        isUpdating = true;
+                        const start = new Date(startDate);
+                        start.setDate(start.getDate() + restPeriod);
+                        consultEndDateInput.value = start.toISOString().split('T')[0];
+                        isUpdating = false;
+            }
+                };
+                
+                const updateConsultStartDate = function() {
+                    if (isUpdating) return; // Prevent circular updates
+                    const endDate = consultEndDateInput.value;
+                    const restPeriod = parseInt(consultRestPeriodInput.value);
+                    
+                    if (endDate && restPeriod > 0) {
+                        isUpdating = true;
+                        const end = new Date(endDate);
+                        // Subtract (restPeriod - 1) days to get the start date
+                        // This ensures the period includes both start and end dates
+                        end.setDate(end.getDate() - (restPeriod - 1));
+                        consultStartDateInput.value = end.toISOString().split('T')[0];
+                        isUpdating = false;
+                    }
+                };
+                
+                const updateConsultRestPeriod = function() {
+                    if (isUpdating) return; // Prevent circular updates
+                    const startDate = consultStartDateInput.value;
+                    const endDate = consultEndDateInput.value;
+                    
+                    if (startDate && endDate) {
+                        isUpdating = true;
+                        const start = new Date(startDate);
+                        const end = new Date(endDate);
+                        
+                        if (end >= start) {
+                            // Calculate difference in days (inclusive of both dates)
+                            const diffTime = end - start;
+                            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                            consultRestPeriodInput.value = diffDays;
+                        }
+                        isUpdating = false;
+                    }
+                };
+                
+                consultRestPeriodInput.addEventListener('input', updateConsultEndDate);
+                consultStartDateInput.addEventListener('change', function() {
+                    updateConsultEndDate();
+                    updateConsultRestPeriod();
+                });
+                consultEndDateInput.addEventListener('change', function() {
+                    updateConsultStartDate();
+                    updateConsultRestPeriod();
+                });
+            }
+        }
+
 
         window.printMedicalCertificate = function(certificateId) {
             const certificates = JSON.parse(localStorage.getItem('medical_certificates') || '[]');
@@ -8046,66 +9528,118 @@
                 return;
             }
             
-            // Get cabinet settings for letterhead
+            // Get patient information
+            const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
+            const patient = cert.patientId ? patients.find(p => p.id === cert.patientId) : null;
+            
+            // Get consultation date
+            const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+            const consultation = cert.consultationId ? consultations.find(c => c.id === cert.consultationId) : null;
+            const consultationDate = consultation ? consultation.createdAt : cert.createdAt;
+            
+            // Get cabinet settings
             const cabinetSettings = getCabinetSettings();
+            
+            // Format dates in French format
+            const formatDateFR = (dateStr) => {
+                if (!dateStr) return '';
+                const date = new Date(dateStr);
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                return day + '/' + month + '/' + year;
+            };
+            
+            const consultationDateFR = formatDateFR(consultationDate);
+            const startDateFR = formatDateFR(cert.startDate);
+            const endDateFR = formatDateFR(cert.endDate);
+            const certificateDateFR = formatDateFR(cert.createdAt);
+            const patientBirthDateFR = patient && patient.dateOfBirth ? formatDateFR(patient.dateOfBirth) : '';
+            
+            // Determine patient title (M./Mme) based on gender
+            const patientTitle = patient && patient.gender ? 
+                (patient.gender.toLowerCase() === 'male' || patient.gender.toLowerCase() === 'homme' ? 'M.' : 'Mme') : 
+                'M.';
+            
+            // Calculate rest period in days
+            const restDays = cert.restPeriod || (cert.startDate && cert.endDate ? 
+                Math.ceil((new Date(cert.endDate) - new Date(cert.startDate)) / (1000 * 60 * 60 * 24)) : 0);
+            
+            // Get cabinet location
+            const cabinetLocation = cabinetSettings.address ? 
+                (cabinetSettings.address.split(',')[0] || cabinetSettings.address) : 'Tunis';
             
             // Create printable certificate
             const printWindow = window.open('', '_blank');
-            const certTypeDisplay = cert.certType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
             
             let certificateHTML = '<!DOCTYPE html><html><head>';
-            certificateHTML += '<title>Medical Certificate - ' + cert.patientName + '</title>';
+            certificateHTML += '<title>Certificat Médical - ' + cert.patientName + '</title>';
+            certificateHTML += '<meta charset="UTF-8">';
             certificateHTML += '<style>';
-            certificateHTML += 'body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px; line-height: 1.6; }';
-            certificateHTML += '.header { text-align: center; border-bottom: 3px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px; }';
-            certificateHTML += '.logo { max-width: 120px; margin-bottom: 10px; }';
-            certificateHTML += '.cabinet-name { font-size: 24px; font-weight: bold; color: #1e40af; margin-bottom: 5px; }';
-            certificateHTML += '.cabinet-info { font-size: 14px; color: #666; }';
-            certificateHTML += '.certificate-title { text-align: center; font-size: 28px; font-weight: bold; color: #059669; margin: 30px 0; text-transform: uppercase; }';
-            certificateHTML += '.cert-body { margin: 30px 0; }';
-            certificateHTML += '.info-section { margin-bottom: 20px; }';
-            certificateHTML += '.info-label { font-weight: bold; color: #374151; }';
-            certificateHTML += '.info-value { color: #1f2937; margin-left: 10px; }';
-            certificateHTML += '.diagnosis-box { background: #f3f4f6; padding: 15px; border-left: 4px solid #2563eb; margin: 20px 0; }';
-            certificateHTML += '.signature-section { margin-top: 60px; display: flex; justify-content: space-between; }';
-            certificateHTML += '.signature-box { text-align: center; min-width: 200px; }';
-            certificateHTML += '.signature-line { border-top: 2px solid #000; margin-top: 50px; padding-top: 5px; }';
-            certificateHTML += '.footer { margin-top: 40px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #ddd; padding-top: 20px; }';
+            certificateHTML += 'body { font-family: "Times New Roman", serif; max-width: 800px; margin: 0 auto; padding: 40px; line-height: 1.8; font-size: 14px; }';
+            certificateHTML += '.certificate-title { font-weight: bold; font-size: 18px; margin-bottom: 30px; }';
+            certificateHTML += '.cert-body { text-align: justify; margin: 20px 0; }';
+            certificateHTML += '.cert-body p { margin: 15px 0; }';
+            certificateHTML += '.signature-section { margin-top: 60px; }';
+            certificateHTML += '.signature-line { border-top: 1px solid #000; margin-top: 50px; padding-top: 5px; }';
+            certificateHTML += '.signature-box { margin-top: 30px; }';
+            certificateHTML += '.signature-box div { margin: 5px 0; }';
             certificateHTML += '@media print { body { padding: 20px; } }';
             certificateHTML += '</style></head><body>';
-            certificateHTML += '<div class="header">';
-            if (cabinetSettings.logo) {
-                certificateHTML += '<img src="' + cabinetSettings.logo + '" alt="Logo" class="logo">';
-            }
-            certificateHTML += '<div class="cabinet-name">' + (cabinetSettings.name || 'Medical Center') + '</div>';
-            certificateHTML += '<div class="cabinet-info">' + (cabinetSettings.address || 'Tunis, Tunisia') + '</div>';
-            certificateHTML += '<div class="cabinet-info">Tel: ' + (cabinetSettings.phone || '00 000 000') + '</div>';
-            certificateHTML += '</div>';
-            certificateHTML += '<div class="certificate-title">Medical Certificate</div>';
-            certificateHTML += '<div style="text-align: center; margin-bottom: 20px; font-size: 16px; color: #059669;">' + certTypeDisplay + '</div>';
+            
+            // Title
+            certificateHTML += '<div class="certificate-title">CERTIFICAT MÉDICAL</div>';
+            
+            // Certificate body
             certificateHTML += '<div class="cert-body">';
-            certificateHTML += '<div class="info-section"><span class="info-label">Certificate ID:</span><span class="info-value">' + cert.id + '</span></div>';
-            certificateHTML += '<div class="info-section"><span class="info-label">Date of Issue:</span><span class="info-value">' + new Date(cert.createdAt).toLocaleDateString() + '</span></div>';
-            certificateHTML += '<div class="info-section"><span class="info-label">Patient Name:</span><span class="info-value">' + cert.patientName + '</span></div>';
-            if (cert.startDate) {
-                certificateHTML += '<div class="info-section"><span class="info-label">Period:</span><span class="info-value">From ' + new Date(cert.startDate).toLocaleDateString();
-                if (cert.endDate) certificateHTML += ' to ' + new Date(cert.endDate).toLocaleDateString();
-                if (cert.restPeriod) certificateHTML += ' (' + cert.restPeriod + ' days)';
-                certificateHTML += '</span></div>';
+            
+            // Doctor declaration
+            certificateHTML += '<p>Je soussigné(e), Dr ' + cert.doctorName + ', Médecin généraliste, certifie que :</p>';
+            
+            // Patient and consultation info
+            certificateHTML += '<p>' + patientTitle + ' ' + cert.patientName;
+            if (patientBirthDateFR) {
+                certificateHTML += ', né(e) le ' + patientBirthDateFR;
             }
-            certificateHTML += '<div class="diagnosis-box"><div class="info-label" style="margin-bottom: 10px;">Medical Diagnosis / Condition:</div><div>' + cert.diagnosis + '</div></div>';
-            if (cert.recommendations) {
-                certificateHTML += '<div class="info-section"><div class="info-label" style="margin-bottom: 5px;">Medical Recommendations:</div><div style="color: #1f2937;">' + cert.recommendations + '</div></div>';
+            certificateHTML += ', a consulté mon cabinet en date du ' + consultationDateFR + '.</p>';
+            
+            // Medical finding and rest period
+            if (restDays > 0) {
+                const restDaysText = restDays === 1 ? 'un (1) jour' : restDays + ' (' + restDays + ') jours';
+                certificateHTML += '<p>Après examen médical, il/elle présente un état de santé nécessitant un repos complet de ' + restDaysText + ' à compter de la date de la consultation.</p>';
             }
-            if (cert.notes) {
-                certificateHTML += '<div class="info-section"><div class="info-label" style="margin-bottom: 5px;">Additional Notes:</div><div style="color: #4b5563;">' + cert.notes + '</div></div>';
+            
+            // Recommendation
+            if (cert.startDate && cert.endDate) {
+                certificateHTML += '<p>Je recommande donc à mon patient de prendre un repos total du ' + startDateFR + ' au ' + endDateFR + '.</p>';
+            } else if (cert.startDate) {
+                certificateHTML += '<p>Je recommande donc à mon patient de prendre un repos total à compter du ' + startDateFR + '.</p>';
             }
+            
+            // Closing statement
+            certificateHTML += '<p>Je reste à votre disposition pour toute information complémentaire.</p>';
+            
+            // Location and date
+            certificateHTML += '<p>Fait à ' + cabinetLocation + ', le ' + certificateDateFR + '.</p>';
+            
+            certificateHTML += '</div>';
+            
+            // Signature section
             certificateHTML += '<div class="signature-section">';
-            certificateHTML += '<div class="signature-box"><div class="signature-line"><strong>Patient Signature</strong></div></div>';
-            certificateHTML += '<div class="signature-box"><div class="signature-line"><strong>Dr. ' + cert.doctorName + '</strong><br><span style="font-size: 12px;">Medical Doctor</span></div></div>';
-            certificateHTML += '</div></div>';
-            certificateHTML += '<div class="footer">This is an official medical certificate issued by ' + (cabinetSettings.name || 'Medical Center') + '<br>';
-            certificateHTML += 'Certificate ID: ' + cert.id + ' | Issued: ' + new Date(cert.createdAt).toLocaleString() + '</div>';
+            certificateHTML += '<div class="signature-line"></div>';
+            certificateHTML += '<div class="signature-box">';
+            certificateHTML += '<div><strong>Signature :</strong></div>';
+            certificateHTML += '<div>' + cert.doctorName + '</div>';
+            certificateHTML += '<div>[Numéro d\'inscription à l\'Ordre des Médecins]</div>';
+            if (cabinetSettings.address) {
+                certificateHTML += '<div>' + cabinetSettings.address + '</div>';
+            }
+            if (cabinetSettings.phone) {
+                certificateHTML += '<div>Tél: ' + cabinetSettings.phone + '</div>';
+            }
+            certificateHTML += '</div>';
+            certificateHTML += '</div>';
+            
             certificateHTML += '<scr' + 'ipt>window.onload = function() { window.print(); };</scr' + 'ipt>';
             certificateHTML += '</body></html>';
             
@@ -8113,18 +9647,117 @@
             printWindow.document.close();
         };
 
+        // Print Prescription for a consultation
+        window.printPrescription = function(consultationId) {
+            const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+            const c = consultations.find(x => x.id === consultationId);
+            if (!c || !c.prescription) {
+                alert('Prescription not found.');
+                return;
+            }
+            
+            // Patient info
+            const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
+            const patient = patients.find(p => p.id === c.patientId);
+            
+            // Cabinet settings (header/footer)
+            const cabinetSettings = JSON.parse(localStorage.getItem('cabinetSettings') || '{}');
+            
+            const t = (k, d) => (window.t ? window.t(k, d) : d);
+            const title = t('medical_prescription', 'Medical Prescription');
+            
+            const printHTML = `<!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="utf-8" />
+                    <title>${title}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 24px; color: #111827; }
+                        .cabinet-header { display:flex; align-items:center; gap:16px; border-bottom:2px solid #2563eb; padding-bottom:16px; margin-bottom:24px; }
+                        .cabinet-logo { width:64px; height:64px; object-fit:contain; flex-shrink:0; }
+                        .cabinet-info { flex:1; }
+                        .cabinet-name { font-size:24px; font-weight:700; color:#1e40af; margin-bottom:4px; }
+                        .cabinet-details { font-size:13px; color:#4b5563; line-height:1.6; }
+                        .cabinet-details div { margin-bottom:2px; }
+                        .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; }
+                        .clinic { font-size:18px; font-weight:700; color:#111827; }
+                        .address { font-size:12px; color:#6b7280; }
+                        .section { margin-top:12px; }
+                        .section h3 { margin:0 0 6px 0; font-size:16px; }
+                        .box { background:#f9fafb; border:1px solid #e5e7eb; border-radius:6px; padding:12px; white-space:pre-wrap; }
+                        .meta { font-size:12px; color:#374151; }
+                        .footer { margin-top:24px; display:flex; justify-content:space-between; font-size:12px; color:#374151; }
+                        .sign { margin-top:32px; text-align:right; }
+                    </style>
+                </head>
+                <body>
+                    <div class="cabinet-header">
+                        ${cabinetSettings.logo && /^data:image\//.test(cabinetSettings.logo) ? `
+                            <img src="${cabinetSettings.logo}" alt="Logo" class="cabinet-logo" />
+                        ` : ''}
+                        <div class="cabinet-info">
+                            <div class="cabinet-name">${cabinetSettings.name || 'Medical Center'}</div>
+                            <div class="cabinet-details">
+                                ${cabinetSettings.address ? `<div>${cabinetSettings.address}</div>` : ''}
+                                ${cabinetSettings.phone ? `<div>${t('phone','Phone')}: ${cabinetSettings.phone}</div>` : ''}
+                                ${cabinetSettings.email ? `<div>${t('email','Email')}: ${cabinetSettings.email}</div>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="header">
+                        <div>
+                            <div class="clinic">${title}</div>
+                        </div>
+                        <div class="meta">
+                            <div><strong>${t('date','Date')}:</strong> ${new Date(c.createdAt).toLocaleDateString()}</div>
+                            ${patient ? `<div><strong>${t('patient','Patient')}:</strong> ${patient.fullName}</div>` : ''}
+                        </div>
+                    </div>
+                    ${c.notes ? `
+                    <div class="section">
+                        <h3>${t('clinical_notes','Clinical Notes')}</h3>
+                        <div class="box">${c.notes}</div>
+                    </div>
+                    ` : ''}
+                    <div class="section">
+                        <h3>${t('prescription','Prescription')}</h3>
+                        <div class="box">${c.prescription}</div>
+                    </div>
+                    <div class="sign">
+                        <div>${t('doctor','Doctor')}: ${c.doctor || ''}</div>
+                    </div>
+                    <div class="footer">
+                        <div>${t('generated_on','Generated on')} ${new Date().toLocaleString()}</div>
+                    </div>
+                    <script>window.onload = function(){ window.print(); }<\/script>
+                </body>
+                </html>`;
+            
+            const w = window.open('', '_blank');
+            if (!w) { alert('Popup blocked. Please allow popups to print.'); return; }
+            w.document.open();
+            w.document.write(printHTML);
+            w.document.close();
+        };
+
         // Logout function
         window.logout = function () {
-            if (showTranslatedConfirm('logout_confirm')) {
+            try {
+                const ok = (typeof showTranslatedConfirm === 'function')
+                    ? showTranslatedConfirm('logout_confirm')
+                    : confirm('Are you sure you want to logout?');
+                if (!ok) return;
+
                 // Clear session data
                 localStorage.removeItem('medconnect_session');
 
-                // Clear all healthcare data (optional - you might want to keep this)
-                // localStorage.removeItem('healthcareAppointments');
-                // localStorage.removeItem('healthcarePatients');
-                // localStorage.removeItem('healthcareBills');
+                // Optional data clears can be added here if desired
 
-                // Redirect to login page
+                // Redirect to login page (use replace to avoid back navigation into app)
+                window.location.replace('loginForm.html');
+            } catch (e) {
+                console.error('Logout error:', e);
+                // Fallback redirect
                 window.location.href = 'loginForm.html';
             }
         };
@@ -8134,8 +9767,8 @@
         // ========================================
 
         // Initialize expenses array
-        let storedExpenses = [];
-        let editingExpenseId = null;
+        var storedExpenses = [];
+        var editingExpenseId = null;
 
         // Load expenses from localStorage
         function loadExpenses() {
