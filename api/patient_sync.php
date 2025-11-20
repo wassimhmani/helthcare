@@ -41,86 +41,94 @@ if ($patient['id'] === '') {
     exit;
 }
 
-$dbPath = realpath(__DIR__ . '/../helthcareDB.accdb');
-if (!$dbPath || !file_exists($dbPath)) {
+// Connect to MySQL (XAMPP defaults). Adjust credentials if needed.
+$dbHost = 'localhost';
+$dbUser = 'root';
+$dbPass = '';
+$dbName = 'helthcareDB';
+
+$mysqli = @new mysqli($dbHost, $dbUser, $dbPass, $dbName);
+if ($mysqli->connect_errno) {
     http_response_code(500);
-    echo json_encode(['status' => 'error', 'message' => 'Database file not found']);
+    echo json_encode(['status' => 'error', 'message' => 'Unable to connect to MySQL', 'error' => $mysqli->connect_error]);
+    exit;
+}
+$mysqli->set_charset('utf8mb4');
+
+// Ensure table exists
+$createSql = "CREATE TABLE IF NOT EXISTS `Patient` (
+  `id` VARCHAR(100) NOT NULL,
+  `file_number` VARCHAR(100) NULL,
+  `cin_passport` VARCHAR(100) NULL,
+  `full_name` VARCHAR(255) NULL,
+  `email` VARCHAR(255) NULL,
+  `phone` VARCHAR(50) NULL,
+  `date_of_birth` VARCHAR(20) NULL,
+  `gender` VARCHAR(20) NULL,
+  `address` TEXT NULL,
+  `medical_history` TEXT NULL,
+  `created_at` DATETIME NULL,
+  `updated_at` DATETIME NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+if (!$mysqli->query($createSql)) {
+    http_response_code(500);
+    echo json_encode(['status' => 'error', 'message' => 'Failed to ensure table', 'sql' => $createSql, 'error' => $mysqli->error]);
+    $mysqli->close();
     exit;
 }
 
-$connStr = 'Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=' . $dbPath . ';';
-$conn = @odbc_connect($connStr, '', '');
-if (!$conn) {
+// Upsert (insert or update) using ON DUPLICATE KEY UPDATE
+$sql = "INSERT INTO `Patient` (id, file_number, cin_passport, full_name, email, phone, date_of_birth, gender, address, medical_history, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+            file_number = VALUES(file_number),
+            cin_passport = VALUES(cin_passport),
+            full_name = VALUES(full_name),
+            email = VALUES(email),
+            phone = VALUES(phone),
+            date_of_birth = VALUES(date_of_birth),
+            gender = VALUES(gender),
+            address = VALUES(address),
+            medical_history = VALUES(medical_history),
+            updated_at = VALUES(updated_at)";
+
+$stmt = $mysqli->prepare($sql);
+if (!$stmt) {
     http_response_code(500);
-    echo json_encode(['status' => 'error', 'message' => 'Unable to connect to Access database']);
+    echo json_encode(['status' => 'error', 'message' => 'Failed to prepare statement', 'error' => $mysqli->error]);
+    $mysqli->close();
     exit;
 }
 
-// Ensure table exists (ignore errors when already present)
-@odbc_exec($conn, 'CREATE TABLE patient (
-    id TEXT(100) PRIMARY KEY,
-    file_number TEXT(100),
-    cin_passport TEXT(100),
-    full_name TEXT(255),
-    email TEXT(255),
-    phone TEXT(50),
-    date_of_birth TEXT(20),
-    gender TEXT(20),
-    address MEMO,
-    medical_history MEMO,
-    created_at DATETIME,
-    updated_at DATETIME
-)');
-@odbc_exec($conn, 'CREATE UNIQUE INDEX idx_patient_id ON patient (id)');
+$createdAt = $patient['created_at'] ?: date('Y-m-d H:i:s');
+$updatedAt = $patient['updated_at'] ?: date('Y-m-d H:i:s');
 
-$existsStmt = odbc_prepare($conn, 'SELECT id FROM patient WHERE id = ?');
-$exists = $existsStmt && odbc_execute($existsStmt, [$patient['id']]) && odbc_fetch_row($existsStmt);
+$stmt->bind_param(
+    'ssssssssssss',
+    $patient['id'],
+    $patient['file_number'],
+    $patient['cin_passport'],
+    $patient['full_name'],
+    $patient['email'],
+    $patient['phone'],
+    $patient['date_of_birth'],
+    $patient['gender'],
+    $patient['address'],
+    $patient['medical_history'],
+    $createdAt,
+    $updatedAt
+);
 
-if ($exists) {
-    $updateStmt = odbc_prepare($conn, 'UPDATE patient SET file_number = ?, cin_passport = ?, full_name = ?, email = ?, phone = ?, date_of_birth = ?, gender = ?, address = ?, medical_history = ?, updated_at = ? WHERE id = ?');
-    $ok = $updateStmt && odbc_execute($updateStmt, [
-        $patient['file_number'],
-        $patient['cin_passport'],
-        $patient['full_name'],
-        $patient['email'],
-        $patient['phone'],
-        $patient['date_of_birth'],
-        $patient['gender'],
-        $patient['address'],
-        $patient['medical_history'],
-        date('Y-m-d H:i:s'),
-        $patient['id']
-    ]);
-    if (!$ok) {
-        http_response_code(500);
-        echo json_encode(['status' => 'error', 'message' => 'Failed to update patient']);
-        odbc_close($conn);
-        exit;
-    }
-} else {
-    $insertStmt = odbc_prepare($conn, 'INSERT INTO patient (id, file_number, cin_passport, full_name, email, phone, date_of_birth, gender, address, medical_history, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-    $ok = $insertStmt && odbc_execute($insertStmt, [
-        $patient['id'],
-        $patient['file_number'],
-        $patient['cin_passport'],
-        $patient['full_name'],
-        $patient['email'],
-        $patient['phone'],
-        $patient['date_of_birth'],
-        $patient['gender'],
-        $patient['address'],
-        $patient['medical_history'],
-        date('Y-m-d H:i:s'),
-        date('Y-m-d H:i:s')
-    ]);
-    if (!$ok) {
-        http_response_code(500);
-        echo json_encode(['status' => 'error', 'message' => 'Failed to insert patient']);
-        odbc_close($conn);
-        exit;
-    }
+if (!$stmt->execute()) {
+    http_response_code(500);
+    echo json_encode(['status' => 'error', 'message' => 'Failed to insert/update patient', 'error' => $stmt->error]);
+    $stmt->close();
+    $mysqli->close();
+    exit;
 }
 
-odbc_close($conn);
+$stmt->close();
+$mysqli->close();
 
 echo json_encode(['status' => 'ok', 'id' => $patient['id']]);

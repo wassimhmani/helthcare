@@ -8,7 +8,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <script src="library/tailwind.js"></script>
-    <script src="i18n/i18n.js"></script>
+    
     <script>
         window.addEventListener('DOMContentLoaded', () => {
             if (window.I18n && I18n.initI18n) {
@@ -306,7 +306,7 @@
             </div>
             <form id="consultationForm">
                 <div class="form-group">
-                    <input type="text" id="consultPatient" class="form-input" disabled readonly>
+                    <input type="text" id="consultPatient" class="form-input" disabled readonly placeholder="Patient will be selected from previous modal">
                     <input type="hidden" id="consultPatientId" name="consultPatientId">
                 </div>
                 
@@ -317,6 +317,7 @@
                     <button type="button" class="consult-menu-btn" onclick="showConsultSection('lab')" data-section="lab" style="background: #86efac; color: white; padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-weight: 500; font-size: 0.7rem; border: none; cursor: pointer; opacity: 0.8; flex: 1; line-height: 1.3; text-align: center; white-space: nowrap;" data-translate="lab_assessment">Lab Assessment</button>
                     <button type="button" class="consult-menu-btn" onclick="showConsultSection('radiology')" data-section="radiology" style="background: #ef4444; color: white; padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-weight: 500; font-size: 0.7rem; border: none; cursor: pointer; opacity: 0.8; flex: 1; line-height: 1.3; text-align: center; white-space: nowrap;" data-translate="radiology_results">Radiology Results</button>
                     <button type="button" class="consult-menu-btn" onclick="showConsultSection('prescription')" data-section="prescription" style="background: #06b6d4; color: white; padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-weight: 500; font-size: 0.7rem; border: none; cursor: pointer; opacity: 0.8; flex: 1; line-height: 1.3; text-align: center; white-space: nowrap;" data-translate="medical_prescription">Medical Prescription</button>
+                    <button type="button" class="consult-menu-btn" onclick="showConsultSection('documents')" data-section="documents" style="background: #f97316; color: white; padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-weight: 500; font-size: 0.7rem; border: none; cursor: pointer; opacity: 0.8; flex: 1; line-height: 1.3; text-align: center; white-space: nowrap;" data-translate="medical_documents">Medical Documents</button>
                     <button type="button" class="consult-menu-btn" onclick="showConsultSection('certificate')" data-section="certificate" style="background: #86efac; color: white; padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-weight: 500; font-size: 0.7rem; border: none; cursor: pointer; opacity: 0.8; flex: 1; line-height: 1.3; text-align: center; white-space: nowrap;" data-translate="work_certificate">Work Certificate</button>
                     </div>
                 
@@ -379,9 +380,12 @@
                     <input type="text" id="consultBloodPressure" class="form-input" placeholder="e.g., 120/80" data-translate-placeholder="blood_pressure_example" />
                 </div>
                 
+                <!-- Clinical Note Card -->
+                <div class="card p-6 mb-4">
+                    <h3 class="text-lg font-semibold mb-4" data-translate="clinical_notes">Clinical Note</h3>
                 <div class="form-group">
-                    <label class="form-label" for="consultVitalNotes" data-translate="vital_notes">Vital Notes</label>
-                    <textarea id="consultVitalNotes" class="form-input form-textarea" rows="3" placeholder="Enter vital notes..." data-translate-placeholder="enter_vital_notes"></textarea>
+                        <textarea id="consultNotes" class="form-input form-textarea" placeholder="Enter notes" data-translate-placeholder="enter_notes"></textarea>
+                    </div>
                 </div>
                 
                 <!-- Payment Status -->
@@ -401,80 +405,88 @@
                 </div>
                 
                 <!-- Lab Assessment Section -->
-                <div id="consultSectionLab" class="consult-section hidden">
+                <div id="consultSectionRadiology" class="consult-section hidden">
                     <div class="mb-4">
-                        <!-- Lab Results Input -->
+                        <!-- Diagnostics Input -->
                         <div class="mb-4">
-                            <div class="flex items-center justify-between bg-blue-600 text-white px-4 py-2 rounded-t-lg">
-                                <h3 class="font-semibold" data-translate="lab_results">Lab Results</h3>
-                                <button type="button" onclick="editLabResults()" class="w-8 h-8 rounded-full bg-purple-600 hover:bg-purple-700 flex items-center justify-center transition-colors">
-                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                    </svg>
-                                </button>
+                            <div class="flex flex-wrap items-center justify-between gap-3 bg-blue-600 text-white px-4 py-2 rounded-t-lg">
+                                <h3 class="font-semibold" data-translate="diagnostics">Diagnostics</h3>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="px-3 py-1 text-xs font-semibold uppercase tracking-wide rounded-full bg-white bg-opacity-20 hover:bg-white hover:text-blue-700 transition-colors" onclick="uploadRadiologySection('diagnostics')" data-translate="upload">Upload</button>
+                                    <button type="button" class="px-3 py-1 text-xs font-semibold uppercase tracking-wide rounded-full bg-white bg-opacity-20 hover:bg-white hover:text-blue-700 transition-colors" onclick="printRadiologySection('diagnostics')" data-translate="print">Print</button>
+                                    <button type="button" class="px-3 py-1 text-xs font-semibold uppercase tracking-wide rounded-full bg-white bg-opacity-20 hover:bg-white hover:text-blue-700 transition-colors" onclick="saveRadiologySection('diagnostics')" data-translate="save">Save</button>
+                                </div>
                             </div>
-                            <textarea id="labResults" class="w-full border border-gray-300 rounded-b-lg p-4 min-h-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter lab results..." data-translate-placeholder="enter_lab_results"></textarea>
+                            <textarea id="radiologyDiagnostics" class="w-full border border-gray-300 rounded-b-lg p-4 min-h-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter diagnostics..." data-translate-placeholder="enter_diagnostics"></textarea>
                         </div>
                         
-                        <!-- Lab Notes/Observations Input -->
+                        <!-- Radiology Result Input -->
                         <div>
-                            <div class="flex items-center justify-between bg-blue-600 text-white px-4 py-2 rounded-t-lg">
-                                <h3 class="font-semibold" data-translate="lab_notes">Lab Notes</h3>
-                                <button type="button" onclick="editLabNotes()" class="w-8 h-8 rounded-full bg-purple-600 hover:bg-purple-700 flex items-center justify-center transition-colors">
-                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                    </svg>
-                                </button>
+                            <div class="flex flex-wrap items-center justify-between gap-3 bg-blue-600 text-white px-4 py-2 rounded-t-lg">
+                                <h3 class="font-semibold" data-translate="radiology_result">Radiology Result</h3>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="px-3 py-1 text-xs font-semibold uppercase tracking-wide rounded-full bg-white bg-opacity-20 hover:bg-white hover:text-blue-700 transition-colors" onclick="uploadRadiologySection('result')" data-translate="upload">Upload</button>
+                                    <button type="button" class="px-3 py-1 text-xs font-semibold uppercase tracking-wide rounded-full bg-white bg-opacity-20 hover:bg-white hover:text-blue-700 transition-colors" onclick="printRadiologySection('result')" data-translate="print">Print</button>
+                                    <button type="button" class="px-3 py-1 text-xs font-semibold uppercase tracking-wide rounded-full bg-white bg-opacity-20 hover:bg-white hover:text-blue-700 transition-colors" onclick="saveRadiologySection('result')" data-translate="save">Save</button>
+                                </div>
                             </div>
-                            <textarea id="labNotes" class="w-full border border-gray-300 rounded-b-lg p-4 min-h-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter lab notes and observations..." data-translate-placeholder="enter_lab_notes"></textarea>
+                            <textarea id="radiologyResult" class="w-full border border-gray-300 rounded-b-lg p-4 min-h-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter radiology result..." data-translate-placeholder="enter_radiology_result"></textarea>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Radiology Results Section -->
-                <div id="consultSectionRadiology" class="consult-section hidden">
+                <!-- Lab Results Section -->
+                <div id="consultSectionLab" class="consult-section hidden">
                     <div class="mb-4">
-                        <!-- Radiology Result Input -->
+                        <!-- Lab Notes/Observations Input -->
                         <div class="mb-4">
-                            <div class="flex items-center justify-between bg-blue-600 text-white px-4 py-2 rounded-t-lg">
-                                <h3 class="font-semibold" data-translate="radiology_result">Radiology Result</h3>
-                                <button type="button" onclick="editRadiologyResult()" class="w-8 h-8 rounded-full bg-purple-600 hover:bg-purple-700 flex items-center justify-center transition-colors">
-                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                    </svg>
-                                </button>
+                            <div class="flex flex-wrap items-center justify-between gap-3 bg-blue-600 text-white px-4 py-2 rounded-t-lg">
+                                <h3 class="font-semibold" data-translate="lab_notes">Lab Notes</h3>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="px-3 py-1 text-xs font-semibold uppercase tracking-wide rounded-full bg-white bg-opacity-20 hover:bg-white hover:text-blue-700 transition-colors" onclick="uploadLabSection('notes')" data-translate="upload">Upload</button>
+                                    <button type="button" class="px-3 py-1 text-xs font-semibold uppercase tracking-wide rounded-full bg-white bg-opacity-20 hover:bg-white hover:text-blue-700 transition-colors" onclick="printLabSection('notes')" data-translate="print">Print</button>
+                                    <button type="button" class="px-3 py-1 text-xs font-semibold uppercase tracking-wide rounded-full bg-white bg-opacity-20 hover:bg-white hover:text-blue-700 transition-colors" onclick="saveLabSection('notes')" data-translate="save">Save</button>
+                                </div>
                             </div>
-                            <textarea id="radiologyResult" class="w-full border border-gray-300 rounded-b-lg p-4 min-h-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter radiology result..." data-translate-placeholder="enter_radiology_result"></textarea>
+                            <textarea id="labNotes" class="w-full border border-gray-300 rounded-b-lg p-4 min-h-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter lab notes and observations..." data-translate-placeholder="enter_lab_notes"></textarea>
                         </div>
                         
-                        <!-- Diagnostics Input -->
+                        <!-- Lab Results Input -->
                         <div>
-                            <div class="flex items-center justify-between bg-blue-600 text-white px-4 py-2 rounded-t-lg">
-                                <h3 class="font-semibold" data-translate="diagnostics">Diagnostics</h3>
-                                <button type="button" onclick="editDiagnostics()" class="w-8 h-8 rounded-full bg-purple-600 hover:bg-purple-700 flex items-center justify-center transition-colors">
-                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                    </svg>
-                                </button>
+                            <div class="flex flex-wrap items-center justify-between gap-3 bg-blue-600 text-white px-4 py-2 rounded-t-lg">
+                                <h3 class="font-semibold" data-translate="lab_results">Lab Results</h3>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="px-3 py-1 text-xs font-semibold uppercase tracking-wide rounded-full bg-white bg-opacity-20 hover:bg-white hover:text-blue-700 transition-colors" onclick="uploadLabSection('results')" data-translate="upload">Upload</button>
+                                    <button type="button" class="px-3 py-1 text-xs font-semibold uppercase tracking-wide rounded-full bg-white bg-opacity-20 hover:bg-white hover:text-blue-700 transition-colors" onclick="printLabSection('results')" data-translate="print">Print</button>
+                                    <button type="button" class="px-3 py-1 text-xs font-semibold uppercase tracking-wide rounded-full bg-white bg-opacity-20 hover:bg-white hover:text-blue-700 transition-colors" onclick="saveLabSection('results')" data-translate="save">Save</button>
+                                </div>
                             </div>
-                            <textarea id="radiologyDiagnostics" class="w-full border border-gray-300 rounded-b-lg p-4 min-h-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter diagnostics..." data-translate-placeholder="enter_diagnostics"></textarea>
+                            <textarea id="labResults" class="w-full border border-gray-300 rounded-b-lg p-4 min-h-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter lab results..." data-translate-placeholder="enter_lab_results"></textarea>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Prescription Section -->
                 <div id="consultSectionPrescription" class="consult-section hidden">
-                    <!-- Clinical Note Card -->
-                    <div class="card p-6 mb-4">
-                        <h3 class="text-lg font-semibold mb-4" data-translate="clinical_notes">Clinical Note</h3>
-                        <div class="form-group">
-                            <textarea id="consultNotes" class="form-input form-textarea" placeholder="Enter notes" data-translate-placeholder="enter_notes"></textarea>
-                        </div>
-                    </div>
-                    
                     <!-- Medical Prescription Card -->
                     <div class="card p-6 mb-4">
-                        <h3 class="text-lg font-semibold mb-4" data-translate="medical_prescription">Medical Prescription</h3>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold" data-translate="medical_prescription">Medical Prescription</h3>
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="printPrescriptionMedicinesList()" class="btn btn-primary btn-sm flex items-center gap-2" data-translate="print">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                            </svg>
+                                    <span data-translate="print">Print</span>
+                        </button>
+                                <button type="button" onclick="clearPrescriptionMedicinesList()" class="btn btn-secondary btn-sm flex items-center gap-2" data-translate="clear">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                                    <span data-translate="clear">Clear</span>
+                        </button>
+                            </div>
+                        </div>
                         
                         <!-- Add Medicine -->
                         <div class="mb-4">
@@ -508,9 +520,9 @@
                                     <button type="button" id="addMedicineToPrescriptionBtn" class="btn btn-primary w-full whitespace-nowrap flex items-center justify-center">
                                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                        </svg>
+                            </svg>
                                         <span data-translate="add_medicine">Add Medicine</span>
-                                    </button>
+                        </button>
                                 </div>
                             </div>
                         </div>
@@ -526,6 +538,19 @@
                             <textarea id="consultPrescription" class="form-input form-textarea" rows="6"
                                 placeholder="Drugs, dosage, duration" data-translate-placeholder="drugs_dosage"></textarea>
                         </div>
+                        
+                        <!-- Prescription Information -->
+                        <div class="card p-3 bg-yellow-50 border-yellow-200 mb-4">
+                            <div class="flex items-start gap-2">
+                                <svg class="w-5 h-5 text-yellow-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div class="text-sm text-yellow-800">
+                                    <p class="font-semibold mb-1" data-translate="prescription_info">Prescription Information</p>
+                                    <p data-translate="prescription_info_text">After saving, you can view and print the prescription from the consultation details.</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -536,8 +561,24 @@
                             <svg class="w-6 h-6 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>
-                            <span data-translate="documents">Documents</span>
+                            <span data-translate="medical_documents">Medical Documents</span>
                         </h3>
+                        
+                        <!-- File Upload Area -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2" data-translate="upload_document">Upload Document</label>
+                            <div class="flex items-center gap-3">
+                                <input type="file" id="consultDocumentUpload" class="hidden" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.txt" multiple onchange="handleConsultationDocumentUpload(event)">
+                                <button type="button" onclick="document.getElementById('consultDocumentUpload').click()" class="btn btn-primary flex items-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                    </svg>
+                                    <span data-translate="select_files">Select Files</span>
+                        </button>
+                                <span class="text-sm text-gray-500" data-translate="supported_formats">Supported: PDF, DOC, DOCX, JPG, PNG, GIF, TXT</span>
+                    </div>
+                </div>
+                
                         <div id="consultDocumentsList" class="space-y-3">
                             <!-- Documents will be loaded here -->
                         </div>
@@ -549,28 +590,15 @@
                     <div id="consultCertificateForm">
                         <input type="hidden" id="consultCertConsultationId">
                         
-                        <!-- Certificate Type -->
-                        <div class="form-group">
-                            <label class="form-label font-semibold" for="consultCertType" data-translate="certificate_type">Certificate Type</label>
-                            <select id="consultCertType" class="form-input">
-                                <option value="" data-translate="select_type">Select type...</option>
-                                <option value="sick_leave" data-translate="sick_leave_certificate">Sick Leave Certificate</option>
-                                <option value="fitness" data-translate="fitness_certificate">Fitness Certificate</option>
-                                <option value="medical_report" data-translate="medical_report_certificate">Medical Report Certificate</option>
-                                <option value="disability" data-translate="disability_certificate">Disability Certificate</option>
-                                <option value="other" data-translate="other">Other</option>
-                            </select>
-                        </div>
-                        
                         <!-- Rest Period (for sick leave) -->
-                        <div class="form-group">
+                <div class="form-group">
                             <label class="form-label font-semibold" data-translate="rest_period">Rest Period (Days)</label>
                             <input type="number" id="consultCertRestPeriod" class="form-input" min="1" max="365" data-translate-placeholder="rest_period_placeholder" placeholder="e.g., 7">
-                        </div>
-                        
+                </div>
+                
                         <!-- Start Date -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="form-group">
+                <div class="form-group">
                                 <label class="form-label font-semibold" for="consultCertStartDate" data-translate="start_date">Start Date</label>
                                 <input type="date" id="consultCertStartDate" class="form-input">
                             </div>
@@ -593,6 +621,16 @@
                                     <p data-translate="certificate_info_text">After saving, you can view and print the certificate from the consultation details.</p>
                                 </div>
                             </div>
+                        </div>
+                        
+                        <!-- Print Button -->
+                        <div class="flex justify-end gap-3 mb-4">
+                            <button type="button" class="btn btn-primary" onclick="printCertificateFromForm()" data-translate="print_certificate">
+                                <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                                </svg>
+                                <span data-translate="print_certificate">Print Certificate</span>
+                            </button>
                         </div>
                         
                     </div>
@@ -695,6 +733,29 @@
                             placeholder="Any relevant medical history, allergies, or notes..."></textarea>
                     </div>
 
+                    <!-- Patient Documents Section -->
+                    <div class="form-group">
+                        <label class="form-label" data-translate="patient_documents">Patient Documents</label>
+                        <div class="card p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2" data-translate="upload_document">Upload Document</label>
+                                <div class="flex items-center gap-3">
+                                    <input type="file" id="patientDocumentUpload" class="hidden" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.txt" multiple onchange="handlePatientDocumentUpload(event)">
+                                    <button type="button" onclick="document.getElementById('patientDocumentUpload').click()" class="btn btn-primary flex items-center gap-2">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                        </svg>
+                                        <span data-translate="select_files">Select Files</span>
+                                    </button>
+                                    <span class="text-sm text-gray-500" data-translate="supported_formats">Supported: PDF, DOC, DOCX, JPG, PNG, GIF, TXT</span>
+                                </div>
+                            </div>
+                            
+                            <div id="patientDocumentsList" class="space-y-3">
+                                <!-- Documents will be displayed here -->
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="modal-actions">
                         <button type="button" class="btn btn-secondary" onclick="closePatientManagement()"
@@ -2053,9 +2114,9 @@
 
     <div class="p-4" style="margin-top: 4rem;">
         <div class="max-w-7xl mx-auto">
-            <!-- Header -->
             <div class="mb-6 mt-8">
-                <div class="flex items-center justify-end mb-4">
+                <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+                    <div class="flex-1" id="dailySummaryContainer"></div>
                     <div class="flex items-center gap-2">
                         <button class="btn btn-outline" onclick="goToPreviousDay()">
                             <svg class="icon mr-2" viewBox="0 0 24 24">
@@ -2077,6 +2138,9 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- Daily Summary Badges (Fallback if JS not run) -->
+                <div class="lg:col-span-4 hidden" id="dailySummaryFallback"></div>
+
                 <!-- Calendar Sidebar -->
                 <div class="lg:col-span-1">
                     <!-- Waiting Room -->
@@ -2186,56 +2250,56 @@
         </div>
     </div>
 
-    <!-- Reason Modal -->
-    <div class="modal" id="reasonModal">
-        <div class="modal-content" style="max-width: 600px;">
-            <div class="modal-header">
-                <h2 class="modal-title" data-translate="reason">Reason for Visit</h2>
-                <button class="modal-close" onclick="closeReasonModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p class="text-gray-600 mb-4">Document the patient's reason for consultation.</p>
-                <textarea id="reasonText" class="form-input form-textarea" rows="6" placeholder="Enter reason for visit..."></textarea>
-            </div>
-            <div class="modal-actions">
-                <button type="button" class="btn btn-secondary" onclick="closeReasonModal()">Close</button>
-                <button type="button" class="btn btn-primary" onclick="saveReason()">Save</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Diagnosis Modal -->
-    <div class="modal" id="diagnosisModal">
-        <div class="modal-content" style="max-width: 600px;">
-            <div class="modal-header">
-                <h2 class="modal-title" data-translate="diagnosis">Diagnosis</h2>
-                <button class="modal-close" onclick="closeDiagnosisModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p class="text-gray-600 mb-4">Document the medical diagnosis.</p>
-                <textarea id="diagnosisText" class="form-input form-textarea" rows="6" placeholder="Enter diagnosis..."></textarea>
-            </div>
-            <div class="modal-actions">
-                <button type="button" class="btn btn-secondary" onclick="closeDiagnosisModal()">Close</button>
-                <button type="button" class="btn btn-primary" onclick="saveDiagnosis()">Save</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Clinical Examination Modal -->
     <div class="modal" id="clinicalExamModal">
         <div class="modal-content" style="max-width: 600px;">
             <div class="modal-header">
-                <h2 class="modal-title" data-translate="clinical_examination">Clinical Examination</h2>
+                <h2 class="modal-title" data-translate="clinical_examination">Clinical examinations</h2>
                 <button class="modal-close" onclick="closeClinicalExamModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <p class="text-gray-600 mb-4">Document clinical examination findings.</p>
+                <p class="text-gray-600 mb-4" data-translate="enter_clinical_examination">Document clinical examination findings.</p>
                 <textarea id="clinicalExamText" class="form-input form-textarea" rows="8" placeholder="Enter clinical examination findings..."></textarea>
             </div>
             <div class="modal-actions">
-                <button type="button" class="btn btn-secondary" onclick="closeClinicalExamModal()">Close</button>
-                <button type="button" class="btn btn-primary" onclick="saveClinicalExam()">Save</button>
+                <button type="button" class="btn btn-secondary" onclick="closeClinicalExamModal()" data-translate="close">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveClinicalExam()" data-translate="save">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Medical Diagnosis Modal -->
+    <div class="modal" id="diagnosisModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2 class="modal-title" data-translate="medical_diagnosis">Medical diagnoses</h2>
+                <button class="modal-close" onclick="closeDiagnosisModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="text-gray-600 mb-4" data-translate="enter_medical_diagnosis">Document the medical diagnosis.</p>
+                <textarea id="diagnosisText" class="form-input form-textarea" rows="6" placeholder="Enter diagnosis..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeDiagnosisModal()" data-translate="close">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveDiagnosis()" data-translate="save">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes & Observations Modal -->
+    <div class="modal" id="notesObservationsModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2 class="modal-title" data-translate="notes_observations">Notes and observations</h2>
+                <button class="modal-close" onclick="closeNotesObservationsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="text-gray-600 mb-4" data-translate="enter_notes_observations">Add supplementary notes and observations.</p>
+                <textarea id="notesObservationsText" class="form-input form-textarea" rows="6" placeholder="Enter notes and observations..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeNotesObservationsModal()" data-translate="close">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveNotesObservations()" data-translate="save">Save</button>
             </div>
         </div>
     </div>
@@ -2344,7 +2408,91 @@
 
     <script src="i18n/i18n.js"></script>
     <script src="scripts/translation.js"></script>
+    <script src="scripts/expense_management.js"></script>
+    <script src="scripts/logout.js"></script>
+    <script src="scripts/medicalCertificate.js"></script>
+    <script src="scripts/medicalPrescription.js"></script>
+    <script src="scripts/consultation.js"></script>
     <script src="scripts/app_script.js"></script>
+    <script>
+        // Verify and ensure showDoctorDashboard is available
+        (function() {
+            const ensureDashboard = function(){
+                if (typeof window.showDoctorDashboard !== 'function') {
+                    console.warn('showDoctorDashboard not available, installing safe fallback');
+                    window.showDoctorDashboard = function() {
+                        // Open the modal directly as a graceful fallback
+                        const modal = document.getElementById('doctorDashboardModal');
+                        if (modal) {
+                            modal.classList.add('active');
+                            // Load data if functions exist
+                            if (typeof window.loadTodayAppointments === 'function') window.loadTodayAppointments();
+                            if (typeof window.loadTodayConsultations === 'function') window.loadTodayConsultations();
+                            if (typeof window.updateModalTranslations === 'function') window.updateModalTranslations();
+                        } else {
+                            console.error('Doctor dashboard modal element not found');
+                        }
+                    };
+                } else {
+                    console.log('showDoctorDashboard is available');
+                }
+            };
+            // Run after a short delay and again on window load to avoid race conditions
+            setTimeout(ensureDashboard, 100);
+            window.addEventListener('load', ensureDashboard);
+        })();
+    </script>
+    <script>
+        // Ensure consultation modal helpers exist to prevent onclick ReferenceError
+        (function(){
+            const ensureConsultationHelpers = function(){
+                // Ensure showConsultationModal exists
+                if (typeof window.showConsultationModal !== 'function') {
+                    window.showConsultationModal = function() {
+                        const modal = document.getElementById('consultationModal');
+                        if (modal) {
+                            modal.classList.add('active');
+                        } else {
+                            console.warn('Consultation modal element not found');
+                        }
+                    };
+                }
+                
+                // Ensure loadConsultationPatientDetails exists
+                if (typeof window.loadConsultationPatientDetails !== 'function') {
+                    window.loadConsultationPatientDetails = function() {
+                        console.warn('loadConsultationPatientDetails not yet loaded');
+                    };
+                }
+                
+                // Ensure startConsultation exists
+                if (typeof window.startConsultation !== 'function') {
+                    console.warn('startConsultation not available, installing safe fallback');
+                    window.startConsultation = function(appointmentId, patientName, patientId){
+                        // Graceful fallback: open consultation modal and prefill name
+                        if (typeof window.showConsultationModal === 'function') {
+                            window.showConsultationModal();
+                            const name = (patientName||'').trim();
+                            const patientInput = document.getElementById('consultPatient'); 
+                            if (patientInput) patientInput.value = name;
+                            const patientIdInput = document.getElementById('consultPatientId'); 
+                            if (patientIdInput) patientIdInput.value = patientId || '';
+                            // Attempt to load details if we have an ID
+                            if ((patientId||'') && typeof window.loadConsultationPatientDetails === 'function') {
+                                setTimeout(()=>window.loadConsultationPatientDetails(), 150);
+                            }
+                        } else {
+                            console.error('Consultation modal helpers not loaded');
+                        }
+                    };
+                }
+            };
+            // Install immediately to prevent early clicks from failing
+            ensureConsultationHelpers();
+            // Also ensure after full load
+            window.addEventListener('load', ensureConsultationHelpers);
+        })();
+    </script>
     <script>
         // Initialize i18n system
         document.addEventListener('DOMContentLoaded', function() {
@@ -2352,13 +2500,13 @@
             localStorage.removeItem('selectedLanguage');
             
             if (window.I18n) {
-                // Force English as default to avoid browser language detection
+                // Force French as default to avoid browser language detection
                 const storedLang = localStorage.getItem('app_lang');
                 if (!storedLang) {
-                    localStorage.setItem('app_lang', 'en');
+                    localStorage.setItem('app_lang', 'fr');
                 }
                 
-                window.I18n.initI18n({ lang: storedLang || 'en' });
+                window.I18n.initI18n({ lang: storedLang || 'fr' });
                 
                 // Override setLanguage to refresh dashboard
                 const originalSetLanguage = window.I18n.setLanguage;
@@ -2384,7 +2532,7 @@
                 };
                 
                 // Set initial language radio button
-                const currentLang = localStorage.getItem('app_lang') || 'en';
+                const currentLang = localStorage.getItem('app_lang') || 'fr';
                 updateLanguageRadioButtons(currentLang);
             }
         });
@@ -2410,7 +2558,7 @@
                     window.showLanguageSettings = function() {
                         originalShowLanguageSettings();
                         // Ensure radio buttons are properly synced
-                        const currentLang = localStorage.getItem('app_lang') || 'en';
+                        const currentLang = localStorage.getItem('app_lang') || 'fr';
                         updateLanguageRadioButtons(currentLang);
                     };
                 }

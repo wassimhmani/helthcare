@@ -3,7 +3,7 @@
 (function(){
   // Global current language synced with localStorage
   var getLang = function(){
-    return localStorage.getItem('app_lang') || localStorage.getItem('selectedLanguage') || 'en';
+    return localStorage.getItem('app_lang') || localStorage.getItem('selectedLanguage') || 'fr';
   };
   var setLang = function(lang){
     localStorage.setItem('app_lang', lang);
