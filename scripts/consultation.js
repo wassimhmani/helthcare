@@ -69,6 +69,15 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
   function getPatients(){
     try { return JSON.parse(localStorage.getItem('healthcarePatients')||'[]'); } catch { return []; }
   }
+  
+  // Alias for backward compatibility in case somewhere getPatient() is called instead of getPatients()
+  function getPatient(){
+    return getPatients();
+  }
+  
+  // Make these functions globally available
+  window.getPatients = getPatients;
+  window.getPatient = getPatient;
   function getConsultations(){
     try { return JSON.parse(localStorage.getItem('consultations')||'[]'); } catch { return []; }
   }

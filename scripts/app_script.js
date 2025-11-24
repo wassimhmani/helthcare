@@ -76,6 +76,20 @@ const translations = window.translations;
                 saveStoredPatients();
             }
         };
+        
+        // Get patients function (alias for loadStoredPatients result)
+        const getPatients = () => {
+            return storedPatients;
+        };
+        
+        // Alias for backward compatibility in case somewhere getPatient() is called instead of getPatients()
+        const getPatient = () => {
+            return getPatients();
+        };
+        
+        // Make these functions globally available
+        window.getPatients = getPatients;
+        window.getPatient = getPatient;
 
 // Load appointments from API (no longer using localStorage)
 const loadStoredAppointments = () => {
