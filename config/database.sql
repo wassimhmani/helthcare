@@ -164,6 +164,25 @@ CREATE TABLE `bill` (
   KEY `idx_consultation_id` (`consultation_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Structure de la table `expenses`
+--
+
+DROP TABLE IF EXISTS `expenses`;
+
+CREATE TABLE `expenses` (
+  `id` VARCHAR(100) NOT NULL,
+  `expense_date` DATE NOT NULL,
+  `category` VARCHAR(100) NOT NULL,
+  `description` TEXT NOT NULL,
+  `amount` DECIMAL(10,2) NOT NULL,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_expense_date` (`expense_date`),
+  KEY `idx_category` (`category`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
