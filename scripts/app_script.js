@@ -4727,17 +4727,106 @@ function renderPatientsList() {
         }
 
         function getBillDescriptions() {
-            const stored = localStorage.getItem('bill_descriptions');
-            if (!stored) {
-                const defaults = getDefaultBillDescriptions();
-                saveBillDescriptions(defaults);
-                return defaults;
+
+            // If we already have an in-memory cache, return it immediately
+            if (Array.isArray(window.billDescriptionsCache)) {
+                return window.billDescriptionsCache;
             }
-            return JSON.parse(stored);
+
+            // Start with whatever was last fetched from DB and cached in localStorage
+            let local = [];
+            try {
+                const stored = localStorage.getItem('bill_descriptions');
+                if (stored) {
+                    local = JSON.parse(stored) || [];
+                }
+            } catch (e) {
+                console.error('Error reading bill descriptions from localStorage:', e);
+                local = [];
+            }
+
+            // Asynchronously refresh from API and update cache/localStorage
+            try {
+                fetch('api/get_bill_descriptions.php')
+                    .then(async res => {
+                        let data;
+                        try { data = await res.json(); } catch (_) { data = null; }
+                        if (!res.ok || !data || data.status !== 'ok') {
+                            console.error('Failed to load bill descriptions from API:', res.status, data || await res.text());
+                            return;
+                        }
+
+                        const apiServices = Array.isArray(data.services) ? data.services : [];
+
+                        window.billDescriptionsCache = apiServices.map(s => ({
+                            id: isNaN(s.id) ? s.id : Number(s.id),
+                            name: s.name || '',
+                            price: s.defaultPrice != null ? Number(s.defaultPrice) : 0,
+                            notes: s.notes || '',
+                            createdAt: s.createdAt || null,
+                            updatedAt: s.updatedAt || null
+                        }));
+
+                        saveBillDescriptions(window.billDescriptionsCache);
+
+                        // Refresh UI elements that depend on descriptions
+                        try { renderBillDescriptionsList(); } catch (e) {}
+                        try { refreshBillDescriptionSelects(); } catch (e) {}
+                    })
+                    .catch(err => {
+                        console.error('Error fetching bill descriptions from API:', err);
+                    });
+            } catch (e) {
+                console.error('Exception while fetching bill descriptions from API:', e);
+            }
+
+            window.billDescriptionsCache = local;
+            return local;
         }
 
         function saveBillDescriptions(descriptions) {
-            localStorage.setItem('bill_descriptions', JSON.stringify(descriptions));
+            try {
+                localStorage.setItem('bill_descriptions', JSON.stringify(descriptions || []));
+                window.billDescriptionsCache = Array.isArray(descriptions) ? descriptions : [];
+            } catch (e) {
+                console.error('Error saving bill descriptions to localStorage:', e);
+            }
+        }
+
+        // Sync a single bill description (service) to backend via bill_description_sync.php
+        function syncBillDescriptionToDatabase(desc) {
+            try {
+                if (!desc || desc.id === undefined || desc.id === null) return;
+
+                const payload = {
+                    id: String(desc.id),
+                    name: desc.name || '',
+                    defaultPrice: Number(desc.price) || 0,
+                    notes: desc.notes || '',
+                    createdAt: desc.createdAt || new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+
+                fetch('api/bill_description_sync.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                    .then(async res => {
+                        let data;
+                        try { data = await res.json(); } catch (_) { data = null; }
+                        if (!res.ok || !data || data.status !== 'ok') {
+                            console.error('Bill description sync failed:', res.status, data || await res.text());
+                            return;
+                        }
+                        console.log('Bill description sync success:', data);
+                    })
+                    .catch(err => {
+                        console.error('Bill description sync error:', err);
+                    });
+            } catch (e) {
+                console.error('Bill description sync exception:', e);
+            }
         }
 
         function showBillDescriptionsModal() {
@@ -4829,6 +4918,29 @@ function renderPatientsList() {
             const filtered = descriptions.filter(d => d.id !== id);
             saveBillDescriptions(filtered);
             
+            // Call backend to delete from database
+            try {
+                fetch('api/delete_bill_description.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: String(id) })
+                })
+                    .then(async res => {
+                        let data;
+                        try { data = await res.json(); } catch (_) { data = null; }
+                        if (!res.ok || !data || data.status !== 'ok') {
+                            console.error('Failed to delete bill description from database:', res.status, data || await res.text());
+                        } else {
+                            console.log('Bill description deleted from database:', data);
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error calling delete_bill_description API:', err);
+                    });
+            } catch (e) {
+                console.error('Exception while deleting bill description from database:', e);
+            }
+
             renderBillDescriptionsList();
             
             const successMessage = translations[currentLanguage].service_deleted || 'Service deleted successfully!';
@@ -6654,13 +6766,17 @@ window.deleteMedicine = function (id) {
             const descriptions = getBillDescriptions();
             const newId = descriptions.length > 0 ? Math.max(...descriptions.map(d => d.id)) + 1 : 1;
             
-            descriptions.push({
+            const newDesc = {
                 id: newId,
                 name: name,
                 price: price
-            });
+            };
+
+            descriptions.push(newDesc);
             
             saveBillDescriptions(descriptions);
+            // Sync to backend database
+            syncBillDescriptionToDatabase(newDesc);
             renderBillDescriptionsList();
             
             // Clear form
@@ -6691,6 +6807,8 @@ window.deleteMedicine = function (id) {
                 descriptions[index].name = name;
                 descriptions[index].price = price;
                 saveBillDescriptions(descriptions);
+                // Sync updated description to backend
+                syncBillDescriptionToDatabase(descriptions[index]);
                 renderBillDescriptionsList();
                 closeEditDescriptionModal();
                 
