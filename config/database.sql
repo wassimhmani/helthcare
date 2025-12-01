@@ -183,6 +183,23 @@ CREATE TABLE `expenses` (
   KEY `idx_category` (`category`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Structure de la table `medicine`
+--
+
+DROP TABLE IF EXISTS `medicine`;
+
+CREATE TABLE `medicine` (
+  `id` VARCHAR(100) NOT NULL,
+  `name` VARCHAR(255) NOT NULL,
+  `dosage` VARCHAR(255) DEFAULT NULL,
+  `notes` TEXT DEFAULT NULL,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

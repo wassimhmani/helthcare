@@ -4840,17 +4840,110 @@ function renderPatientsList() {
 // ========================================
 
 function getMedicines() {
-    const stored = localStorage.getItem('medicines');
-    if (!stored) {
-        const defaults = [];
-        saveMedicines(defaults);
-        return defaults;
+
+    // If we already have an in-memory cache, return it immediately
+    if (Array.isArray(window.medicinesCache)) {
+        return window.medicinesCache;
     }
-    return JSON.parse(stored);
+
+    // Start with localStorage as a fast cache
+    let local = [];
+    try {
+        const stored = localStorage.getItem('medicines');
+        if (stored) {
+            local = JSON.parse(stored) || [];
+        }
+    } catch (e) {
+        console.error('Error reading medicines from localStorage:', e);
+        local = [];
+    }
+
+    // Asynchronously refresh from API and update cache/localStorage
+    try {
+        fetch('api/get_medicines.php')
+            .then(async res => {
+                let data;
+                try { data = await res.json(); } catch (_) { data = null; }
+                if (!res.ok || !data || data.status !== 'ok') {
+                    console.error('Failed to load medicines from API:', res.status, data || await res.text());
+                    return;
+                }
+
+                const apiMeds = Array.isArray(data.medicines) ? data.medicines : [];
+
+                // Normalise to the structure used in the UI (id may be numeric or string)
+                window.medicinesCache = apiMeds.map(m => ({
+                    id: isNaN(m.id) ? m.id : Number(m.id),
+                    name: m.name || '',
+                    dosage: m.dosage || '',
+                    notes: m.notes || '',
+                    createdAt: m.createdAt || null,
+                    updatedAt: m.updatedAt || null
+                }));
+
+                // Persist to localStorage for offline/next-load usage
+                saveMedicines(window.medicinesCache);
+
+                // Re-render lists/dropdowns that depend on medicines
+                try { renderMedicinesList(); } catch (e) {}
+                try { updatePrescriptionMedicineDropdown(); } catch (e) {}
+            })
+            .catch(err => {
+                console.error('Error fetching medicines from API:', err);
+            });
+    } catch (e) {
+        console.error('Exception while fetching medicines from API:', e);
+    }
+
+    // Use local cache for this call; will be updated once API returns
+    window.medicinesCache = local;
+    return local;
 }
 
+// Persist medicines to localStorage and keep in-memory cache in sync
 function saveMedicines(medicines) {
-    localStorage.setItem('medicines', JSON.stringify(medicines));
+    try {
+        localStorage.setItem('medicines', JSON.stringify(medicines || []));
+        window.medicinesCache = Array.isArray(medicines) ? medicines : [];
+    } catch (e) {
+        console.error('Error saving medicines to localStorage:', e);
+    }
+}
+
+// Sync a single medicine to backend database via medicine_sync.php
+function syncMedicineToDatabase(medicine) {
+    try {
+        if (!medicine || medicine.id === undefined || medicine.id === null) return;
+
+        const payload = {
+            id: String(medicine.id),
+            name: medicine.name || '',
+            dosage: medicine.dosage || '',
+            notes: medicine.notes || '',
+            createdAt: medicine.createdAt || new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+
+        fetch('api/medicine_sync.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+            .then(async res => {
+                let data;
+                try { data = await res.json(); } catch (_) { data = null; }
+                if (!res.ok || !data || data.status !== 'ok') {
+                    console.error('Medicine sync failed:', res.status, data || await res.text());
+                    return;
+                }
+                console.log('Medicine sync success:', data);
+            })
+            .catch(err => {
+                console.error('Medicine sync error:', err);
+            });
+    } catch (e) {
+        console.error('Medicine sync exception:', e);
+    }
 }
 
 function showMedicinesModal() {
@@ -4950,6 +5043,29 @@ window.deleteMedicine = function (id) {
     const medicines = getMedicines();
     const filtered = medicines.filter(m => m.id !== id);
     saveMedicines(filtered);
+
+    // Call backend to delete from database
+    try {
+        fetch('api/delete_medicine.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: String(id) })
+        })
+            .then(async res => {
+                let data;
+                try { data = await res.json(); } catch (_) { data = null; }
+                if (!res.ok || !data || data.status !== 'ok') {
+                    console.error('Failed to delete medicine from database:', res.status, data || await res.text());
+                } else {
+                    console.log('Medicine deleted from database:', data);
+                }
+            })
+            .catch(err => {
+                console.error('Error calling delete_medicine API:', err);
+            });
+    } catch (e) {
+        console.error('Exception while deleting medicine from database:', e);
+    }
 
     renderMedicinesList();
 
@@ -6599,13 +6715,17 @@ if (addMedicineForm) {
         const medicines = getMedicines();
         const newId = medicines.length > 0 ? Math.max(...medicines.map(m => m.id)) + 1 : 1;
 
-        medicines.push({
+        const newMedicine = {
             id: newId,
             name: name,
             dosage: dosage || ''
-        });
+        };
+
+        medicines.push(newMedicine);
 
         saveMedicines(medicines);
+        // Sync to backend database
+        syncMedicineToDatabase(newMedicine);
         renderMedicinesList();
 
         // Clear form
@@ -6639,6 +6759,8 @@ if (editMedicineForm) {
             medicines[index].name = name;
             medicines[index].dosage = dosage || '';
             saveMedicines(medicines);
+            // Sync updated medicine to backend
+            syncMedicineToDatabase(medicines[index]);
             renderMedicinesList();
             closeEditMedicineModal();
 
