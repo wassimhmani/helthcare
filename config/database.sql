@@ -217,6 +217,43 @@ CREATE TABLE `medicine` (
   KEY `idx_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `cabinet_info`
+--
+
+DROP TABLE IF EXISTS `cabinet_info`;
+
+CREATE TABLE `cabinet_info` (
+  `id` VARCHAR(100) NOT NULL,
+  `name` VARCHAR(255) NOT NULL,
+  `address` TEXT DEFAULT NULL,
+  `phone` VARCHAR(50) DEFAULT NULL,
+  `logo_path` VARCHAR(500) DEFAULT NULL,
+  `working_hours` TEXT DEFAULT NULL,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Default cabinet row
+INSERT INTO `cabinet_info` (`id`, `name`, `address`, `phone`, `logo_path`, `working_hours`)
+VALUES (
+  'cabinet-default',
+  'My Medical Cabinet',
+  'Tunis, Tunisia',
+  '00 000 000',
+  NULL,
+  '{"monday":{"enabled":true,"open":"09:00","close":"17:00"},"tuesday":{"enabled":true,"open":"09:00","close":"17:00"},"wednesday":{"enabled":true,"open":"09:00","close":"17:00"},"thursday":{"enabled":true,"open":"09:00","close":"17:00"},"friday":{"enabled":true,"open":"09:00","close":"17:00"},"saturday":{"enabled":false,"open":"09:00","close":"13:00"},"sunday":{"enabled":false,"open":"09:00","close":"13:00"}}'
+)
+ON DUPLICATE KEY UPDATE
+  name = VALUES(name),
+  address = VALUES(address),
+  phone = VALUES(phone),
+  logo_path = VALUES(logo_path),
+  working_hours = VALUES(working_hours);
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
