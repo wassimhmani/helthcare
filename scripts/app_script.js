@@ -1210,6 +1210,30 @@ function handlePatientSelection() {
     }
 }
 
+async function deleteUserFromDatabase(userId) {
+    try {
+        if (!userId) return;
+
+        const res = await fetch('api/delete_user.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: userId })
+        });
+
+        let data;
+        try { data = await res.json(); } catch (_) { data = null; }
+
+        if (!res.ok || !data || data.status !== 'ok') {
+            console.error('Delete user API failed:', res.status, data);
+            return;
+        }
+
+        console.log('Delete user API success:', data);
+    } catch (e) {
+        console.error('Delete user API error:', e);
+    }
+}
+
 function displayPatientDetails(patient) {
     document.getElementById('displayPatientName').textContent = patient.fullName;
     document.getElementById('displayPatientEmail').textContent = patient.email;
@@ -4260,6 +4284,46 @@ function showSettingsMenu() {
     updateModalTranslations();
 }
 
+function syncUserToDatabase(user) {
+    try {
+        if (!user || !user.id || !user.username) return;
+
+        const payload = {
+            id: user.id,
+            username: user.username,
+            password: user.password || '',
+            role: user.role || '',
+            name: user.name || '',
+            email: (user.email || '').toLowerCase(),
+            status: user.status || 'active',
+            // Store permissions as JSON string for the API/table
+            permissions: JSON.stringify(user.permissions || {}),
+            createdAt: user.createdAt || new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+
+        fetch('api/user_sync.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+            .then(async res => {
+                let data;
+                try { data = await res.json(); } catch (_) { data = null; }
+                if (!res.ok || !data || data.status !== 'ok') {
+                    console.error('User sync failed:', res.status, data || (await res.text?.()));
+                    return;
+                }
+                console.log('User sync success:', data);
+            })
+            .catch(err => {
+                console.error('User sync error:', err);
+            });
+    } catch (e) {
+        console.error('User sync exception:', e);
+    }
+}
+
 function closeSettingsMenu() {
     const modal = document.getElementById('settingsMenuModal');
     modal.classList.remove('active');
@@ -4329,6 +4393,43 @@ function getDefaultUsers() {
 
 function saveSystemUsers(users) {
     localStorage.setItem('system_users', JSON.stringify(users));
+}
+
+async function fetchUsersFromAPI() {
+    try {
+        const res = await fetch('api/get_users.php');
+        let data;
+        try { data = await res.json(); } catch (_) { data = null; }
+        if (!res.ok || !data || data.status !== 'ok' || !Array.isArray(data.users)) {
+            console.warn('get_users API returned unexpected response:', res.status, data);
+            return;
+        }
+
+        const dbUsers = data.users.map(u => ({
+            id: u.id,
+            username: u.username || '',
+            password: u.password || '',
+            role: u.role || '',
+            name: u.name || '',
+            email: (u.email || '').toLowerCase(),
+            status: u.status || 'active',
+            permissions: u.permissions && typeof u.permissions === 'object' ? u.permissions : {},
+            createdAt: u.createdAt || null,
+            updatedAt: u.updatedAt || null
+        }));
+
+        if (!dbUsers.length) return;
+
+        saveSystemUsers(dbUsers);
+
+        // If user management modal is open, refresh list
+        const userModal = document.getElementById('userManagementModal');
+        if (userModal && userModal.classList.contains('active')) {
+            renderUsersList();
+        }
+    } catch (e) {
+        console.error('Failed to fetch users from API:', e);
+    }
 }
 
 function exportUserCredentials() {
@@ -4548,6 +4649,11 @@ function deleteUser(userId) {
     saveSystemUsers(filtered);
 
     renderUsersList();
+
+    // Also remove from backend database
+    if (typeof deleteUserFromDatabase === 'function') {
+        deleteUserFromDatabase(userId);
+    }
 
     const successMessage = translations[currentLanguage].user_deleted || 'User deleted successfully!';
     showTranslatedAlert('user_deleted', successMessage);
@@ -7149,6 +7255,11 @@ document.getElementById('addUserForm').addEventListener('submit', (e) => {
     users.push(newUser);
     saveSystemUsers(users);
 
+    // Sync to backend database
+    if (typeof syncUserToDatabase === 'function') {
+        syncUserToDatabase(newUser);
+    }
+
     // Clear form
     document.getElementById('addUserForm').reset();
 
@@ -7230,6 +7341,11 @@ document.getElementById('editUserForm').addEventListener('submit', (e) => {
     }
 
     saveSystemUsers(users);
+
+    // Sync updated user to backend database
+    if (typeof syncUserToDatabase === 'function') {
+        syncUserToDatabase(users[index]);
+    }
 
     // If the edited user is the one currently logged in, update the session permissions immediately
     try {
@@ -7471,6 +7587,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Make updateUserProfile globally available for other parts of the code
     window.updateUserProfile = updateUserProfile;
+    // Refresh system users from database if API is available
+    if (typeof fetchUsersFromAPI === 'function') {
+        fetchUsersFromAPI();
+    }
     // Consultation handlers moved to consultation.js
 });
 
