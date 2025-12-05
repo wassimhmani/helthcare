@@ -42,6 +42,7 @@ CREATE TABLE `patient` (
   `gender` text NOT NULL,
   `address` text NOT NULL,
   `medical_history` text NOT NULL,
+  `patient_doc` text NOT NULL,
   `created_at` text NOT NULL,
   `updated_At` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -50,9 +51,9 @@ CREATE TABLE `patient` (
 -- Déchargement des données de la table `patient`
 --
 
-INSERT INTO `patient` (`id`, `file_number`, `cin_passport`, `full_name`, `email`, `phone`, `date_of_birth`, `gender`, `address`, `medical_history`, `created_at`, `updated_At`) VALUES
-('patient-1757629471207', '66', '1102740866', 'Wassim Hmani', 'hmani@gmail.com', '0214303225', '2014-01-06', 'Male', 'remla-kerkennah-sfax-tunisie', 'Hypertension (5 years), Hyperlipidemia', '2025-09-11T22:24:31.207Z', '2025-11-09T21:15:21.857Z'),
-('patient-1762894833980', 'P-2025-008', '333333', 'hassen hassen', 'hassen@gmail.com', '26585555', '2010-02-10', 'Male', 'sfax', '', '2025-11-11T21:00:33.980Z', '2025-11-11T21:12:46.745Z');
+INSERT INTO `patient` (`id`, `file_number`, `cin_passport`, `full_name`, `email`, `phone`, `date_of_birth`, `gender`, `address`, `medical_history`, `patient_doc`, `created_at`, `updated_At`) VALUES
+('patient-1757629471207', '66', '1102740866', 'Wassim Hmani', 'hmani@gmail.com', '0214303225', '2014-01-06', 'Male', 'remla-kerkennah-sfax-tunisie', 'Hypertension (5 years), Hyperlipidemia', '', '2025-09-11T22:24:31.207Z', '2025-11-09T21:15:21.857Z'),
+('patient-1762894833980', 'P-2025-008', '333333', 'hassen hassen', 'hassen@gmail.com', '26585555', '2010-02-10', 'Male', 'sfax', '', '', '2025-11-11T21:00:33.980Z', '2025-11-11T21:12:46.745Z');
 
 -- --------------------------------------------------------
 

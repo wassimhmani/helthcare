@@ -31,6 +31,7 @@ $patient = [
     'gender' => get_value($input, 'gender'),
     'address' => get_value($input, 'address'),
     'medical_history' => get_value($input, 'medicalHistory'),
+    'patient_doc' => get_value($input, 'patientDoc'),
     'created_at' => get_value($input, 'createdAt', date('Y-m-d H:i:s')),
     'updated_at' => get_value($input, 'updatedAt', date('Y-m-d H:i:s'))
 ];
@@ -67,6 +68,7 @@ $createSql = "CREATE TABLE IF NOT EXISTS `Patient` (
   `gender` VARCHAR(20) NULL,
   `address` TEXT NULL,
   `medical_history` TEXT NULL,
+  `patient_doc` TEXT NULL,
   `created_at` DATETIME NULL,
   `updated_at` DATETIME NULL,
   PRIMARY KEY (`id`)
@@ -79,8 +81,8 @@ if (!$mysqli->query($createSql)) {
 }
 
 // Upsert (insert or update) using ON DUPLICATE KEY UPDATE
-$sql = "INSERT INTO `Patient` (id, file_number, cin_passport, full_name, email, phone, date_of_birth, gender, address, medical_history, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+$sql = "INSERT INTO `Patient` (id, file_number, cin_passport, full_name, email, phone, date_of_birth, gender, address, medical_history, patient_doc, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
             file_number = VALUES(file_number),
             cin_passport = VALUES(cin_passport),
@@ -91,6 +93,7 @@ $sql = "INSERT INTO `Patient` (id, file_number, cin_passport, full_name, email, 
             gender = VALUES(gender),
             address = VALUES(address),
             medical_history = VALUES(medical_history),
+            patient_doc = VALUES(patient_doc),
             updated_at = VALUES(updated_at)";
 
 $stmt = $mysqli->prepare($sql);
@@ -105,7 +108,7 @@ $createdAt = $patient['created_at'] ?: date('Y-m-d H:i:s');
 $updatedAt = $patient['updated_at'] ?: date('Y-m-d H:i:s');
 
 $stmt->bind_param(
-    'ssssssssssss',
+    'sssssssssssss',
     $patient['id'],
     $patient['file_number'],
     $patient['cin_passport'],
@@ -116,6 +119,7 @@ $stmt->bind_param(
     $patient['gender'],
     $patient['address'],
     $patient['medical_history'],
+    $patient['patient_doc'],
     $createdAt,
     $updatedAt
 );

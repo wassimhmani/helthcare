@@ -33,7 +33,7 @@ if ($tableCheck->num_rows === 0) {
 }
 
 // Fetch all patients
-$sql = "SELECT id, file_number, cin_passport, full_name, email, phone, date_of_birth, gender, address, medical_history, created_at, updated_at FROM `Patient` ORDER BY created_at DESC";
+$sql = "SELECT id, file_number, cin_passport, full_name, email, phone, date_of_birth, gender, address, medical_history, patient_doc, created_at, updated_at FROM `Patient` ORDER BY created_at DESC";
 
 $result = $mysqli->query($sql);
 if (!$result) {
@@ -53,6 +53,7 @@ while ($row = $result->fetch_assoc()) {
         'email' => $row['email'] ?? '',
         'phone' => $row['phone'] ?? '',
         'dateOfBirth' => $row['date_of_birth'] ?? '',
+        'patientDoc' => $row['patient_doc'] ?? '',
         'gender' => $row['gender'] ?? '',
         'address' => $row['address'] ?? '',
         'medicalHistory' => $row['medical_history'] ?? '',

@@ -714,17 +714,27 @@ const updateTodaySummary = () => {
 
             if (data.status === 'ok' && Array.isArray(data.appointments)) {
                 // Use total from API response (preferred), then count, then appointments.length
-                const totalAppointments = (data.total !== undefined && data.total !== null)
+                let totalAppointments = (data.total !== undefined && data.total !== null)
                     ? data.total
                     : ((data.count !== undefined && data.count !== null) ? data.count : data.appointments.length);
 
                 console.log('Calculated total appointments:', totalAppointments);
 
-                const preValidationCount = data.appointments.filter(apt => (apt.status || '').toLowerCase() === 'pre-validation').length;
-                const confirmedCount = data.appointments.filter(apt => (apt.status || '').toLowerCase() === 'validated').length;
-                const cancelledCount = data.appointments.filter(apt => (apt.status || '').toLowerCase() === 'cancelled').length;
+                let sourceAppointments = data.appointments;
 
-                // Update stats with API data
+                // If API reports 0 but we have local in-memory appointments for today, use them instead
+                const localToday = (Array.isArray(storedAppointments) ? storedAppointments : []).filter(apt => apt.date === todayDateStr);
+                if (totalAppointments === 0 && localToday.length > 0) {
+                    console.log('API returned 0 appointments but local cache has', localToday.length, 'for today; using local data for summary.');
+                    sourceAppointments = localToday;
+                    totalAppointments = localToday.length;
+                }
+
+                const preValidationCount = sourceAppointments.filter(apt => (apt.status || '').toLowerCase() === 'pre-validation').length;
+                const confirmedCount = sourceAppointments.filter(apt => (apt.status || '').toLowerCase() === 'validated').length;
+                const cancelledCount = sourceAppointments.filter(apt => (apt.status || '').toLowerCase() === 'cancelled').length;
+
+                // Update stats with chosen data source
                 const totalAppointmentsEl = document.getElementById('totalAppointments');
                 if (totalAppointmentsEl) {
                     totalAppointmentsEl.textContent = totalAppointments;
@@ -742,7 +752,7 @@ const updateTodaySummary = () => {
                 const cancelledEl = document.getElementById('cancelledAppointments');
                 if (cancelledEl) cancelledEl.textContent = cancelledCount;
             } else {
-                // Fallback to localStorage if API fails
+                // Fallback to localStorage if API fails or returns unexpected format
                 const todayAppointments = storedAppointments.filter(apt => apt.date === todayDateStr);
                 const appointmentCount = todayAppointments.length;
                 const preValidationCount = todayAppointments.filter(apt => apt.status === 'pre-validation').length;
@@ -1374,6 +1384,11 @@ function closeEditPatientModal() {
     // Reset form
     document.getElementById('editPatientForm').reset();
 
+    // Clear edit patient documents
+    window.editPatientDocuments = [];
+    const editDocsList = document.getElementById('editPatientDocumentsList');
+    if (editDocsList) editDocsList.innerHTML = '';
+
     // Clear edit mode variables
     editingPatient = null;
     editModeNewFiles = [];
@@ -1742,7 +1757,7 @@ function switchPatientTab(tab) {
     if (tab === 'add') {
         window.patientDocuments = [];
         setTimeout(() => {
-            loadPatientDocuments();
+            loadPatientFormDocuments();
         }, 100);
     }
     const addContent = document.getElementById('addPatientContent');
@@ -2154,16 +2169,169 @@ function loadPatientBills(patientId) {
         window.I18n.walkAndTranslate();
     }
 }
+
+// Load and display documents in the Edit Patient form
+function loadEditPatientDocuments() {
+    const documentsList = document.getElementById('editPatientDocumentsList');
+    if (!documentsList) return;
+
+    if (!window.editPatientDocuments || window.editPatientDocuments.length === 0) {
+        documentsList.innerHTML = `
+            <div class="text-center py-4 text-gray-500 text-sm">
+                <p data-translate="no_documents_uploaded">No documents uploaded yet.</p>
+            </div>
+        `;
+        if (window.I18n && window.I18n.walkAndTranslate) {
+            window.I18n.walkAndTranslate();
+        }
+        return;
+    }
+
+    documentsList.innerHTML = window.editPatientDocuments.map(doc => {
+        const docDate = new Date(doc.uploadedAt || doc.createdAt || Date.now());
+        const isImage = doc.type && doc.type.startsWith('image/');
+        const fileIcon = isImage
+            ? '<svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>'
+            : '<svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>';
+
+        const safeId = doc.id || '';
+
+        return `
+            <div class="border border-gray-200 rounded-lg p-3 bg-white hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center flex-1 min-w-0">
+                        ${fileIcon}
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-gray-900 truncate">${doc.name || safeId || 'Document'}</div>
+                            <div class="text-sm text-gray-500">${(doc.size ? (doc.size / 1024).toFixed(1) + ' KB • ' : '')}${docDate.toLocaleDateString()}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 ml-3">
+                        <button type="button" onclick="previewPatientDocument('patient_doc', '${safeId}', '')" class="btn btn-sm btn-secondary" title="Preview">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                        </button>
+                        <button type="button" onclick="removeEditPatientDocument('${safeId}')" class="btn btn-sm btn-danger" title="Remove">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    if (window.I18n && window.I18n.walkAndTranslate) {
+        window.I18n.walkAndTranslate();
+    }
+}
+
+// Handle document upload for Edit Patient form
+window.handleEditPatientDocumentUpload = function (event) {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    Array.from(files).forEach(file => {
+        // Check file size (max 10MB)
+        if (file.size > 10 * 1024 * 1024) {
+            if (typeof window.showTranslatedAlert === 'function') {
+                window.showTranslatedAlert('file_too_large', `File ${file.name} is too large. Maximum size is 10MB.`);
+            } else {
+                alert(`File ${file.name} is too large. Maximum size is 10MB.`);
+            }
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const id = 'DOC-' + Date.now() + '-' + Math.random().toString(36).substring(2, 8);
+            const documentData = {
+                id,
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                uploadedAt: new Date().toISOString(),
+                data: e.target.result
+            };
+
+            if (!window.editPatientDocuments) {
+                window.editPatientDocuments = [];
+            }
+            window.editPatientDocuments.push(documentData);
+
+            loadEditPatientDocuments();
+
+            // Clear the file input
+            event.target.value = '';
+        };
+        reader.onerror = function () {
+            if (typeof window.showTranslatedAlert === 'function') {
+                window.showTranslatedAlert('file_upload_error', `Error reading file ${file.name}`);
+            } else {
+                alert(`Error reading file ${file.name}`);
+            }
+        };
+        reader.readAsDataURL(file);
+    });
+};
+
+// Remove document from Edit Patient form
+window.removeEditPatientDocument = function (documentId) {
+    if (!window.editPatientDocuments) return;
+
+    if (typeof window.showTranslatedConfirm === 'function') {
+        if (!window.showTranslatedConfirm('confirm_delete_document', 'Are you sure you want to remove this document?')) {
+            return;
+        }
+    } else {
+        if (!confirm('Are you sure you want to remove this document?')) {
+            return;
+        }
+    }
+
+    window.editPatientDocuments = window.editPatientDocuments.filter(doc => doc.id !== documentId);
+    loadEditPatientDocuments();
+};
 function loadPatientDocuments(patientId) {
     const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
     const certificates = JSON.parse(localStorage.getItem('medical_certificates') || '[]');
     const labAssessments = JSON.parse(localStorage.getItem('lab_assessments') || '[]');
+    const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
     const documentsList = document.getElementById('patientDocumentsList');
 
     if (!documentsList) return;
 
     // Collect all documents for this patient
     const allDocuments = [];
+    
+    // Get patient data
+    const patient = patients.find(p => p.id === patientId);
+
+    // Add patient documents from stored JSON field (supports both patientDoc and patient_doc)
+    const patientDocJson = patient ? (patient.patientDoc || patient.patient_doc || '') : '';
+    if (patientDocJson) {
+        try {
+            const patientDocs = JSON.parse(patientDocJson);
+            if (Array.isArray(patientDocs)) {
+                patientDocs.forEach((doc, index) => {
+                    allDocuments.push({
+                        type: 'patient_doc',
+                        title: doc.name || `Patient Document ${index + 1}`,
+                        // Prefer the actual document id if present so preview can find it reliably
+                        id: doc.id || `patient-doc-${patientId}-${index}`,
+                        date: doc.uploadedAt || patient.createdAt || new Date().toISOString(),
+                        data: doc,
+                        isPatientDoc: true
+                    });
+                });
+            }
+        } catch (e) {
+            console.error('Error parsing patient_doc:', e);
+        }
+    }
 
     // Get certificates for this patient
     const patientCertificates = certificates.filter(cert => cert.patientId === patientId);
@@ -2289,6 +2457,10 @@ function loadPatientDocuments(patientId) {
                 docIcon = '<svg class="w-5 h-5 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>';
                 bgColor = 'bg-orange-50';
                 break;
+            case 'patient_doc':
+                docIcon = '<svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>';
+                bgColor = 'bg-indigo-50';
+                break;
         }
 
         return `
@@ -2334,6 +2506,110 @@ window.previewPatientDocument = function (docType, docId, consultIdFromDoc) {
 
     // Get document based on type
     switch (docType) {
+        case 'patient_doc': {
+            // Handle patient documents stored on the patient record
+            const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
+            const currentPatient = patients.find(p => p.id === currentPatientDetailsId);
+
+            if (currentPatient) {
+                const patientDocJson = currentPatient.patientDoc || currentPatient.patient_doc || '';
+                if (patientDocJson) {
+                    try {
+                        const patientDocs = JSON.parse(patientDocJson);
+
+                        if (Array.isArray(patientDocs)) {
+                            // First try to find by real document id
+                            if (docId) {
+                                documentData = patientDocs.find(d => d.id === docId) || null;
+                            }
+
+                            // Fallback: if not found by id, try index encoded in synthetic id "patient-doc-<patientId>-<index>"
+                            if (!documentData && typeof docId === 'string') {
+                                const match = docId.match(/patient-doc-[^-]+-(\d+)$/);
+                                if (match) {
+                                    const index = parseInt(match[1], 10);
+                                    if (!Number.isNaN(index) && index >= 0 && index < patientDocs.length) {
+                                        documentData = patientDocs[index];
+                                    }
+                                }
+                            }
+                        }
+
+                        if (documentData) {
+                            documentTitle = documentData.name || 'Patient Document';
+
+                            const isImage = documentData.type && documentData.type.startsWith('image/');
+                            const imageSrc = documentData.data || documentData.url || '';
+
+                            if (isImage && imageSrc) {
+                                // Inline image preview
+                                documentHTML = `
+                        <div class="space-y-4">
+                            <div class="border-b pb-3">
+                                <h4 class="font-semibold text-lg mb-2">${documentTitle}</h4>
+                                <div class="text-sm text-gray-600">
+                                    <strong>ID:</strong> ${documentData.id || ''}<br>
+                                    <strong>Type:</strong> Image<br>
+                                    ${documentData.size ? `<strong>Size:</strong> ${(documentData.size / 1024).toFixed(2)} KB<br>` : ''}
+                                </div>
+                            </div>
+                            <div class="mt-4 flex justify-center">
+                                <img src="${imageSrc}" alt="${documentTitle}" class="max-w-full h-auto border border-gray-300 rounded-lg shadow-md">
+                            </div>
+                            ${documentData.notes ? `
+                            <div class="mt-4">
+                                <p class="font-medium">Notes:</p>
+                                <p class="whitespace-pre-line">${documentData.notes}</p>
+                            </div>
+                            ` : ''}
+                        </div>
+                    `;
+                            } else {
+                                // Non-image document: show link / basic info
+                                documentHTML = `
+                        <div class="space-y-4">
+                            <div class="border-b pb-3">
+                                <h4 class="font-semibold text-lg mb-2">${documentTitle}</h4>
+                                <div class="text-sm text-gray-600">
+                                    <strong>ID:</strong> ${documentData.id || ''}<br>
+                                    <strong>Type:</strong> ${documentData.type || 'Document'}<br>
+                                    ${documentData.size ? `<strong>Size:</strong> ${(documentData.size / 1024).toFixed(2)} KB<br>` : ''}
+                                </div>
+                            </div>
+                            ${imageSrc ? `
+                            <div class="mt-4">
+                                <a href="${imageSrc}" target="_blank" download="${documentTitle}" class="btn btn-primary">
+                                    <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
+                                    Download Document
+                                </a>
+                            </div>
+                            ` : ''}
+                            ${documentData.notes ? `
+                            <div class="mt-4">
+                                <p class="font-medium">Notes:</p>
+                                <p class="whitespace-pre-line">${documentData.notes}</p>
+                            </div>
+                            ` : ''}
+                        </div>
+                    `;
+                            }
+                        } else {
+                            documentHTML = '<p class="text-gray-500">Document not found.</p>';
+                        }
+                    } catch (e) {
+                        console.error('Error parsing patient document:', e);
+                        documentHTML = '<p class="text-red-500">Error loading document. Please try again.</p>';
+                    }
+                } else {
+                    documentHTML = '<p class="text-gray-500">Document not found.</p>';
+                }
+            } else {
+                documentHTML = '<p class="text-gray-500">Document not found.</p>';
+            }
+            break;
+        }
         case 'radiology':
         case 'lab_upload':
         case 'uploaded':
@@ -2688,7 +2964,7 @@ document.getElementById('patientForm').addEventListener('submit', function (even
     document.getElementById('patientForm').reset();
     // Clear patient documents
     window.patientDocuments = [];
-    loadPatientDocuments();
+    loadPatientFormDocuments();
     // Pre-fill a fresh generated file number for the next entry
     const fileNumEl = document.getElementById('patientFileNumber');
     if (fileNumEl) {
@@ -2840,6 +3116,9 @@ function updatePatient(formData) {
         const updatedFiles = [...currentFiles, ...newFilesData];
 
         // Update patient data
+        const updatedDocuments = (window.editPatientDocuments && Array.isArray(window.editPatientDocuments))
+            ? window.editPatientDocuments
+            : (editingPatient.documents || []);
         const updatedPatient = {
             ...editingPatient,
             fileNumber: formData.fileNumber,
@@ -2852,6 +3131,7 @@ function updatePatient(formData) {
             address: formData.address || '',
             medicalHistory: formData.medicalHistory || '',
             medicalFiles: updatedFiles,
+            documents: updatedDocuments,
             updatedAt: new Date().toISOString()
         };
 
@@ -3153,6 +3433,7 @@ function syncPatientToDatabase(patient) {
             gender: patient.gender || '',
             address: patient.address || '',
             medicalHistory: patient.medicalHistory || patient.medical_history || '',
+            patientDoc: JSON.stringify(patient.documents || []), // Include patient documents
             createdAt: patient.createdAt || new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
@@ -3556,11 +3837,36 @@ function clearPatientSearch() {
     loadPatientsList();
 }
 function editPatient(patientId) {
-    const patient = storedPatients.find(p => p.id === patientId);
-    if (!patient) {
-        showTranslatedAlert('patient_not_found');
-        return;
-    }
+	// Ensure storedPatients is hydrated from localStorage if empty
+	if (!Array.isArray(storedPatients) || storedPatients.length === 0) {
+		try {
+			const lsPatients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
+			if (Array.isArray(lsPatients) && lsPatients.length > 0) {
+				storedPatients = lsPatients;
+			}
+		} catch (e) {
+			console.error('Error hydrating storedPatients from localStorage:', e);
+		}
+	}
+
+	let patient = storedPatients.find(p => p.id === patientId);
+	if (!patient) {
+		// Fallback: try to load from localStorage cache
+		try {
+			const lsPatients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
+			patient = lsPatients.find(p => p.id === patientId);
+			if (patient) {
+				// Keep storedPatients in sync so subsequent operations work
+				storedPatients.push(patient);
+			}
+		} catch (e) {
+			console.error('Error loading patient from localStorage for edit:', e);
+		}
+	}
+	if (!patient) {
+		showTranslatedAlert('patient_not_found');
+		return;
+	}
 
     // Set editing patient
     editingPatient = patient;
@@ -3586,6 +3892,28 @@ function editPatient(patientId) {
     document.getElementById('editPatientGender').value = patient.gender || '';
     document.getElementById('editPatientAddress').value = patient.address || '';
     document.getElementById('editPatientMedicalHistory').value = patient.medicalHistory || '';
+
+    // Load patient documents into edit array
+    try {
+        let docs = [];
+        if (Array.isArray(patient.documents)) {
+            docs = patient.documents;
+        } else if (patient.patientDoc || patient.patient_doc) {
+            const raw = patient.patientDoc || patient.patient_doc;
+            if (typeof raw === 'string' && raw.trim()) {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed)) docs = parsed;
+            }
+        }
+        window.editPatientDocuments = docs;
+    } catch (e) {
+        console.error('Error loading edit patient documents:', e);
+        window.editPatientDocuments = [];
+    }
+
+    if (typeof loadEditPatientDocuments === 'function') {
+        loadEditPatientDocuments();
+    }
 
     // Display current files
     displayCurrentFiles(patient.medicalFiles || []);
@@ -8092,8 +8420,10 @@ window.previewConsultationDocument = function (documentId) {
     }
 };
 
-// Initialize patient documents array for form
+// Initialize patient documents array for add form
 window.patientDocuments = window.patientDocuments || [];
+// Initialize documents array for edit patient form
+window.editPatientDocuments = window.editPatientDocuments || [];
 
 // Handle document upload for patient form
 window.handlePatientDocumentUpload = function (event) {
@@ -8129,7 +8459,7 @@ window.handlePatientDocumentUpload = function (event) {
             window.patientDocuments.push(documentData);
 
             // Refresh the documents list
-            loadPatientDocuments();
+            loadPatientFormDocuments();
 
             // Clear the file input
             event.target.value = '';
@@ -8160,7 +8490,7 @@ window.removePatientDocument = function (documentId) {
     }
 
     window.patientDocuments = window.patientDocuments.filter(doc => doc.id !== documentId);
-    loadPatientDocuments();
+    loadPatientFormDocuments();
 };
 
 // Preview patient document
@@ -8202,8 +8532,8 @@ window.previewPatientFormDocument = function (documentId) {
 };
 
 // Load and display patient documents in the form
-function loadPatientDocuments() {
-    const documentsList = document.getElementById('patientDocumentsList');
+function loadPatientFormDocuments() {
+    const documentsList = document.getElementById('patientFormDocumentsList');
     if (!documentsList) return;
 
     if (!window.patientDocuments || window.patientDocuments.length === 0) {

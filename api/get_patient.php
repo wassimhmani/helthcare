@@ -47,7 +47,7 @@ if ($tableCheck->num_rows === 0) {
 }
 
 // Fetch patient by ID
-$stmt = $mysqli->prepare("SELECT id, file_number, cin_passport, full_name, email, phone, date_of_birth, gender, address, medical_history, created_at, updated_at FROM `Patient` WHERE id = ? LIMIT 1");
+$stmt = $mysqli->prepare("SELECT id, file_number, cin_passport, full_name, email, phone, date_of_birth, gender, address, medical_history, patient_doc, created_at, updated_at FROM `Patient` WHERE id = ? LIMIT 1");
 if (!$stmt) {
     http_response_code(500);
     echo json_encode(['status' => 'error', 'message' => 'Failed to prepare query', 'error' => $mysqli->error]);
@@ -79,6 +79,7 @@ $patient = [
     'gender' => $row['gender'] ?? '',
     'address' => $row['address'] ?? '',
     'medicalHistory' => $row['medical_history'] ?? '',
+    'patientDoc' => $row['patient_doc'] ?? '',
     'createdAt' => $row['created_at'] ?? '',
     'updatedAt' => $row['updated_at'] ?? ''
 ];
