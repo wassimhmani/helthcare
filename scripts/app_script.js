@@ -4309,12 +4309,40 @@ function renderReadyBills() {
     }).join('');
 }
 
-function renderDoneBills(searchTerm = '') {
+async function renderDoneBills(searchTerm = '') {
     const container = document.getElementById('doneBillsContainer');
     if (!container) return;
 
-    const bills = JSON.parse(localStorage.getItem('healthcareBills') || '[]');
-    const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
+    // Show a lightweight loading state while fetching from API
+    container.innerHTML = `
+                <div class="text-center py-6 text-gray-500">
+                    <span data-translate="loading_bills">Loading bills...</span>
+                </div>
+            `;
+
+    let bills = [];
+    let patients = [];
+
+    try {
+        const response = await fetch('api/get_bills.php');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        if (data && data.status === 'ok' && Array.isArray(data.bills)) {
+            bills = data.bills;
+            // Keep bills in localStorage so other features (view/print) keep working
+            localStorage.setItem('healthcareBills', JSON.stringify(bills));
+        } else {
+            bills = JSON.parse(localStorage.getItem('healthcareBills') || '[]');
+        }
+    } catch (err) {
+        // On error, fall back to any locally stored bills
+        bills = JSON.parse(localStorage.getItem('healthcareBills') || '[]');
+    }
+
+    patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
 
     // Sort by creation date (newest first)
     let sortedBills = bills.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -4323,9 +4351,9 @@ function renderDoneBills(searchTerm = '') {
     if (searchTerm) {
         searchTerm = searchTerm.toLowerCase();
         sortedBills = sortedBills.filter(bill =>
-            bill.patientName.toLowerCase().includes(searchTerm) ||
-            bill.id.toLowerCase().includes(searchTerm) ||
-            bill.status.toLowerCase().includes(searchTerm)
+            (bill.patientName || '').toLowerCase().includes(searchTerm) ||
+            (bill.id || '').toLowerCase().includes(searchTerm) ||
+            (bill.status || '').toLowerCase().includes(searchTerm)
         );
     }
 
@@ -5347,6 +5375,68 @@ function applyCabinetSettingsToForm(settings) {
             }
         }
     }
+}
+
+// Load bill/service descriptions from cache, localStorage, or backend API
+function getBillDescriptions() {
+    // 1) Prefer in-memory cache if available
+    if (Array.isArray(window.billDescriptionsCache) && window.billDescriptionsCache.length > 0) {
+        return window.billDescriptionsCache;
+    }
+
+    // 2) Try localStorage cache
+    try {
+        const raw = localStorage.getItem('bill_descriptions');
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                window.billDescriptionsCache = parsed;
+                return window.billDescriptionsCache;
+            }
+        }
+    } catch (e) {
+        console.error('Error reading bill_descriptions from localStorage:', e);
+    }
+
+    // 3) Fallback: fetch from backend API asynchronously and cache for next calls
+    fetch('api/get_bill_descriptions.php')
+        .then(res => {
+            if (!res.ok) throw new Error('Failed to fetch bill descriptions');
+            return res.json();
+        })
+        .then(data => {
+            if (data && data.status === 'ok' && Array.isArray(data.services)) {
+                const descriptions = data.services.map(s => ({
+                    id: s.id,
+                    name: s.name,
+                    price: typeof s.defaultPrice === 'number' ? s.defaultPrice : Number(s.defaultPrice) || 0,
+                    notes: s.notes || '',
+                    createdAt: s.createdAt || '',
+                    updatedAt: s.updatedAt || ''
+                }));
+
+                try {
+                    localStorage.setItem('bill_descriptions', JSON.stringify(descriptions));
+                } catch (e) {
+                    console.error('Error caching bill_descriptions to localStorage:', e);
+                }
+                window.billDescriptionsCache = descriptions;
+
+                // Re-render settings UI if open
+                if (typeof renderBillDescriptionsList === 'function') {
+                    renderBillDescriptionsList();
+                }
+            } else {
+                console.warn('get_bill_descriptions.php returned no services');
+                window.billDescriptionsCache = [];
+            }
+        })
+        .catch(err => {
+            console.error('Error fetching bill descriptions from API:', err);
+        });
+
+    // Synchronous return: whatever cache we currently have (may be empty on first call)
+    return Array.isArray(window.billDescriptionsCache) ? window.billDescriptionsCache : [];
 }
 
 function saveBillDescriptions(descriptions) {
@@ -6738,13 +6828,15 @@ function createBill(formData) {
     };
 
     console.log('Creating bill:', newBill);
-    storedBills.push(newBill);
-    saveStoredBills();
+    // Persist bill via backend API
+    syncBillToDatabase(newBill);
 
-    // Sync to backend database
-    if (typeof syncBillToDatabase === 'function') {
-        syncBillToDatabase(newBill);
-    }
+    // Also keep a local copy so Ready Bills can immediately exclude this consultation
+    try {
+        const existingBills = JSON.parse(localStorage.getItem('healthcareBills') || '[]');
+        existingBills.push(newBill);
+        localStorage.setItem('healthcareBills', JSON.stringify(existingBills));
+    } catch { }
 
     // Update cabinet cash display after creating bill
     if (typeof updateCabinetCashDisplay === 'function') {
@@ -7305,11 +7397,16 @@ document.getElementById('billingForm').addEventListener('submit', (e) => {
         return;
     }
 
-    // Refresh ready bills if the modal is open
+    // Refresh Ready Bills list so the related consultation card disappears
     const readyBillsModal = document.getElementById('readyBillsModal');
-    if (readyBillsModal && readyBillsModal.classList.contains('active')) {
-        if (typeof renderReadyBills === 'function') {
-            renderReadyBills();
+    if (formData.consultationId) {
+        // If the modal is already open, just re-render; otherwise reopen it
+        if (readyBillsModal && readyBillsModal.classList.contains('active')) {
+            if (typeof renderReadyBills === 'function') {
+                renderReadyBills();
+            }
+        } else if (typeof showReadyBillsModal === 'function') {
+            showReadyBillsModal();
         }
     }
 

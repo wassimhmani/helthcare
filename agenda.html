@@ -2465,6 +2465,28 @@
             setTimeout(ensureDashboard, 100);
             window.addEventListener('load', ensureDashboard);
         })();
+
+        // Verify and ensure showBillingOrReadyBills is available
+        (function() {
+            const ensureBilling = function(){
+                if (typeof window.showBillingOrReadyBills !== 'function') {
+                    console.warn('showBillingOrReadyBills not available, installing safe fallback');
+                    window.showBillingOrReadyBills = function() {
+                        // Graceful fallback: open main billing modal if available
+                        if (typeof window.showBillingModal === 'function') {
+                            window.showBillingModal();
+                        } else {
+                            alert('Billing feature is not available.');
+                        }
+                    };
+                } else {
+                    console.log('showBillingOrReadyBills is available');
+                }
+            };
+            // Run after a short delay and again on window load to avoid race conditions
+            setTimeout(ensureBilling, 100);
+            window.addEventListener('load', ensureBilling);
+        })();
     </script>
     <script>
         // Ensure consultation modal helpers exist to prevent onclick ReferenceError
