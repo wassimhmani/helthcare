@@ -341,12 +341,14 @@
         }
         editingExpenseId = null;
       } else {
+        const now = new Date();
         const newExpense = {
           id: 'EXP-' + Date.now(),
           description,
           amount,
-          date: new Date().toISOString(),
-          createdAt: new Date().toISOString()
+          // Store local date in YYYY-MM-DD format so it matches agenda's selected date
+          date: formatDateForStorage(now),
+          createdAt: now.toISOString()
         };
         storedExpenses.push(newExpense);
         // Sync new expense to backend

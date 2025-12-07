@@ -516,6 +516,7 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
     const temperature = tempVal ? parseFloat(tempVal) : null;
     const heartRate = heartRateVal ? parseInt(heartRateVal,10) : null;
     const bloodSugar = bloodSugarVal ? parseInt(bloodSugarVal,10) : null;
+    const bloodPressure = bpInputVal ? bpInputVal.trim() : '';
     let bpSystolic=null, bpDiastolic=null;
     if (bpInputVal && typeof bpInputVal === 'string'){
       const m = bpInputVal.trim().match(/(\d{2,3})\s*\/\s*(\d{2,3})/); if (m){ bpSystolic = parseInt(m[1],10); bpDiastolic = parseInt(m[2],10); }
@@ -558,27 +559,70 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
       if (idx !== -1){
         const existing = consultations[idx];
         const shouldUpdateDate = window.currentConsultationAppointmentId;
-        consultations[idx] = { ...existing, patientId, height, weight, temperature, heartRate, bloodSugar, bpSystolic, bpDiastolic, imc:bmi, bmiCategory:category, vitalNotes, notes, radiologyResult, radiologyDiagnostics, labResults, labNotes, prescription, paymentStatus, documents: allDocuments, doctor: session?.name || existing.doctor || 'Doctor', createdAt: shouldUpdateDate ? new Date().toISOString() : existing.createdAt };
+        consultations[idx] = { 
+          ...existing,
+          patientId,
+          height,
+          weight,
+          temperature,
+          heartRate,
+          bloodSugar,
+          bpSystolic,
+          bpDiastolic,
+          bloodPressure,
+          imc: bmi,
+          bmiCategory: category,
+          vitalNotes,
+          notes,
+          radiologyResult,
+          radiologyDiagnostics,
+          labResults,
+          labNotes,
+          prescription,
+          paymentStatus,
+          documents: allDocuments,
+          doctor: session?.name || existing.doctor || 'Doctor',
+          createdAt: shouldUpdateDate ? new Date().toISOString() : existing.createdAt
+        };
       }
     } else {
-      consultations.push({ id, patientId, height, weight, temperature, heartRate, bloodSugar, bpSystolic, bpDiastolic, imc:bmi, bmiCategory:category, vitalNotes, notes, radiologyResult, radiologyDiagnostics, labResults, labNotes, prescription, paymentStatus, documents: allDocuments, doctor: session?.name || 'Doctor', createdAt: new Date().toISOString() });
+      consultations.push({
+        id,
+        patientId,
+        height,
+        weight,
+        temperature,
+        heartRate,
+        bloodSugar,
+        bpSystolic,
+        bpDiastolic,
+        bloodPressure,
+        imc: bmi,
+        bmiCategory: category,
+        vitalNotes,
+        notes,
+        radiologyResult,
+        radiologyDiagnostics,
+        labResults,
+        labNotes,
+        prescription,
+        paymentStatus,
+        documents: allDocuments,
+        doctor: session?.name || 'Doctor',
+        createdAt: new Date().toISOString()
+      });
     }
     saveConsultations(consultations);
 
-    // Sync to backend database
-    const consultationToSync = window.editingConsultationId && consultations.find(c => c.id === window.editingConsultationId) 
+    // Sync to backend database using consultation_sync.php (upsert by ID)
+    const consultationToSync = window.editingConsultationId && consultations.find(c => c.id === window.editingConsultationId)
         ? consultations.find(c => c.id === window.editingConsultationId)
         : consultations.find(c => c.id === id);
-    
-    // Use update API for existing consultations, sync API for new ones
-    if (consultationToSync) {
-        if (window.editingConsultationId && typeof updateConsultationInDatabase === 'function') {
-            // Update existing consultation
-            updateConsultationInDatabase(consultationToSync);
-        } else if (typeof syncConsultationToDatabase === 'function') {
-            // Create new consultation
-            syncConsultationToDatabase(consultationToSync);
-        }
+
+    if (consultationToSync && typeof syncConsultationToDatabase === 'function') {
+        // consultation_sync.php uses INSERT ... ON DUPLICATE KEY UPDATE,
+        // so passing an existing ID will update that row instead of creating a new one.
+        syncConsultationToDatabase(consultationToSync);
     }
 
     // Clear radiology and lab uploads after saving
@@ -1574,21 +1618,7 @@ window.viewConsultationDetail = function (consultationId) {
                 if (content && typeof content.focus === 'function') {
                     setTimeout(() => content.focus(), 0);
                 }
-
-        // Add event delegation for print certificate and prescription buttons on the modal content
-        setTimeout(() => {
-            const detailContent = document.getElementById('consultationDetailContent');
-            if (detailContent) {
-                // Remove any existing click listeners by cloning
-                detailContent.removeEventListener('click', handlePrintCertificateClick);
-                detailContent.removeEventListener('click', handlePrintPrescriptionClick);
-
-                // Add new event listeners
-                detailContent.addEventListener('click', handlePrintCertificateClick);
-                detailContent.addEventListener('click', handlePrintPrescriptionClick);
             }
-        }, 100);
-    }
 };
 window.loadTodayAppointments = function () {
             const appointmentCountEl = document.getElementById('appointmentCount');
@@ -1626,16 +1656,12 @@ window.loadTodayAppointments = function () {
                         const totalCount = (totalData.total !== undefined && totalData.total !== null)
                             ? totalData.total
                             : ((totalData.count !== undefined && totalData.count !== null) ? totalData.count : totalData.appointments.length);
-                        
-                        console.log('Calculated total count for badge:', totalCount);
-                        
-                        // Update total appointment badge with count from API
-                        if (appointmentCountEl) {
-                            appointmentCountEl.textContent = totalCount;
-                            console.log('Successfully updated appointmentCount badge to:', totalCount);
-                        } else {
-                            console.warn('appointmentCount element not found in DOM');
-                        }
+
+                        console.log('Total appointments for today (all statuses):', totalCount);
+
+                        // Do not update the appointmentCount badge here; it should
+                        // reflect only validated appointments from the second fetch
+                        // to avoid mismatches when the validated list is empty.
                     } else {
                         console.error('Invalid API response for appointment count:', totalData);
                     }
