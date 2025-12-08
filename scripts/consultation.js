@@ -79,7 +79,26 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
   window.getPatients = getPatients;
   window.getPatient = getPatient;
   function getConsultations(){
-    try { return JSON.parse(localStorage.getItem('consultations')||'[]'); } catch { return []; }
+    try {
+      const raw = JSON.parse(localStorage.getItem('consultations')||'[]') || [];
+      let changed = false;
+      const normalized = raw.map(c => {
+        if (c && !c.clinicalNote) {
+          const note = c.clinicalNote || c.vitalNotes || c.notes;
+          if (note) {
+            changed = true;
+            return { ...c, clinicalNote: note };
+          }
+        }
+        return c;
+      });
+      if (changed) {
+        localStorage.setItem('consultations', JSON.stringify(normalized));
+      }
+      return normalized;
+    } catch {
+      return [];
+    }
   }
   function saveConsultations(list){ localStorage.setItem('consultations', JSON.stringify(list)); }
 
@@ -392,11 +411,10 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
           ${consultation.bloodSugar ? `<div><strong>${t('blood_sugar','Blood Sugar')}:</strong> ${consultation.bloodSugar} mg/dL</div>` : ''}
           ${consultation.bpSystolic && consultation.bpDiastolic ? `<div><strong>${t('blood_pressure','Blood Pressure')}:</strong> ${consultation.bpSystolic}/${consultation.bpDiastolic} mmHg</div>` : ''}
         </div>
-        ${consultation.vitalNotes ? `<div class="mt-4 pt-4 border-t border-gray-200"><h4 class="text-sm font-semibold text-gray-700 mb-2">${t('vital_notes','Vital Notes')}</h4><div class="text-sm text-gray-700 whitespace-pre-wrap">${consultation.vitalNotes}</div></div>` : ''}
       </div>
       <div class="card p-4">
         <h3 class="text-lg font-semibold mb-3 text-gray-900">${t('clinical_notes','Clinical Note')}</h3>
-        <div class="text-sm text-gray-700 whitespace-pre-wrap">${consultation.notes || t('no_notes_provided','No notes provided.')}</div>
+        <div class="text-sm text-gray-700 whitespace-pre-wrap">${consultation.clinicalNote}</div>
       </div>
       ${consultation.radiologyResult || consultation.radiologyDiagnostics ? `
         <div class="card p-4">
@@ -498,8 +516,11 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
     const heartRateVal = document.getElementById('consultHeartRate')?.value;
     const bloodSugarVal = document.getElementById('consultBloodSugar')?.value;
     const bpInputVal = document.getElementById('consultBloodPressure')?.value;
-    const vitalNotes = document.getElementById('consultVitalNotes')?.value.trim() || '';
-    const notes = document.getElementById('consultNotes')?.value.trim() || '';
+    // Clinical note: use the Clinical Note textarea; fallback to old vital-notes field only if present
+    const clinicalNoteInput = document.getElementById('consultNotes') || document.getElementById('consultVitalNotes');
+    const clinicalNote = clinicalNoteInput && typeof clinicalNoteInput.value === 'string'
+      ? clinicalNoteInput.value.trim()
+      : '';
     const radiologyResult = document.getElementById('radiologyResult')?.value.trim() || '';
     const radiologyDiagnostics = document.getElementById('radiologyDiagnostics')?.value.trim() || '';
     const labResults = document.getElementById('labResults')?.value.trim() || '';
@@ -572,8 +593,7 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
           bloodPressure,
           imc: bmi,
           bmiCategory: category,
-          vitalNotes,
-          notes,
+          clinicalNote,
           radiologyResult,
           radiologyDiagnostics,
           labResults,
@@ -599,8 +619,7 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
         bloodPressure,
         imc: bmi,
         bmiCategory: category,
-        vitalNotes,
-        notes,
+        clinicalNote,
         radiologyResult,
         radiologyDiagnostics,
         labResults,
@@ -833,7 +852,21 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
         if (data.status === 'ok' && Array.isArray(data.consultations)) {
           const todayConsultations = data.consultations;
           console.log('Total consultations from API:', todayConsultations.length);
-          
+
+          // Merge API consultations into localStorage so detail modal sees latest fields (clinicalNote, etc.)
+          try {
+            const existing = getConsultations();
+            const byId = {};
+            existing.forEach(c => { if (c && c.id) byId[c.id] = c; });
+            todayConsultations.forEach(c => { if (c && c.id) byId[c.id] = { ...byId[c.id], ...c }; });
+            const merged = Object.values(byId);
+            if (Array.isArray(merged) && merged.length) {
+              saveConsultations(merged);
+            }
+          } catch (e) {
+            console.error('Failed to merge API consultations into localStorage:', e);
+          }
+
           // Update count
           if (consultationCountEl) consultationCountEl.textContent = todayConsultations.length;
           
@@ -868,7 +901,7 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
               <div class="consultation-item">
                 <div class="patient-name">${patientName}</div>
                 <div class="consultation-time">${consultationTime}</div>
-                <div class="consultation-notes">${(consultation.notes||'').substring(0,100)}${(consultation.notes||'').length>100?'...':''}</div>
+		        <div class="consultation-notes">${(consultation.clinicalNote||consultation.vitalNotes||'').substring(0,100)}${(consultation.clinicalNote||consultation.vitalNotes||'').length>100?'...':''}</div>
                 <div class="flex gap-2 mt-3 flex-wrap">
                   <button class="btn btn-sm btn-primary" onclick="viewConsultationDetail('${consultation.id}')" data-translate="view_details">View Details</button>
                 </div>
@@ -909,7 +942,7 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
             <div class="consultation-item">
               <div class="patient-name">${patientName}</div>
               <div class="consultation-time">${consultationTime}</div>
-              <div class="consultation-notes">${(consultation.notes||'').substring(0,100)}${(consultation.notes||'').length>100?'...':''}</div>
+		      <div class="consultation-notes">${(consultation.clinicalNote||consultation.vitalNotes||'').substring(0,100)}${(consultation.clinicalNote||consultation.vitalNotes||'').length>100?'...':''}</div>
                 <div class="flex gap-2 mt-3 flex-wrap">
                   <button class="btn btn-sm btn-primary" onclick="viewConsultationDetail('${consultation.id}')" data-translate="view_details">View Details</button>
                 </div>
@@ -1043,7 +1076,24 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
         if(patientIdInput) patientIdInput.value=c.patientId;
       }
       const consultCertConsultationIdInput=document.getElementById('consultCertConsultationId'); if(consultCertConsultationIdInput) consultCertConsultationIdInput.value=consultationId;
-      set('consultHeight', c.height); set('consultWeight', c.weight); set('consultTemperature', c.temperature); set('consultHeartRate', c.heartRate); set('consultBloodSugar', c.bloodSugar); set('consultBloodPressure', c.bpSystolic && c.bpDiastolic ? `${c.bpSystolic}/${c.bpDiastolic}` : ''); set('consultVitalNotes', c.vitalNotes || ''); set('consultNotes', c.notes); set('consultPrescription', c.prescription); set('radiologyResult', c.radiologyResult || ''); set('radiologyDiagnostics', c.radiologyDiagnostics || ''); set('labResults', c.labResults || ''); set('labNotes', c.labNotes || '');
+      set('consultHeight', c.height);
+      set('consultWeight', c.weight);
+      set('consultTemperature', c.temperature);
+      set('consultHeartRate', c.heartRate);
+      set('consultBloodSugar', c.bloodSugar);
+      set('consultBloodPressure', c.bpSystolic && c.bpDiastolic ? `${c.bpSystolic}/${c.bpDiastolic}` : '');
+      // Clinical note: prefer clinicalNote field, fallback to legacy vitalNotes/notes
+      const editClinical = c.clinicalNote || c.vitalNotes || c.notes || '';
+      if (document.getElementById('consultNotes')) {
+        set('consultNotes', editClinical);
+      } else if (document.getElementById('consultVitalNotes')) {
+        set('consultVitalNotes', editClinical);
+      }
+      set('consultPrescription', c.prescription);
+      set('radiologyResult', c.radiologyResult || '');
+      set('radiologyDiagnostics', c.radiologyDiagnostics || '');
+      set('labResults', c.labResults || '');
+      set('labNotes', c.labNotes || '');
       const payingRadio=document.getElementById('payingPatient'); const nonPayingRadio=document.getElementById('nonPayingPatient'); if(c.paymentStatus==='non-paying'){ if(nonPayingRadio) nonPayingRadio.checked=true; } else { if(payingRadio) payingRadio.checked=true; }
       
       // Load documents list
@@ -1264,8 +1314,13 @@ window.editConsultation = function (consultationId) {
         set('consultHeartRate', c.heartRate);
         set('consultBloodSugar', c.bloodSugar);
         set('consultBloodPressure', c.bpSystolic && c.bpDiastolic ? `${c.bpSystolic}/${c.bpDiastolic}` : '');
-        set('consultVitalNotes', c.vitalNotes || '');
-        set('consultNotes', c.notes);
+        // When editing, restore clinical note into Clinical Note textarea (fallback to old vitalNotes field)
+        const noteVal = c.clinicalNote || c.vitalNotes || '';
+        if (document.getElementById('consultNotes')) {
+          set('consultNotes', noteVal);
+        } else if (document.getElementById('consultVitalNotes')) {
+          set('consultVitalNotes', noteVal);
+        }
         set('consultPrescription', c.prescription);
         set('radiologyResult', c.radiologyResult || '');
         set('radiologyDiagnostics', c.radiologyDiagnostics || '');
@@ -1485,7 +1540,7 @@ window.viewConsultationDetail = function (consultationId) {
                 
                 <div class="card p-4">
                     <h3 class="text-lg font-semibold mb-3 text-gray-900">${window.t ? window.t('clinical_notes', 'Clinical Note') : 'Clinical Note'}</h3>
-                    <div class="text-sm text-gray-700 whitespace-pre-wrap">${consultation.notes || (window.t ? window.t('no_notes_provided', 'No notes provided.') : 'No notes provided.')}</div>
+                    <div class="text-sm text-gray-700 whitespace-pre-wrap">${consultation.clinicalNote || (window.t ? window.t('no_notes_provided', 'No notes provided.') : 'No notes provided.')}</div>
                 </div>
                 
                 ${consultation.radiologyResult || consultation.radiologyDiagnostics ? `

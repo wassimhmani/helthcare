@@ -40,8 +40,8 @@ $consultation = [
     'blood_pressure' => get_value($input, 'bloodPressure'),
     'imc' => get_value($input, 'imc'),
     'bmi_category' => get_value($input, 'bmiCategory'),
-    'vital_notes' => get_value($input, 'vitalNotes'),
-    'notes' => get_value($input, 'notes'),
+    // Prefer clinicalNote key from frontend; fallback to legacy vitalNotes if present
+    'clinical_note' => get_value($input, 'clinicalNote', get_value($input, 'vitalNotes')),
     'radiology_result' => get_value($input, 'radiologyResult'),
     'radiology_diagnostics' => get_value($input, 'radiologyDiagnostics'),
     'lab_results' => get_value($input, 'labResults'),
@@ -92,8 +92,7 @@ $createSql = "CREATE TABLE IF NOT EXISTS `consultation` (
   `blood_pressure` VARCHAR(20) DEFAULT NULL,
   `imc` DECIMAL(4,2) DEFAULT NULL,
   `bmi_category` VARCHAR(50) DEFAULT NULL,
-  `vital_notes` TEXT DEFAULT NULL,
-  `notes` TEXT DEFAULT NULL,
+  `clinical_note` TEXT DEFAULT NULL,
   `radiology_result` TEXT DEFAULT NULL,
   `radiology_diagnostics` TEXT DEFAULT NULL,
   `lab_results` TEXT DEFAULT NULL,
@@ -131,11 +130,11 @@ $updatedAt = isset($input['updatedAt']) && $input['updatedAt'] ? date('Y-m-d H:i
 
 // Upsert (insert or update) using ON DUPLICATE KEY UPDATE
 $sql = "INSERT INTO `consultation` (
-    id, patient_id, height, weight, temperature, heart_rate, blood_sugar, 
-    blood_pressure, imc, bmi_category, vital_notes, notes, 
-    radiology_result, radiology_diagnostics, lab_results, lab_notes, 
-    prescription, payment_status, documents, doctor, created_at, updated_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	id, patient_id, height, weight, temperature, heart_rate, blood_sugar, 
+	blood_pressure, imc, bmi_category, clinical_note,
+	radiology_result, radiology_diagnostics, lab_results, lab_notes, 
+	prescription, payment_status, documents, doctor, created_at, updated_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
     patient_id = VALUES(patient_id),
     height = VALUES(height),
@@ -146,8 +145,7 @@ ON DUPLICATE KEY UPDATE
     blood_pressure = VALUES(blood_pressure),
     imc = VALUES(imc),
     bmi_category = VALUES(bmi_category),
-    vital_notes = VALUES(vital_notes),
-    notes = VALUES(notes),
+    clinical_note = VALUES(clinical_note),
     radiology_result = VALUES(radiology_result),
     radiology_diagnostics = VALUES(radiology_diagnostics),
     lab_results = VALUES(lab_results),
@@ -166,30 +164,30 @@ if (!$stmt) {
     exit;
 }
 
+
 $stmt->bind_param(
-    'ssdddiisdsssssssssssss',
-    $consultation['id'],
-    $consultation['patient_id'],
-    $height,
-    $weight,
-    $temperature,
-    $heartRate,
-    $bloodSugar,
-    $consultation['blood_pressure'],
-    $imc,
-    $consultation['bmi_category'],
-    $consultation['vital_notes'],
-    $consultation['notes'],
-    $consultation['radiology_result'],
-    $consultation['radiology_diagnostics'],
-    $consultation['lab_results'],
-    $consultation['lab_notes'],
-    $consultation['prescription'],
-    $consultation['payment_status'],
-    $consultation['documents'],
-    $consultation['doctor'],
-    $createdAt,
-    $updatedAt
+	'ssdddiisdssssssssssss',
+	$consultation['id'],
+	$consultation['patient_id'],
+	$height,
+	$weight,
+	$temperature,
+	$heartRate,
+	$bloodSugar,
+	$consultation['blood_pressure'],
+	$imc,
+	$consultation['bmi_category'],
+	$consultation['clinical_note'],
+	$consultation['radiology_result'],
+	$consultation['radiology_diagnostics'],
+	$consultation['lab_results'],
+	$consultation['lab_notes'],
+	$consultation['prescription'],
+	$consultation['payment_status'],
+	$consultation['documents'],
+	$consultation['doctor'],
+	$createdAt,
+	$updatedAt
 );
 
 if (!$stmt->execute()) {
