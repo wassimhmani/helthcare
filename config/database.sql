@@ -125,6 +125,79 @@ CREATE TABLE `consultation` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
+-- Structure de la table `radiology_result`
+--
+
+DROP TABLE IF EXISTS `radiology_result`;
+
+CREATE TABLE `radiology_result` (
+  `id` VARCHAR(100) NOT NULL,
+  `consultation_id` VARCHAR(100) DEFAULT NULL,
+  `patient_id` VARCHAR(100) DEFAULT NULL,
+  `exam_type` VARCHAR(255) DEFAULT NULL,
+  `exam_date` DATE DEFAULT NULL,
+  `radiology_result` TEXT DEFAULT NULL,
+  `radiology_diagnostics` TEXT DEFAULT NULL,
+  `notes` TEXT DEFAULT NULL,
+  `documents` LONGTEXT DEFAULT NULL,
+  `doctor` VARCHAR(255) DEFAULT NULL,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_radiology_result_patient_id` (`patient_id`),
+  KEY `idx_radiology_result_consultation_id` (`consultation_id`),
+  KEY `idx_radiology_result_exam_date` (`exam_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Structure de la table `lab_assessment`
+--
+
+DROP TABLE IF EXISTS `lab_assessment`;
+
+CREATE TABLE `lab_assessment` (
+  `id` VARCHAR(100) NOT NULL,
+  `consultation_id` VARCHAR(100) DEFAULT NULL,
+  `patient_id` VARCHAR(100) DEFAULT NULL,
+  `assessment_type` VARCHAR(255) DEFAULT NULL,
+  `lab_date` DATE DEFAULT NULL,
+  `results` TEXT DEFAULT NULL,
+  `notes` TEXT DEFAULT NULL,
+  `documents` LONGTEXT DEFAULT NULL,
+  `doctor` VARCHAR(255) DEFAULT NULL,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_lab_assessment_patient_id` (`patient_id`),
+  KEY `idx_lab_assessment_consultation_id` (`consultation_id`),
+  KEY `idx_lab_assessment_lab_date` (`lab_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Structure de la table `certificate`
+--
+
+DROP TABLE IF EXISTS `certificate`;
+
+CREATE TABLE `certificate` (
+  `id` VARCHAR(100) NOT NULL,
+  `consultation_id` VARCHAR(100) NOT NULL,
+  `patient_id` VARCHAR(100) NOT NULL,
+  `cert_type` VARCHAR(100) DEFAULT NULL,
+  `rest_period` INT DEFAULT NULL,
+  `start_date` DATE DEFAULT NULL,
+  `end_date` DATE DEFAULT NULL,
+  `notes` TEXT DEFAULT NULL,
+  `doctor_name` VARCHAR(255) DEFAULT NULL,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_certificate_patient_id` (`patient_id`),
+  KEY `idx_certificate_consultation_id` (`consultation_id`),
+  KEY `idx_certificate_start_date` (`start_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
 -- Index pour la table `appointment`
 --
 ALTER TABLE `appointment`
@@ -215,6 +288,19 @@ CREATE TABLE `medicine` (
   PRIMARY KEY (`id`),
   KEY `idx_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Default medicines
+INSERT INTO `medicine` (`id`, `name`, `dosage`, `notes`)
+VALUES
+  ('med_paracetamol_500', 'Paracetamol', '500 mg tablet', 'Analgesic and antipyretic'),
+  ('med_ibuprofen_400', 'Ibuprofen', '400 mg tablet', 'NSAID for pain and inflammation'),
+  ('med_amoxicillin_500', 'Amoxicillin', '500 mg capsule', 'Broad-spectrum antibiotic'),
+  ('med_metformin_850', 'Metformin', '850 mg tablet', 'Oral antidiabetic (biguanide)'),
+  ('med_omeprazole_20', 'Omeprazole', '20 mg capsule', 'Proton pump inhibitor for gastric acid reduction')
+ON DUPLICATE KEY UPDATE
+  `name` = VALUES(`name`),
+  `dosage` = VALUES(`dosage`),
+  `notes` = VALUES(`notes`);
 
 -- --------------------------------------------------------
 

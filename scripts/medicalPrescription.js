@@ -92,7 +92,7 @@
     const instructionsInput = document.getElementById('prescriptionInstructions');
     if (!select || !dosageInput) return;
 
-    const medicineId = parseInt(select.value);
+    const medicineId = select.value; // use string ID from option value
     const dosage = dosageInput.value.trim();
     const instructions = instructionsInput ? instructionsInput.value.trim() : '';
     if (!medicineId) { alert('Please select a medicine.'); return; }

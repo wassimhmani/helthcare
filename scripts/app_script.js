@@ -313,12 +313,18 @@ const getStatusActions = (appointment) => {
     return actions.join('');
 };
 
-// Generate time slots
+// Generate time slots (08:00 → 22:00, matching API HH:MM format)
 const generateTimeSlots = () => {
     const slots = [];
-    for (let hour = 8; hour < 18; hour++) {
-        slots.push(`${hour}:00`);
-        slots.push(`${hour}:30`);
+    const startHour = 8;   // 08:00
+    const endHour = 17;    // 17:00 
+    for (let hour = startHour; hour <= endHour; hour++) {
+        const h = String(hour).padStart(2, '0'); // Ensure HH format (e.g., 08, 09)
+        slots.push(`${h}:00`);
+        // Add :30 slots for all hours except the final closing hour
+        if (hour < endHour) {
+            slots.push(`${h}:30`);
+        }
     }
     return slots;
 };
@@ -3247,6 +3253,107 @@ function syncConsultationToDatabase(consultation) {
     }
 }
 
+function syncRadiologyResultToDatabase(consultation, radiologyFiles) {
+    try {
+        if (!consultation || !consultation.id || !consultation.patientId) {
+            return;
+        }
+
+        const hasResult = typeof consultation.radiologyResult === 'string' && consultation.radiologyResult.trim() !== '';
+        const hasDiagnostics = typeof consultation.radiologyDiagnostics === 'string' && consultation.radiologyDiagnostics.trim() !== '';
+        const hasFiles = Array.isArray(radiologyFiles) && radiologyFiles.length > 0;
+
+        if (!hasResult && !hasDiagnostics && !hasFiles) {
+            return;
+        }
+
+        const payload = {
+            id: 'rad_' + consultation.id,
+            consultationId: consultation.id,
+            patientId: consultation.patientId,
+            examType: 'Radiology Exam',
+            examDate: new Date().toISOString(),
+            radiologyResult: consultation.radiologyResult || '',
+            radiologyDiagnostics: consultation.radiologyDiagnostics || '',
+            notes: '',
+            documents: hasFiles ? JSON.stringify(radiologyFiles) : null,
+            doctor: consultation.doctor || '',
+            createdAt: consultation.createdAt || new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+
+        fetch('api/radiology_result_sync.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+            .then(async res => {
+                let data;
+                try { data = await res.json(); } catch (_) { data = null; }
+                if (!res.ok) {
+                    console.error('Radiology result sync failed:', res.status, data || await res.text());
+                    return;
+                }
+                console.log('Radiology result sync success:', data);
+            })
+            .catch(err => {
+                console.error('Radiology result sync error:', err);
+            });
+    } catch (e) {
+        console.error('Radiology result sync exception:', e);
+    }
+}
+
+function syncLabAssessmentToDatabase(consultation, labFiles) {
+    try {
+        if (!consultation || !consultation.id || !consultation.patientId) {
+            return;
+        }
+
+        const hasResults = typeof consultation.labResults === 'string' && consultation.labResults.trim() !== '';
+        const hasNotes = typeof consultation.labNotes === 'string' && consultation.labNotes.trim() !== '';
+        const hasFiles = Array.isArray(labFiles) && labFiles.length > 0;
+
+        if (!hasResults && !hasNotes && !hasFiles) {
+            return;
+        }
+
+        const payload = {
+            id: 'lab_' + consultation.id,
+            consultationId: consultation.id,
+            patientId: consultation.patientId,
+            assessmentType: 'Lab Assessment',
+            labDate: new Date().toISOString(),
+            results: consultation.labResults || '',
+            notes: consultation.labNotes || '',
+            documents: hasFiles ? JSON.stringify(labFiles) : null,
+            doctor: consultation.doctor || '',
+            createdAt: consultation.createdAt || new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+
+        fetch('api/lab_assessment_sync.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+            .then(async res => {
+                let data;
+                try { data = await res.json(); } catch (_) { data = null; }
+                if (!res.ok) {
+                    console.error('Lab assessment sync failed:', res.status, data || await res.text());
+                    return;
+                }
+                console.log('Lab assessment sync success:', data);
+            })
+            .catch(err => {
+                console.error('Lab assessment sync error:', err);
+            });
+    } catch (e) {
+        console.error('Lab assessment sync exception:', e);
+    }
+}
+
 // Update an existing consultation record in backend database (Access via update_consultation.php)
 function updateConsultationInDatabase(consultation) {
     try {
@@ -4253,28 +4360,53 @@ function switchBillsTab(tab) {
         renderDoneBills();
     }
 }
-function renderReadyBills() {
+async function renderReadyBills() {
     const container = document.getElementById('readyBillsContainer');
     if (!container) return;
 
-    const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+    // Lightweight loading state
+    container.innerHTML = `
+                <div class="text-center py-6 text-gray-500">
+                    <span data-translate="loading_ready_bills">Loading consultations ready for billing...</span>
+                </div>
+            `;
+
+    let readyConsultations = [];
+
+    try {
+        const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+        const response = await fetch('api/get_ready_bill.php?date=' + encodeURIComponent(today));
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        if (data && data.status === 'ok' && Array.isArray(data.consultations)) {
+            readyConsultations = data.consultations;
+        } else {
+            throw new Error('Invalid response structure from get_ready_bill.php');
+        }
+    } catch (err) {
+        console.error('Error loading ready bills from API, falling back to localStorage:', err);
+
+        // Fallback to previous localStorage-based logic
+        const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+        const bills = JSON.parse(localStorage.getItem('healthcareBills') || '[]');
+
+        const consultationIdsWithBills = new Set(
+            bills.filter(b => b.consultationId).map(b => b.consultationId)
+        );
+
+        readyConsultations = consultations.filter(c => {
+            const hasBill = consultationIdsWithBills.has(c.id);
+            return !hasBill;
+        });
+    }
+
     const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
-    const bills = JSON.parse(localStorage.getItem('healthcareBills') || '[]');
 
-    // Get all consultation IDs that already have bills
-    const consultationIdsWithBills = new Set(
-        bills.filter(b => b.consultationId).map(b => b.consultationId)
-    );
-
-    // Filter out consultations where patient no longer exists OR where a bill already exists
-    const validConsultations = consultations.filter(c => {
-        const patientExists = patients.some(p => p.id === c.patientId);
-        const hasBill = consultationIdsWithBills.has(c.id);
-        return patientExists && !hasBill;
-    });
-
-    // Show most recent first
-    const sorted = validConsultations.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    // Sort by most recent
+    const sorted = readyConsultations.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     if (sorted.length === 0) {
         container.innerHTML = '<p class="text-gray-500 text-center py-6" data-translate="no_consultations_today">No consultations conducted today.</p>';

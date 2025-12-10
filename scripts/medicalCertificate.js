@@ -41,35 +41,66 @@
       const session = JSON.parse(localStorage.getItem('medconnect_session') || '{}');
 
       const existingIndex = certificates.findIndex(c => c.consultationId === consultationId);
-      const payload = {
+      const basePayload = {
         certType,
         restPeriod: certRestPeriod ? parseInt(certRestPeriod) : null,
         startDate: certStartDate,
         endDate: certEndDate || null,
         notes: certNotes,
+        consultationId,
+        patientId,
         patientName: patient ? patient.fullName : (existingIndex !== -1 ? certificates[existingIndex].patientName : '-') ,
         doctorName: session?.name || (existingIndex !== -1 ? certificates[existingIndex].doctorName : 'Doctor')
       };
 
+      let certRecord;
       if (existingIndex !== -1) {
-        certificates[existingIndex] = { ...certificates[existingIndex], ...payload };
+        certRecord = { ...certificates[existingIndex], ...basePayload };
+        certificates[existingIndex] = certRecord;
       } else {
-        certificates.push({
+        certRecord = {
           id: 'cert_' + Date.now(),
           consultationId,
           patientId,
-          patientName: payload.patientName,
-          doctorName: payload.doctorName,
-          certType: payload.certType,
-          restPeriod: payload.restPeriod,
-          startDate: payload.startDate,
-          endDate: payload.endDate,
-          notes: payload.notes,
+          patientName: basePayload.patientName,
+          doctorName: basePayload.doctorName,
+          certType: basePayload.certType,
+          restPeriod: basePayload.restPeriod,
+          startDate: basePayload.startDate,
+          endDate: basePayload.endDate,
+          notes: basePayload.notes,
           createdAt: new Date().toISOString()
-        });
+        };
+        certificates.push(certRecord);
       }
 
       localStorage.setItem('medical_certificates', JSON.stringify(certificates));
+
+      // Sync to backend certificate table (fire and forget)
+      try {
+        const apiPayload = {
+          id: certRecord.id,
+          consultationId: certRecord.consultationId,
+          patientId: certRecord.patientId,
+          certType: certRecord.certType,
+          restPeriod: certRecord.restPeriod,
+          startDate: certRecord.startDate,
+          endDate: certRecord.endDate,
+          notes: certRecord.notes,
+          doctorName: certRecord.doctorName,
+          createdAt: certRecord.createdAt || new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+
+        fetch('api/certificate_sync.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(apiPayload)
+        }).catch(err => console.error('Error syncing certificate (auto-save):', err));
+      } catch (syncErr) {
+        console.error('Error preparing certificate sync (auto-save):', syncErr);
+      }
+
       return true;
     } catch (e) {
       console.error('Error auto-saving certificate:', e);
@@ -452,6 +483,28 @@ certificates.push(payload);
 }
 
 localStorage.setItem('medical_certificates', JSON.stringify(certificates));
+try {
+  const apiPayload = {
+    id: payload.id,
+    consultationId: payload.consultationId,
+    patientId: payload.patientId,
+    certType: payload.certType,
+    restPeriod: payload.restPeriod,
+    startDate: payload.startDate,
+    endDate: payload.endDate,
+    notes: payload.notes,
+    doctorName: payload.doctorName,
+    createdAt: payload.createdAt || new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  fetch('api/certificate_sync.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(apiPayload)
+  }).catch(err => console.error('Error syncing certificate:', err));
+} catch (err) {
+  console.error('Error preparing certificate sync:', err);
+}
 
 if (showAlert) {
 const successMessage = (window.translations && window.currentLanguage && translations[currentLanguage]?.certificate_saved) || 'Medical certificate saved successfully!';

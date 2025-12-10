@@ -120,6 +120,50 @@
     }
   }
 
+  function refreshExpensesCacheFromAPI(){
+    try {
+      return fetch('api/get_expenses.php')
+        .then(async res => {
+          let data;
+          try { data = await res.json(); } catch (_) { data = null; }
+          if (!res.ok || !data || data.status !== 'ok') {
+            console.error('Failed to refresh expenses from API:', res.status, data);
+            return;
+          }
+
+          const apiExpenses = Array.isArray(data.expenses) ? data.expenses : [];
+          storedExpenses = apiExpenses.map(e => ({
+            id: e.id,
+            description: e.description || '',
+            amount: e.amount != null ? Number(e.amount) : 0,
+            date: e.expenseDate || e.createdAt || new Date().toISOString(),
+            createdAt: e.createdAt || null,
+            updatedAt: e.updatedAt || null,
+            category: e.category || 'General'
+          }));
+
+          try {
+            localStorage.setItem('healthcareExpenses', JSON.stringify(storedExpenses));
+          } catch (err) {
+            console.error('Error caching expenses from API:', err);
+          }
+
+          updateExpensesDisplay();
+          try { window.updateCabinetCashDisplay && window.updateCabinetCashDisplay(); } catch(e){}
+          if (typeof window.renderDailyAgenda === 'function') {
+            setTimeout(() => {
+              window.renderDailyAgenda();
+            }, 0);
+          }
+        })
+        .catch(err => {
+          console.error('Error refreshing expenses from API:', err);
+        });
+    } catch (e) {
+      console.error('Exception while refreshing expenses from API:', e);
+    }
+  }
+
   function loadExpensesList(){
     const expenseList = document.getElementById('expenseList');
     if (!expenseList) return;
@@ -295,6 +339,7 @@
     loadExpensesList();
     updateExpensesDisplay();
     try { window.updateCabinetCashDisplay && window.updateCabinetCashDisplay(); } catch(e){}
+    try { refreshExpensesCacheFromAPI && refreshExpensesCacheFromAPI(); } catch(e){}
     // Force refresh of daily agenda to update badges
     if (typeof window.renderDailyAgenda === 'function') {
       setTimeout(() => {
@@ -315,66 +360,73 @@
   // Form submit listener
   document.addEventListener('DOMContentLoaded', function(){
     const expenseForm = document.getElementById('expenseForm');
-    if (!expenseForm) return;
-    expenseForm.addEventListener('submit', function(e){
-      e.preventDefault();
-      const description = document.getElementById('expenseDescription').value.trim();
-      const amount = parseFloat(document.getElementById('expenseAmount').value);
-      if (!description || !amount || amount <= 0) {
-        alert('Please fill in all fields with valid values.');
-        return;
-      }
-      if (editingExpenseId){
-        const idx = storedExpenses.findIndex(e => e.id === editingExpenseId);
-        if (idx !== -1){
-          storedExpenses[idx].description = description;
-          storedExpenses[idx].amount = amount;
-          storedExpenses[idx].updatedAt = new Date().toISOString();
-          // Sync updated expense to backend
-          syncExpenseToDatabase(storedExpenses[idx]);
-          // Prevent loadExpenses() from overwriting storedExpenses before syncExpenseToDatabase is called
-          setTimeout(() => {
-            loadExpenses();
-          }, 0);
-          saveExpenses();
-          window.showTranslatedAlert && showTranslatedAlert('expense_updated');
+    if (expenseForm) {
+      expenseForm.addEventListener('submit', function(e){
+        e.preventDefault();
+        const description = document.getElementById('expenseDescription').value.trim();
+        const amount = parseFloat(document.getElementById('expenseAmount').value);
+        if (!description || !amount || amount <= 0) {
+          alert('Please fill in all fields with valid values.');
+          return;
         }
-        editingExpenseId = null;
-      } else {
-        const now = new Date();
-        const newExpense = {
-          id: 'EXP-' + Date.now(),
-          description,
-          amount,
-          // Store local date in YYYY-MM-DD format so it matches agenda's selected date
-          date: formatDateForStorage(now),
-          createdAt: now.toISOString()
-        };
-        storedExpenses.push(newExpense);
-        // Sync new expense to backend
-        syncExpenseToDatabase(newExpense);
-        saveExpenses();
-        window.showTranslatedAlert && showTranslatedAlert('expense_added');
-      }
-      expenseForm.reset();
-      const submitBtn = expenseForm.querySelector('button[type="submit"]');
-      if (submitBtn) submitBtn.textContent = window.t ? window.t('add_expense','Add Expense') : 'Add Expense';
-      // Reload expenses to ensure fresh data
-      loadExpenses();
-      loadExpensesList();
-      updateExpensesDisplay();
-      try { window.updateCabinetCashDisplay && window.updateCabinetCashDisplay(); } catch(e){}
-      // Force refresh of daily agenda to update badges
-      if (typeof window.renderDailyAgenda === 'function') {
-        // Use setTimeout to ensure localStorage write is complete
-        setTimeout(() => {
-          window.renderDailyAgenda();
-        }, 0);
-      }
-      switchExpenseTab('view');
-    });
+        if (editingExpenseId){
+          const idx = storedExpenses.findIndex(e => e.id === editingExpenseId);
+          if (idx !== -1){
+            storedExpenses[idx].description = description;
+            storedExpenses[idx].amount = amount;
+            storedExpenses[idx].updatedAt = new Date().toISOString();
+            // Sync updated expense to backend
+            syncExpenseToDatabase(storedExpenses[idx]);
+            // Prevent loadExpenses() from overwriting storedExpenses before syncExpenseToDatabase is called
+            setTimeout(() => {
+              loadExpenses();
+            }, 0);
+            saveExpenses();
+            window.showTranslatedAlert && showTranslatedAlert('expense_updated');
+          }
+          editingExpenseId = null;
+        } else {
+          const now = new Date();
+          const newExpense = {
+            id: 'EXP-' + Date.now(),
+            description,
+            amount,
+            // Store local date in YYYY-MM-DD format so it matches agenda's selected date
+            date: formatDateForStorage(now),
+            createdAt: now.toISOString()
+          };
+          storedExpenses.push(newExpense);
+          // Sync new expense to backend
+          syncExpenseToDatabase(newExpense);
+          saveExpenses();
+          window.showTranslatedAlert && showTranslatedAlert('expense_added');
+        }
+        expenseForm.reset();
+        const submitBtn = expenseForm.querySelector('button[type="submit"]');
+        if (submitBtn) submitBtn.textContent = window.t ? window.t('add_expense','Add Expense') : 'Add Expense';
+        // Reload expenses to ensure fresh data
+        loadExpenses();
+        loadExpensesList();
+        updateExpensesDisplay();
+        try { window.updateCabinetCashDisplay && window.updateCabinetCashDisplay(); } catch(e){}
+        try { refreshExpensesCacheFromAPI && refreshExpensesCacheFromAPI(); } catch(e){}
+        // After saving an expense, behave like clicking the "Today" button if available
+        if (typeof goToToday === 'function') {
+          setTimeout(() => {
+            try { goToToday(); } catch (e) { console.error('Error calling goToToday from expense form:', e); }
+          }, 0);
+        } else if (typeof window.renderDailyAgenda === 'function') {
+          // Fallback: directly refresh the daily agenda
+          setTimeout(() => {
+            window.renderDailyAgenda();
+          }, 0);
+        }
+        switchExpenseTab('view');
+      });
+    }
     // Initialize
     loadExpenses();
+    refreshExpensesCacheFromAPI();
   });
 
   // Expose globally
@@ -382,6 +434,7 @@
   window.getExpensesForPeriod = getExpensesForPeriod;
   window.calculateTodayExpenses = calculateTodayExpenses;
   window.updateExpensesDisplay = updateExpensesDisplay;
+  window.refreshExpensesCacheFromAPI = refreshExpensesCacheFromAPI;
   window.loadExpensesList = loadExpensesList;
   window.showExpensesModal = showExpensesModal;
   window.closeExpensesModal = closeExpensesModal;

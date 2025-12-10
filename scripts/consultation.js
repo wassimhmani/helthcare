@@ -78,6 +78,7 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
   // Make these functions globally available
   window.getPatients = getPatients;
   window.getPatient = getPatient;
+  window.todayConsultationsFromAPI = window.todayConsultationsFromAPI || [];
   function getConsultations(){
     try {
       const raw = JSON.parse(localStorage.getItem('consultations')||'[]') || [];
@@ -416,18 +417,8 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
         <h3 class="text-lg font-semibold mb-3 text-gray-900">${t('clinical_notes','Clinical Note')}</h3>
         <div class="text-sm text-gray-700 whitespace-pre-wrap">${consultation.clinicalNote}</div>
       </div>
-      ${consultation.radiologyResult || consultation.radiologyDiagnostics ? `
-        <div class="card p-4">
-          <h3 class="text-lg font-semibold mb-4 text-gray-900">${t('radiology_results','Radiology Results')}</h3>
-          ${consultation.radiologyResult ? `<div class="mb-4"><h4 class="text-sm font-semibold text-gray-700 mb-2">${t('radiology_result','Radiology Result')}</h4><div class="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 p-3 rounded border border-gray-200">${consultation.radiologyResult}</div></div>` : ''}
-          ${consultation.radiologyDiagnostics ? `<div><h4 class="text-sm font-semibold text-gray-700 mb-2">${t('diagnostics','Diagnostics')}</h4><div class="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 p-3 rounded border border-gray-200">${consultation.radiologyDiagnostics}</div></div>` : ''}
-        </div>` : ''}
-      ${consultation.labResults || consultation.labNotes ? `
-        <div class="card p-4">
-          <h3 class="text-lg font-semibold mb-4 text-gray-900">${t('lab_assessment','Lab Assessment')}</h3>
-          ${consultation.labResults ? `<div class="mb-4"><h4 class="text-sm font-semibold text-gray-700 mb-2">${t('lab_results','Lab Results')}</h4><div class="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 p-3 rounded border border-gray-200">${consultation.labResults}</div></div>` : ''}
-          ${consultation.labNotes ? `<div><h4 class="text-sm font-semibold text-gray-700 mb-2">${t('lab_notes','Lab Notes')}</h4><div class="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 p-3 rounded border border-gray-200">${consultation.labNotes}</div></div>` : ''}
-        </div>` : ''}
+      <div id="consultationRadiologyContainer"></div>
+      <div id="consultationLabAssessmentContainer"></div>
       ${consultation.prescription ? `
         <div class="card p-4">
           <div class="flex items-center justify-between mb-3">
@@ -437,6 +428,113 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
           <div class="text-sm text-gray-700 whitespace-pre-wrap">${consultation.prescription}</div>
         </div>` : ''}
     `;
+
+    // Load Radiology Results from API and render section, with fallback to consultation fields
+    try {
+      const radContainer = document.getElementById('consultationRadiologyContainer');
+      if (radContainer) {
+        const apiUrl = `api/get_radiology_results.php?consultation_id=${encodeURIComponent(consultationId)}`;
+        fetch(apiUrl)
+          .then(res => res.json().catch(() => null))
+          .then(data => {
+            if (!radContainer) return;
+
+            const items = data && data.status === 'ok' && Array.isArray(data.radiologyResults)
+              ? data.radiologyResults
+              : [];
+
+            if (items.length > 0) {
+              radContainer.innerHTML = `
+                <div class="card p-4">
+                  <h3 class="text-lg font-semibold mb-4 text-gray-900">${t('radiology_results','Radiology Results')}</h3>
+                  <div class="space-y-3">
+                    ${items.map(r => `
+                      <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                        <div class="flex items-center justify-between mb-2 text-xs text-gray-600">
+                          <span>${r.examType || t('radiology_results','Radiology Results')}</span>
+                          ${r.examDate ? `<span>${new Date(r.examDate).toLocaleDateString()}</span>` : ''}
+                        </div>
+                        ${r.radiologyResult ? `<div class="mb-2"><h4 class="text-sm font-semibold text-gray-700 mb-1">${t('radiology_result','Radiology Result')}</h4><div class="text-sm text-gray-700 whitespace-pre-wrap bg-white p-2 rounded border border-gray-200">${r.radiologyResult}</div></div>` : ''}
+                        ${r.radiologyDiagnostics ? `<div class="mb-2"><h4 class="text-sm font-semibold text-gray-700 mb-1">${t('diagnostics','Diagnostics')}</h4><div class="text-sm text-gray-700 whitespace-pre-wrap bg-white p-2 rounded border border-gray-200">${r.radiologyDiagnostics}</div></div>` : ''}
+                        ${r.notes ? `<div><h4 class="text-sm font-semibold text-gray-700 mb-1">${t('notes','Notes')}</h4><div class="text-sm text-gray-700 whitespace-pre-wrap bg-white p-2 rounded border border-gray-200">${r.notes}</div></div>` : ''}
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              `;
+            } else if (consultation.radiologyResult || consultation.radiologyDiagnostics) {
+              // Fallback to local consultation fields when no DB records exist
+              radContainer.innerHTML = `
+                <div class="card p-4">
+                  <h3 class="text-lg font-semibold mb-4 text-gray-900">${t('radiology_results','Radiology Results')}</h3>
+                  ${consultation.radiologyResult ? `<div class="mb-4"><h4 class="text-sm font-semibold text-gray-700 mb-2">${t('radiology_result','Radiology Result')}</h4><div class="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 p-3 rounded border border-gray-200">${consultation.radiologyResult}</div></div>` : ''}
+                  ${consultation.radiologyDiagnostics ? `<div><h4 class="text-sm font-semibold text-gray-700 mb-2">${t('diagnostics','Diagnostics')}</h4><div class="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 p-3 rounded border border-gray-200">${consultation.radiologyDiagnostics}</div></div>` : ''}
+                </div>
+              `;
+            } else {
+              radContainer.innerHTML = '';
+            }
+          })
+          .catch(err => {
+            console.error('Error loading radiology results:', err);
+          });
+      }
+    } catch (e) {
+      console.error('Exception while loading radiology results:', e);
+    }
+
+    // Load Lab Assessments from API and render section, with fallback to consultation fields
+    try {
+      const labContainer = document.getElementById('consultationLabAssessmentContainer');
+      if (labContainer) {
+        const apiUrl = `api/get_lab_assessments.php?consultation_id=${encodeURIComponent(consultationId)}`;
+        fetch(apiUrl)
+          .then(res => res.json().catch(() => null))
+          .then(data => {
+            if (!labContainer) return;
+
+            const labAssessments = data && data.status === 'ok' && Array.isArray(data.labAssessments)
+              ? data.labAssessments
+              : [];
+
+            if (labAssessments.length > 0) {
+              labContainer.innerHTML = `
+                <div class="card p-4">
+                  <h3 class="text-lg font-semibold mb-4 text-gray-900">${t('lab_assessment','Lab Assessment')}</h3>
+                  <div class="space-y-3">
+                    ${labAssessments.map(a => `
+                      <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                        <div class="flex items-center justify-between mb-2 text-xs text-gray-600">
+                          <span>${a.assessmentType || t('lab_assessment','Lab Assessment')}</span>
+                          ${a.labDate ? `<span>${new Date(a.labDate).toLocaleDateString()}</span>` : ''}
+                        </div>
+                        ${a.results ? `<div class="mb-2"><h4 class="text-sm font-semibold text-gray-700 mb-1">${t('lab_results','Lab Results')}</h4><div class="text-sm text-gray-700 whitespace-pre-wrap bg-white p-2 rounded border border-gray-200">${a.results}</div></div>` : ''}
+                        ${a.notes ? `<div><h4 class="text-sm font-semibold text-gray-700 mb-1">${t('lab_notes','Lab Notes')}</h4><div class="text-sm text-gray-700 whitespace-pre-wrap bg-white p-2 rounded border border-gray-200">${a.notes}</div></div>` : ''}
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              `;
+            } else if (consultation.labResults || consultation.labNotes) {
+              // Fallback to local consultation fields when no DB records exist
+              labContainer.innerHTML = `
+                <div class="card p-4">
+                  <h3 class="text-lg font-semibold mb-4 text-gray-900">${t('lab_assessment','Lab Assessment')}</h3>
+                  ${consultation.labResults ? `<div class="mb-4"><h4 class="text-sm font-semibold text-gray-700 mb-2">${t('lab_results','Lab Results')}</h4><div class="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 p-3 rounded border border-gray-200">${consultation.labResults}</div></div>` : ''}
+                  ${consultation.labNotes ? `<div><h4 class="text-sm font-semibold text-gray-700 mb-2">${t('lab_notes','Lab Notes')}</h4><div class="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 p-3 rounded border border-gray-200">${consultation.labNotes}</div></div>` : ''}
+                </div>
+              `;
+            } else {
+              labContainer.innerHTML = '';
+            }
+          })
+          .catch(err => {
+            console.error('Error loading lab assessments:', err);
+          });
+      }
+    } catch (e) {
+      console.error('Exception while loading lab assessments:', e);
+    }
 
     // Certificates section
     try {
@@ -642,6 +740,14 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
         // consultation_sync.php uses INSERT ... ON DUPLICATE KEY UPDATE,
         // so passing an existing ID will update that row instead of creating a new one.
         syncConsultationToDatabase(consultationToSync);
+    }
+
+    if (consultationToSync && typeof syncRadiologyResultToDatabase === 'function') {
+        syncRadiologyResultToDatabase(consultationToSync, radiologyFiles);
+    }
+
+    if (consultationToSync && typeof syncLabAssessmentToDatabase === 'function') {
+        syncLabAssessmentToDatabase(consultationToSync, labFiles);
     }
 
     // Clear radiology and lab uploads after saving
@@ -851,6 +957,7 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
         
         if (data.status === 'ok' && Array.isArray(data.consultations)) {
           const todayConsultations = data.consultations;
+          window.todayConsultationsFromAPI = todayConsultations;
           console.log('Total consultations from API:', todayConsultations.length);
 
           // Merge API consultations into localStorage so detail modal sees latest fields (clinicalNote, etc.)
@@ -927,6 +1034,7 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
         const consultations = getConsultations();
         const todayStr = new Date().toISOString().split('T')[0];
         const todayConsultations = consultations.filter(c => new Date(c.createdAt).toISOString().split('T')[0] === todayStr);
+        window.todayConsultationsFromAPI = todayConsultations;
         if (consultationCountEl) consultationCountEl.textContent = todayConsultations.length;
         if (!consultationsListEl) return;
         if (todayConsultations.length === 0) {
@@ -1489,15 +1597,24 @@ window.editConsultation = function (consultationId) {
     }
 };
 window.viewConsultationDetail = function (consultationId) {
-            const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
-            const consultation = consultations.find(c => c.id === consultationId);
+            let consultation = null;
+
+            if (Array.isArray(window.todayConsultationsFromAPI)) {
+                consultation = window.todayConsultationsFromAPI.find(c => c && c.id === consultationId);
+            }
+
+            if (!consultation) {
+                const consultations = getConsultations();
+                consultation = consultations.find(c => c && c.id === consultationId);
+            }
             
             if (!consultation) {
                 showTranslatedAlert('Consultation not found.');
                 return;
             }
             
-            const patient = storedPatients.find(p => p.id === consultation.patientId);
+            const patients = (window.storedPatients && Array.isArray(window.storedPatients)) ? window.storedPatients : getPatients();
+            const patient = patients.find(p => p.id === consultation.patientId);
             const patientName = patient ? patient.fullName : 'Unknown Patient';
             const consultationTime = new Date(consultation.createdAt).toLocaleString('en-US', {
                 year: 'numeric',
@@ -1593,20 +1710,22 @@ window.viewConsultationDetail = function (consultationId) {
                         <div class="text-sm text-gray-700 whitespace-pre-wrap">${consultation.prescription}</div>
                     </div>
                 ` : ''}
+                <div id="consultationCertificatesContainer"></div>
                 `;
-    // Add medical certificates section
-            const medicalCertificates = JSON.parse(localStorage.getItem('medical_certificates') || '[]');
-    // Filter certificates that match THIS consultation ID only
-            const consultationCertificates = medicalCertificates.filter(c => c.consultationId === consultationId);
-            
-            if (consultationCertificates.length > 0) {
-                detailContent.innerHTML += `
+
+            // Add medical certificates section (API + localStorage fallback)
+            const certificatesContainer = document.getElementById('consultationCertificatesContainer');
+
+            const renderCertificates = (certificates) => {
+                if (!certificatesContainer) return;
+                if (certificates && certificates.length > 0) {
+                    certificatesContainer.innerHTML = `
                     <div class="card p-4">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-semibold text-gray-900">${window.t ? window.t('medical_certificates', 'Medical Certificates') : 'Medical Certificates'}</h3>
                         </div>
                         <div class="space-y-3">
-                            ${consultationCertificates.map((cert, index) => `
+                            ${certificates.map(cert => `
                                 <div class="border border-green-200 rounded-lg p-4 bg-green-50">
                                     <div class="flex items-center justify-between mb-3">
                                         <div class="flex items-center gap-2">
@@ -1615,7 +1734,7 @@ window.viewConsultationDetail = function (consultationId) {
                                             </svg>
                                             <span class="font-semibold text-gray-700">${cert.certType ? cert.certType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Medical Certificate'}</span>
                                         </div>
-                                        <span class="text-xs text-gray-500">${new Date(cert.createdAt).toLocaleDateString()}</span>
+                                        <span class="text-xs text-gray-500">${cert.createdAt ? new Date(cert.createdAt).toLocaleDateString() : ''}</span>
                                     </div>
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm mb-3">
                                         ${cert.startDate ? `
@@ -1646,10 +1765,9 @@ window.viewConsultationDetail = function (consultationId) {
                             `).join('')}
                         </div>
                     </div>
-                `;
-    } else {
-        // Show button to add first certificate
-        detailContent.innerHTML += `
+                    `;
+                } else {
+                    certificatesContainer.innerHTML = `
                     <div class="card p-4 border-dashed border-2 border-gray-300 bg-gray-50">
                         <div class="text-center py-3">
                             <svg class="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1658,9 +1776,59 @@ window.viewConsultationDetail = function (consultationId) {
                             <p class="text-gray-600 mb-3">${window.t ? window.t('no_certificates_yet', 'No medical certificates yet') : 'No medical certificates yet'}</p>
                         </div>
                     </div>
-                `;
+                    `;
+                }
+            };
+
+            let localCertificates = [];
+            try {
+                const storedCerts = JSON.parse(localStorage.getItem('medical_certificates') || '[]');
+                localCertificates = storedCerts.filter(c => c.consultationId === consultationId);
+            } catch (err) {
+                console.error('Error reading certificates from localStorage:', err);
             }
-            
+
+            // Render local certificates immediately (for offline support)
+            if (localCertificates.length > 0) {
+                renderCertificates(localCertificates);
+            }
+
+            // Try to load certificates from backend API and merge with local ones
+            fetch(`api/get_certificates.php?consultationId=${encodeURIComponent(consultationId)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch certificates');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data || data.status !== 'ok' || !Array.isArray(data.certificates)) {
+                        if (!localCertificates.length) {
+                            renderCertificates([]);
+                        }
+                        return;
+                    }
+
+                    const fromApi = data.certificates || [];
+                    const byId = {};
+
+                    localCertificates.forEach(cert => {
+                        if (cert && cert.id) byId[cert.id] = cert;
+                    });
+                    fromApi.forEach(cert => {
+                        if (cert && cert.id) byId[cert.id] = cert;
+                    });
+
+                    const mergedCertificates = Object.values(byId);
+                    renderCertificates(mergedCertificates);
+                })
+                .catch(err => {
+                    console.error('Error loading certificates from API:', err);
+                    if (!localCertificates.length) {
+                        renderCertificates([]);
+                    }
+                });
+
             updateModalTranslations();
             
             const modal = document.getElementById('consultationDetailModal');
