@@ -628,6 +628,9 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
     // Prescription: rely on textarea kept in sync by medicalPrescription.js
     const prescription = document.getElementById('consultPrescription')?.value.trim() || '';
 
+    // True edit only when editingConsultationId is set (e.g. via Update Last Consultation / Edit)
+    const isEditingConsultation = !!window.editingConsultationId;
+
     if (!patientId){ if (typeof window.showTranslatedAlert==='function') window.showTranslatedAlert('select_patient_first','Please select a patient first.'); return; }
 
     const height = heightVal ? parseFloat(heightVal) : null;
@@ -671,9 +674,9 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
     const allDocuments = [...documents, ...radiologyFiles, ...labFiles];
 
     const consultations = getConsultations();
-    let id = window.editingConsultationId || ('CONS-' + Date.now());
+    let id = isEditingConsultation ? window.editingConsultationId : ('CONS-' + Date.now());
     try { var session = JSON.parse(localStorage.getItem('medconnect_session')||'{}'); } catch { var session = {}; }
-    if (window.editingConsultationId){
+    if (isEditingConsultation){
       const idx = consultations.findIndex(c=>c.id===window.editingConsultationId);
       if (idx !== -1){
         const existing = consultations[idx];
@@ -731,15 +734,17 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
     }
     saveConsultations(consultations);
 
-    // Sync to backend database using consultation_sync.php (upsert by ID)
-    const consultationToSync = window.editingConsultationId && consultations.find(c => c.id === window.editingConsultationId)
-        ? consultations.find(c => c.id === window.editingConsultationId)
-        : consultations.find(c => c.id === id);
+    // Sync to backend database
+    const consultationToSync = consultations.find(c => c.id === id);
 
-    if (consultationToSync && typeof syncConsultationToDatabase === 'function') {
-        // consultation_sync.php uses INSERT ... ON DUPLICATE KEY UPDATE,
-        // so passing an existing ID will update that row instead of creating a new one.
-        syncConsultationToDatabase(consultationToSync);
+    if (consultationToSync) {
+        // Existing consultation (including "Update Last Consultation")
+        if (isEditingConsultation && typeof updateConsultationInDatabase === 'function') {
+            updateConsultationInDatabase(consultationToSync);
+        } else if (typeof syncConsultationToDatabase === 'function') {
+            // Brand new consultation: use upsert API
+            syncConsultationToDatabase(consultationToSync);
+        }
     }
 
     if (consultationToSync && typeof syncRadiologyResultToDatabase === 'function') {
@@ -1063,7 +1068,10 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
   function startConsultation(appointmentId, patientName, patientId){
     if (!isDoctor()) { if (typeof window.showTranslatedAlert==='function') window.showTranslatedAlert('consultations_doctors_only'); return; }
     window.currentConsultationAppointmentId = appointmentId || null;
-    
+    // Explicitly clear any previous editing state so this is treated as a NEW consultation
+    window.editingConsultationId = null;
+    const consultCertInput = document.getElementById('consultCertConsultationId');
+    if (consultCertInput) consultCertInput.value = '';
     // Function to open modal and load patient details from API
     const openModalWithPatient = (foundPatientId, displayName) => {
       showConsultationModal();
@@ -1395,7 +1403,7 @@ window.editConsultation = function (consultationId) {
                 showTranslatedAlert('Consultation not found.');
                 return;
             }
-        editingConsultationId = consultationId;
+        window.editingConsultationId = consultationId;
 
         // Set patient display and hidden id
         const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');

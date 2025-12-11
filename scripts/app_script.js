@@ -3365,8 +3365,12 @@ function updateConsultationInDatabase(consultation) {
             temperature: consultation.temperature !== null && consultation.temperature !== undefined ? consultation.temperature : null,
             heartRate: consultation.heartRate !== null && consultation.heartRate !== undefined ? consultation.heartRate : null,
             bloodSugar: consultation.bloodSugar !== null && consultation.bloodSugar !== undefined ? consultation.bloodSugar : null,
-            bpSystolic: consultation.bpSystolic !== null && consultation.bpSystolic !== undefined ? consultation.bpSystolic : null,
-            bpDiastolic: consultation.bpDiastolic !== null && consultation.bpDiastolic !== undefined ? consultation.bpDiastolic : null,
+            bloodPressure: consultation.bloodPressure
+                ? consultation.bloodPressure
+                : (consultation.bpSystolic !== null && consultation.bpSystolic !== undefined &&
+                   consultation.bpDiastolic !== null && consultation.bpDiastolic !== undefined
+                      ? `${consultation.bpSystolic}/${consultation.bpDiastolic}`
+                      : null),
             imc: consultation.imc !== null && consultation.imc !== undefined ? consultation.imc : null,
             bmiCategory: consultation.bmiCategory || null,
             clinicalNote: consultation.clinicalNote || consultation.vitalNotes || '',

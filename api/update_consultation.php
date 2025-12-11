@@ -79,6 +79,7 @@ $updateValues = [];
 $types = '';
 
 // Map frontend consultation structure to database structure
+// Note: consultation table uses a single blood_pressure column (no bp_systolic/bp_diastolic)
 $fieldMappings = [
     'patientId' => ['db' => 'patient_id', 'type' => 's'],
     'height' => ['db' => 'height', 'type' => 'd'],
@@ -86,8 +87,7 @@ $fieldMappings = [
     'temperature' => ['db' => 'temperature', 'type' => 'd'],
     'heartRate' => ['db' => 'heart_rate', 'type' => 'i'],
     'bloodSugar' => ['db' => 'blood_sugar', 'type' => 'i'],
-    'bpSystolic' => ['db' => 'bp_systolic', 'type' => 'i'],
-    'bpDiastolic' => ['db' => 'bp_diastolic', 'type' => 'i'],
+    'bloodPressure' => ['db' => 'blood_pressure', 'type' => 's'],
     'imc' => ['db' => 'imc', 'type' => 'd'],
     'bmiCategory' => ['db' => 'bmi_category', 'type' => 's'],
     'clinicalNote' => ['db' => 'clinical_note', 'type' => 's'],
