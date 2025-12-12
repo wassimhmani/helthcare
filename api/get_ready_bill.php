@@ -11,9 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 // Optional date filter (defaults to today)
-$dateParam = isset($_GET['date']) ? trim($_GET['date']) : null; // YYYY-MM-DD
-$today     = date('Y-m-d');
-$targetDate = $dateParam !== null && $dateParam !== '' ? $dateParam : $today;
+// (Currently unused; endpoint returns all consultations without a bill regardless of date)
 
 // DB connection (same as other APIs)
 $dbHost = 'localhost';
@@ -39,8 +37,7 @@ if (!$tableCheck || $tableCheck->num_rows === 0) {
     $mysqli->close();
     echo json_encode([
         'status' => 'ok',
-        'consultations' => [],
-        'date' => $targetDate
+        'consultations' => []
     ]);
     exit;
 }
@@ -52,7 +49,7 @@ if ($billCheck && $billCheck->num_rows > 0) {
     $billTableExists = true;
 }
 
-// Build query: consultations for target date that do not have a related bill
+// Build query: consultations that do not have a related bill (no date filter)
 if ($billTableExists) {
     $sql = "SELECT c.id, c.patient_id, c.height, c.weight, c.temperature, c.heart_rate, c.blood_sugar,
                    c.blood_pressure, c.imc, c.bmi_category, c.clinical_note,
@@ -60,17 +57,15 @@ if ($billTableExists) {
                    c.prescription, c.payment_status, c.documents, c.doctor, c.created_at, c.updated_at
             FROM consultation c
             LEFT JOIN bill b ON b.consultation_id = c.id
-            WHERE DATE(c.created_at) = ?
-              AND b.id IS NULL
+            WHERE b.id IS NULL
             ORDER BY c.created_at DESC";
 } else {
-    // No bill table yet: by definition, all consultations for the date are "ready" (no bills)
+    // No bill table yet: by definition, all consultations are "ready" (no bills)
     $sql = "SELECT id, patient_id, height, weight, temperature, heart_rate, blood_sugar,
                    blood_pressure, imc, bmi_category, clinical_note,
                    radiology_result, radiology_diagnostics, lab_results, lab_notes,
                    prescription, payment_status, documents, doctor, created_at, updated_at
             FROM consultation
-            WHERE DATE(created_at) = ?
             ORDER BY created_at DESC";
 }
 
@@ -85,8 +80,6 @@ if (!$stmt) {
     $mysqli->close();
     exit;
 }
-
-$stmt->bind_param('s', $targetDate);
 
 if (!$stmt->execute()) {
     http_response_code(500);
@@ -144,6 +137,5 @@ $mysqli->close();
 
 echo json_encode([
     'status' => 'ok',
-    'consultations' => $consultations,
-    'date' => $targetDate
+    'consultations' => $consultations
 ]);
