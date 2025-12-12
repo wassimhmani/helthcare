@@ -1839,6 +1839,38 @@ window.viewConsultationDetail = function (consultationId) {
 
             updateModalTranslations();
             
+            // Wire print buttons inside consultation detail modal (certificates & prescription)
+            setTimeout(() => {
+                const detailContentEl = document.getElementById('consultationDetailContent');
+                if (!detailContentEl || detailContentEl._printHandlersBound) return;
+
+                const clickHandler = (e) => {
+                    const certBtn = e.target.closest('.btn-print-certificate');
+                    if (certBtn) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const certId = certBtn.getAttribute('data-cert-id');
+                        if (certId && typeof window.printMedicalCertificate === 'function') {
+                            window.printMedicalCertificate(certId);
+                        }
+                        return;
+                    }
+
+                    const rxBtn = e.target.closest('.btn-print-prescription');
+                    if (rxBtn) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const cid = rxBtn.getAttribute('data-consultation-id');
+                        if (cid && typeof window.printPrescription === 'function') {
+                            window.printPrescription(cid);
+                        }
+                    }
+                };
+
+                detailContentEl.addEventListener('click', clickHandler);
+                detailContentEl._printHandlersBound = true;
+            }, 100);
+
             const modal = document.getElementById('consultationDetailModal');
             if (modal) {
                 // Ensure it appears above other modals

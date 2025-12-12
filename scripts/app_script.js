@@ -1446,8 +1446,12 @@ document.getElementById('appointmentForm').addEventListener('submit', function (
 
     // Force refresh the agenda display
     console.log('Refreshing agenda after appointment creation...');
-    renderDailyAgenda();
-    renderCalendar();
+    if (typeof goToToday === 'function') {
+      goToToday();
+    } else {
+      renderDailyAgenda();
+      renderCalendar();
+    }
 
     // Close modal and reset form
     closeAddAppointmentModal();
