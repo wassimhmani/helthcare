@@ -846,7 +846,19 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
     }
     if (typeof window.updateTodaySummary==='function') window.updateTodaySummary();
     if (typeof window.updateWaitingRoom==='function') window.updateWaitingRoom();
-    if (typeof window.renderDailyAgenda==='function') window.renderDailyAgenda();
+
+    if (typeof goToToday === 'function') {
+      setTimeout(() => {
+        try { goToToday(); } catch (e) { console.error('Error calling goToToday from consultation form:', e); }
+      }, 0);
+    } else {
+      if (typeof window.renderDailyAgenda === 'function') {
+        try { window.renderDailyAgenda(); } catch (e) { console.error('Error calling renderDailyAgenda from consultation form:', e); }
+      }
+      if (typeof window.renderCalendar === 'function') {
+        try { window.renderCalendar(); } catch (e) { console.error('Error calling renderCalendar from consultation form:', e); }
+      }
+    }
 
     try { if (typeof window.autoSaveCertificateFromConsultationFields==='function') window.autoSaveCertificateFromConsultationFields(id, patientId); } catch (err){ console.error('Error auto-saving certificate:', err); }
 

@@ -339,34 +339,67 @@ const getUnavailableTimesForDate = (dateStr) => {
     );
     return unavailable;
 };
+
 // Populate the time select with only available slots for the selected date
+// Uses in-memory appointments immediately, then refines with API data
 const populateAvailableTimes = () => {
     const dateInput = document.getElementById('appointmentDate');
     const timeSelect = document.getElementById('appointmentTime');
     if (!dateInput || !timeSelect) return;
 
-    // Compute selected date string
+    // Compute selected date string (YYYY-MM-DD)
     const selectedDateStr = dateInput.value || (selectedDate ? formatDateForStorage(selectedDate) : '');
 
-    // Generate options
     const allSlots = generateTimeSlots();
-    const unavailable = getUnavailableTimesForDate(selectedDateStr);
 
-    // Rebuild options list
-    timeSelect.innerHTML = '';
-    const placeholder = document.createElement('option');
-    placeholder.value = '';
-    placeholder.textContent = window.t ? window.t('select_time', 'Select time') : 'Select time';
-    timeSelect.appendChild(placeholder);
+    const rebuildOptions = (unavailableSet) => {
+        timeSelect.innerHTML = '';
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = window.t ? window.t('select_time', 'Select time') : 'Select time';
+        timeSelect.appendChild(placeholder);
 
-    allSlots
-        .filter(slot => !unavailable.has(slot))
-        .forEach(slot => {
-            const opt = document.createElement('option');
-            opt.value = slot;
-            // Display in HH:MM (24h) to match agenda; keep as-is
-            opt.textContent = slot;
-            timeSelect.appendChild(opt);
+        allSlots
+            .filter(slot => !unavailableSet.has(slot))
+            .forEach(slot => {
+                const opt = document.createElement('option');
+                opt.value = slot;
+                opt.textContent = slot; // 24h HH:MM
+                timeSelect.appendChild(opt);
+            });
+    };
+
+    // 1) Start with local in-memory appointments (newly added in this session)
+    const localUnavailable = getUnavailableTimesForDate(selectedDateStr);
+    rebuildOptions(localUnavailable);
+
+    // 2) If we have a valid date, refine with backend appointments so DB is source of truth
+    if (!selectedDateStr) return;
+
+    fetch(`api/get_today_appointments.php?date=${selectedDateStr}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch appointments for available time slots');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (!data || data.status !== 'ok' || !Array.isArray(data.appointments)) {
+                console.warn('populateAvailableTimes: unexpected API response', data);
+                return;
+            }
+
+            const apiUnavailable = new Set(
+                data.appointments
+                    .filter(apt => (apt.status || '').toString().trim().toLowerCase() !== 'cancelled')
+                    .map(apt => apt.time)
+            );
+
+            const mergedUnavailable = new Set([...localUnavailable, ...apiUnavailable]);
+            rebuildOptions(mergedUnavailable);
+        })
+        .catch(err => {
+            console.error('populateAvailableTimes: error fetching appointments from API:', err);
         });
 };
 

@@ -488,7 +488,7 @@
   "select_gender": "Sélectionner le sexe",
   "male": "Homme",
   "female": "Femme",
-  "phone_example": "+33 1 23 45 67 89",
+  "phone_example": "+216 20 123 456",
   "file_number_example": "Entrez le numéro de dossier patient (ex: P-2024-001)",
   "full_name_example": "Entrez le nom complet du patient",
   "email_example": "patient@exemple.com",

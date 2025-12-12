@@ -485,7 +485,7 @@
   "select_gender": "Select gender",
   "male": "Male",
   "female": "Female",
-  "phone_example": "+1 (555) 123-4567",
+  "phone_example": "+216 20 123 456",
   "file_number_example": "Enter patient file number (e.g., P-2024-001)",
   "full_name_example": "Enter patient's full name",
   "email_example": "patient@example.com",
