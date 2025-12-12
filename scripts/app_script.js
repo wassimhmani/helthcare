@@ -5514,66 +5514,73 @@ function applyCabinetSettingsToForm(settings) {
     }
 }
 
-// Load bill/service descriptions from cache, localStorage, or backend API
+// Load bill/service descriptions with database as source of truth
+// Uses localStorage as a fast cache, then refreshes from get_bill_descriptions.php
 function getBillDescriptions() {
-    // 1) Prefer in-memory cache if available
-    if (Array.isArray(window.billDescriptionsCache) && window.billDescriptionsCache.length > 0) {
+    // 1) If we already have an in-memory cache, return it immediately
+    if (Array.isArray(window.billDescriptionsCache)) {
         return window.billDescriptionsCache;
     }
 
-    // 2) Try localStorage cache
+    // 2) Start with localStorage as a fast cache
+    let local = [];
     try {
         const raw = localStorage.getItem('bill_descriptions');
         if (raw) {
             const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-                window.billDescriptionsCache = parsed;
-                return window.billDescriptionsCache;
+            if (Array.isArray(parsed)) {
+                local = parsed;
             }
         }
     } catch (e) {
         console.error('Error reading bill_descriptions from localStorage:', e);
+        local = [];
     }
 
-    // 3) Fallback: fetch from backend API asynchronously and cache for next calls
-    fetch('api/get_bill_descriptions.php')
-        .then(res => {
-            if (!res.ok) throw new Error('Failed to fetch bill descriptions');
-            return res.json();
-        })
-        .then(data => {
-            if (data && data.status === 'ok' && Array.isArray(data.services)) {
-                const descriptions = data.services.map(s => ({
-                    id: s.id,
-                    name: s.name,
-                    price: typeof s.defaultPrice === 'number' ? s.defaultPrice : Number(s.defaultPrice) || 0,
-                    notes: s.notes || '',
-                    createdAt: s.createdAt || '',
-                    updatedAt: s.updatedAt || ''
-                }));
+    // 3) Asynchronously refresh from backend API and update cache/localStorage
+    try {
+        fetch('api/get_bill_descriptions.php')
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to fetch bill descriptions');
+                return res.json();
+            })
+            .then(data => {
+                if (data && data.status === 'ok' && Array.isArray(data.services)) {
+                    const descriptions = data.services.map(s => ({
+                        id: s.id,
+                        name: s.name,
+                        price: typeof s.defaultPrice === 'number' ? s.defaultPrice : Number(s.defaultPrice) || 0,
+                        notes: s.notes || '',
+                        createdAt: s.createdAt || '',
+                        updatedAt: s.updatedAt || ''
+                    }));
 
-                try {
-                    localStorage.setItem('bill_descriptions', JSON.stringify(descriptions));
-                } catch (e) {
-                    console.error('Error caching bill_descriptions to localStorage:', e);
+                    try {
+                        localStorage.setItem('bill_descriptions', JSON.stringify(descriptions));
+                    } catch (e) {
+                        console.error('Error caching bill_descriptions to localStorage:', e);
+                    }
+                    window.billDescriptionsCache = descriptions;
+
+                    // Re-render settings UI if open
+                    if (typeof renderBillDescriptionsList === 'function') {
+                        renderBillDescriptionsList();
+                    }
+                } else {
+                    console.warn('get_bill_descriptions.php returned no services');
+                    window.billDescriptionsCache = [];
                 }
-                window.billDescriptionsCache = descriptions;
+            })
+            .catch(err => {
+                console.error('Error fetching bill descriptions from API:', err);
+            });
+    } catch (e) {
+        console.error('Exception while fetching bill descriptions from API:', e);
+    }
 
-                // Re-render settings UI if open
-                if (typeof renderBillDescriptionsList === 'function') {
-                    renderBillDescriptionsList();
-                }
-            } else {
-                console.warn('get_bill_descriptions.php returned no services');
-                window.billDescriptionsCache = [];
-            }
-        })
-        .catch(err => {
-            console.error('Error fetching bill descriptions from API:', err);
-        });
-
-    // Synchronous return: whatever cache we currently have (may be empty on first call)
-    return Array.isArray(window.billDescriptionsCache) ? window.billDescriptionsCache : [];
+    // 4) Use local cache for this call; will be updated once API returns
+    window.billDescriptionsCache = local;
+    return local;
 }
 
 function saveBillDescriptions(descriptions) {

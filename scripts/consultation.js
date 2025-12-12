@@ -1725,6 +1725,13 @@ window.viewConsultationDetail = function (consultationId) {
             const certificatesContainer = document.getElementById('consultationCertificatesContainer');
 
             const renderCertificates = (certificates) => {
+                // Expose currently displayed certificates globally so printing can use API-loaded data
+                if (Array.isArray(certificates)) {
+                    window.currentConsultationCertificates = certificates;
+                } else {
+                    window.currentConsultationCertificates = [];
+                }
+
                 if (!certificatesContainer) return;
                 if (certificates && certificates.length > 0) {
                     certificatesContainer.innerHTML = `

@@ -252,8 +252,24 @@ CREATE TABLE `bill_description` (
   PRIMARY KEY (`id`),
   KEY `idx_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- Default billable services
+INSERT INTO `bill_description` (`id`, `name`, `default_price`, `notes`)
+VALUES
+  ('svc_consultation_standard', 'Consultation', 50.00, 'Standard medical consultation'),
+  ('svc_consultation_followup', 'Follow-up consultation', 40.00, 'Short follow-up visit'),
+  ('svc_emergency_visit', 'Emergency visit', 80.00, 'Urgent, unscheduled consultation'),
+  ('svc_blood_pressure_check', 'Blood pressure check', 10.00, 'Quick blood pressure measurement and advice'),
+  ('svc_injection_im', 'Intramuscular injection', 15.00, 'IM injection (drug not included)'),
+  ('svc_vaccination', 'Vaccination', 30.00, 'Routine vaccination (vaccine not included)'),
+  ('svc_wound_dressing', 'Wound dressing', 25.00, 'Cleaning and dressing of wound'),
+  ('svc_ecg', 'ECG', 35.00, '12-lead electrocardiogram'),
+  ('svc_ultrasound_abdomen', 'Abdominal ultrasound', 90.00, 'Ultrasound examination of the abdomen'),
+  ('svc_lab_basic_panel', 'Basic lab panel', 60.00, 'Standard blood tests panel')
+ON DUPLICATE KEY UPDATE
+  `name` = VALUES(`name`),
+  `default_price` = VALUES(`default_price`),
+  `notes` = VALUES(`notes`);
 
---
 -- Structure de la table `expenses`
 --
 

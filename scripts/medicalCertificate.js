@@ -110,8 +110,19 @@
 
   // Print a stored medical certificate by its ID
   window.printMedicalCertificate = function(certificateId) {
-    const certificates = JSON.parse(localStorage.getItem('medical_certificates') || '[]');
-    const cert = certificates.find(c => c.id === certificateId);
+    let cert = null;
+
+    // Prefer certificates currently displayed in consultation detail (API-loaded or merged)
+    if (Array.isArray(window.currentConsultationCertificates)) {
+      cert = window.currentConsultationCertificates.find(c => c && c.id === certificateId) || null;
+    }
+
+    // Fallback to certificates stored in localStorage
+    if (!cert) {
+      const certificates = JSON.parse(localStorage.getItem('medical_certificates') || '[]');
+      cert = certificates.find(c => c.id === certificateId) || null;
+    }
+
     if (!cert) {
       alert('Certificate not found.');
       return;
@@ -156,6 +167,9 @@
     const restDays = cert.restPeriod || (cert.startDate && cert.endDate ?
       Math.ceil((new Date(cert.endDate) - new Date(cert.startDate)) / (1000 * 60 * 60 * 24)) : 0);
 
+    // Derive patient display name (support API-loaded certificates without patientName field)
+    const patientName = cert.patientName || (patient ? patient.fullName : '');
+
     // Cabinet location
     const cabinetLocation = cabinetSettings.address ?
       (cabinetSettings.address.split(',')[0] || cabinetSettings.address) : 'Tunis';
@@ -163,7 +177,7 @@
     // Build printable HTML
     const printWindow = window.open('', '_blank');
     let certificateHTML = '<!DOCTYPE html><html><head>';
-    certificateHTML += '<title>Certificat Médical - ' + cert.patientName + '</title>';
+    certificateHTML += '<title>Certificat Médical - ' + (patientName || '') + '</title>';
     certificateHTML += '<meta charset="UTF-8">';
     certificateHTML += '<style>';
     certificateHTML += 'body { font-family: "Times New Roman", serif; max-width: 800px; margin: 0 auto; padding: 40px; line-height: 1.8; font-size: 14px; }';
@@ -187,7 +201,7 @@
     certificateHTML += '<p>Je soussigné(e), Dr ' + (cert.doctorName || '') + ', Médecin généraliste, certifie que :</p>';
 
     // Patient and consultation info
-    certificateHTML += '<p>' + patientTitle + ' ' + cert.patientName;
+    certificateHTML += '<p>' + patientTitle + ' ' + (patientName || '');
     if (patientBirthDateFR) {
       certificateHTML += ', né(e) le ' + patientBirthDateFR;
     }
