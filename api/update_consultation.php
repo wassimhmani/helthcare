@@ -90,6 +90,7 @@ $fieldMappings = [
     'bloodPressure' => ['db' => 'blood_pressure', 'type' => 's'],
     'imc' => ['db' => 'imc', 'type' => 'd'],
     'bmiCategory' => ['db' => 'bmi_category', 'type' => 's'],
+    'consultationAct' => ['db' => 'consultation_act', 'type' => 's'],
     'clinicalNote' => ['db' => 'clinical_note', 'type' => 's'],
     'radiologyResult' => ['db' => 'radiology_result', 'type' => 's'],
     'radiologyDiagnostics' => ['db' => 'radiology_diagnostics', 'type' => 's'],

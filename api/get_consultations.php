@@ -35,7 +35,7 @@ if ($tableCheck->num_rows === 0) {
 
 // Fetch consultations for the target date (based on created_at)
 $sql = "SELECT id, patient_id, height, weight, temperature, heart_rate, blood_sugar, 
-        blood_pressure, imc, bmi_category, clinical_note, 
+        blood_pressure, imc, bmi_category, consultation_act, clinical_note, 
         radiology_result, radiology_diagnostics, lab_results, lab_notes, 
         prescription, payment_status, documents, doctor, created_at, updated_at 
         FROM `consultation` 
@@ -76,6 +76,7 @@ while ($row = $result->fetch_assoc()) {
         'bloodPressure' => $row['blood_pressure'] ?? null,
         'imc' => $row['imc'] !== null ? floatval($row['imc']) : null,
         'bmiCategory' => $row['bmi_category'] ?? null,
+        'consultationAct' => $row['consultation_act'] ?? '',
         'clinicalNote' => $row['clinical_note'] ?? '',
         'radiologyResult' => $row['radiology_result'] ?? '',
         'radiologyDiagnostics' => $row['radiology_diagnostics'] ?? '',

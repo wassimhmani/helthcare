@@ -40,6 +40,7 @@ $consultation = [
     'blood_pressure' => get_value($input, 'bloodPressure'),
     'imc' => get_value($input, 'imc'),
     'bmi_category' => get_value($input, 'bmiCategory'),
+    'consultation_act' => get_value($input, 'consultationAct'),
     // Prefer clinicalNote key from frontend; fallback to legacy vitalNotes if present
     'clinical_note' => get_value($input, 'clinicalNote', get_value($input, 'vitalNotes')),
     'radiology_result' => get_value($input, 'radiologyResult'),
@@ -92,6 +93,7 @@ $createSql = "CREATE TABLE IF NOT EXISTS `consultation` (
   `blood_pressure` VARCHAR(20) DEFAULT NULL,
   `imc` DECIMAL(4,2) DEFAULT NULL,
   `bmi_category` VARCHAR(50) DEFAULT NULL,
+  `consultation_act` VARCHAR(255) DEFAULT NULL,
   `clinical_note` TEXT DEFAULT NULL,
   `radiology_result` TEXT DEFAULT NULL,
   `radiology_diagnostics` TEXT DEFAULT NULL,
@@ -131,10 +133,10 @@ $updatedAt = isset($input['updatedAt']) && $input['updatedAt'] ? date('Y-m-d H:i
 // Upsert (insert or update) using ON DUPLICATE KEY UPDATE
 $sql = "INSERT INTO `consultation` (
 	id, patient_id, height, weight, temperature, heart_rate, blood_sugar, 
-	blood_pressure, imc, bmi_category, clinical_note,
+	blood_pressure, imc, bmi_category, consultation_act, clinical_note,
 	radiology_result, radiology_diagnostics, lab_results, lab_notes, 
 	prescription, payment_status, documents, doctor, created_at, updated_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
     patient_id = VALUES(patient_id),
     height = VALUES(height),
@@ -145,6 +147,7 @@ ON DUPLICATE KEY UPDATE
     blood_pressure = VALUES(blood_pressure),
     imc = VALUES(imc),
     bmi_category = VALUES(bmi_category),
+    consultation_act = VALUES(consultation_act),
     clinical_note = VALUES(clinical_note),
     radiology_result = VALUES(radiology_result),
     radiology_diagnostics = VALUES(radiology_diagnostics),
@@ -166,7 +169,7 @@ if (!$stmt) {
 
 
 $stmt->bind_param(
-	'ssdddiisdssssssssssss',
+	'ssdddiisdsssssssssssss',
 	$consultation['id'],
 	$consultation['patient_id'],
 	$height,
@@ -177,6 +180,7 @@ $stmt->bind_param(
 	$consultation['blood_pressure'],
 	$imc,
 	$consultation['bmi_category'],
+	$consultation['consultation_act'],
 	$consultation['clinical_note'],
 	$consultation['radiology_result'],
 	$consultation['radiology_diagnostics'],

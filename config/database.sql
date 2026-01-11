@@ -10,6 +10,7 @@
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
+SET GLOBAL max_allowed_packet = 268435456; -- 256M
 
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -42,7 +43,7 @@ CREATE TABLE `patient` (
   `gender` text NOT NULL,
   `address` text NOT NULL,
   `medical_history` text NOT NULL,
-  `patient_doc` text NOT NULL,
+  `patient_doc` LONGTEXT NOT NULL,
   `created_at` text NOT NULL,
   `updated_At` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -107,6 +108,7 @@ CREATE TABLE `consultation` (
   `blood_pressure` VARCHAR(20) DEFAULT NULL,
   `imc` DECIMAL(4,2) DEFAULT NULL,
   `bmi_category` VARCHAR(50) DEFAULT NULL,
+  `consultation_act` VARCHAR(255) DEFAULT NULL,
   `clinical_note` TEXT DEFAULT NULL,
   `radiology_result` TEXT DEFAULT NULL,
   `radiology_diagnostics` TEXT DEFAULT NULL,
@@ -331,7 +333,7 @@ CREATE TABLE `cabinet_info` (
   `name` VARCHAR(255) NOT NULL,
   `address` TEXT DEFAULT NULL,
   `phone` VARCHAR(50) DEFAULT NULL,
-  `logo_path` VARCHAR(500) DEFAULT NULL,
+  `logo_path` LONGTEXT DEFAULT NULL,
   `working_hours` TEXT DEFAULT NULL,
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

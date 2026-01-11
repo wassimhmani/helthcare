@@ -39,41 +39,12 @@ const formatDateForStorage = (date) => {
     return `${year}-${month}-${day}`;
 };
 
-// Load patients from localStorage
+// Load patients (no longer from localStorage; rely on API via fetchPatientsFromAPI)
 const loadStoredPatients = () => {
-    const saved = localStorage.getItem('healthcarePatients');
-    console.log('Loading patients from localStorage:', saved);
-    if (saved) {
-        storedPatients = JSON.parse(saved);
-        console.log('Loaded patients:', storedPatients);
-    } else {
-        console.log('No saved patients found');
-        // Add some sample patients for demonstration
-        storedPatients = [
-            {
-                id: 'patient-1',
-                fullName: 'John Smith',
-                email: 'john.smith@email.com',
-                phone: '+1 (555) 123-4567',
-                dateOfBirth: '1985-03-15',
-                gender: 'Male',
-                address: '123 Main St, New York, NY',
-                medicalHistory: 'No known allergies. Regular check-ups.',
-                createdAt: new Date().toISOString()
-            },
-            {
-                id: 'patient-2',
-                fullName: 'Sarah Johnson',
-                email: 'sarah.j@company.com',
-                phone: '+1 (555) 234-5678',
-                dateOfBirth: '1990-07-22',
-                gender: 'Female',
-                address: '456 Oak Ave, Los Angeles, CA',
-                medicalHistory: 'Allergic to penicillin. Diabetes type 2.',
-                createdAt: new Date().toISOString()
-            }
-        ];
-        saveStoredPatients();
+    // Keep storedPatients as-is; patients will be populated by fetchPatientsFromAPI.
+    console.log('Patients are now loaded from API, not localStorage');
+    if (!Array.isArray(storedPatients)) {
+        storedPatients = [];
     }
 };
 
@@ -99,8 +70,6 @@ const loadStoredAppointments = () => {
     console.log('Appointments are now loaded from API, not localStorage');
 };
 
-
-
 // Save appointments to API (no longer using localStorage)
 const saveStoredAppointments = () => {
     // Appointments are now saved directly to API via syncAppointmentToDatabase
@@ -108,9 +77,9 @@ const saveStoredAppointments = () => {
     console.log('Appointments are now saved to API, not localStorage');
 };
 
-// Save patients to localStorage
+// Save patients (no longer persisted to localStorage; database is source of truth)
 const saveStoredPatients = () => {
-    localStorage.setItem('healthcarePatients', JSON.stringify(storedPatients));
+    console.log('Patients are now stored only in the database, not localStorage');
 };
 
 // Add new appointment to storage
@@ -492,12 +461,19 @@ const renderDailyAgenda = () => {
         .then(data => {
             if (data.status === 'ok' && Array.isArray(data.appointments)) {
                 // Use appointments from API
-                const appointments = data.appointments;
-                console.log('Appointments from API:', appointments);
-                console.log('Total appointments from API:', appointments.length);
+                const apiAppointments = data.appointments;
+                console.log('Appointments from API:', apiAppointments);
+                console.log('Total appointments from API:', apiAppointments.length);
+
+                const localForDate = (Array.isArray(storedAppointments) ? storedAppointments : [])
+                    .filter(apt => apt.date === dateStr);
+                const existingIds = new Set(apiAppointments.map(a => a.id));
+                const mergedAppointments = apiAppointments.concat(
+                    localForDate.filter(apt => !existingIds.has(apt.id))
+                );
 
                 // Render agenda with API appointments
-                renderAgendaWithAppointments(appointments, dateStr);
+                renderAgendaWithAppointments(mergedAppointments, dateStr);
             } else {
                 console.error('Invalid API response:', data);
                 // Fallback to localStorage
@@ -1477,14 +1453,23 @@ document.getElementById('appointmentForm').addEventListener('submit', function (
     // Show success message
     showAppointmentSuccess(formData);
 
-    // Force refresh the agenda display
+    // Force refresh the agenda display for the appointment date
     console.log('Refreshing agenda after appointment creation...');
-    if (typeof goToToday === 'function') {
-      goToToday();
-    } else {
-      renderDailyAgenda();
-      renderCalendar();
+    try {
+        if (formData.appointmentDate) {
+            const appointmentJsDate = new Date(formData.appointmentDate);
+            if (!isNaN(appointmentJsDate.getTime())) {
+                // Update selected date and calendar context to the appointment date
+                selectedDate = new Date(appointmentJsDate);
+                currentCalendarDate = new Date(appointmentJsDate);
+            }
+        }
+    } catch (e) {
+        console.error('Error updating selected date after appointment creation:', e);
     }
+    // Re-render calendar and daily agenda using the (possibly updated) selectedDate
+    renderCalendar();
+    renderDailyAgenda();
 
     // Close modal and reset form
     closeAddAppointmentModal();
@@ -1863,11 +1848,22 @@ window.toggleAccordion = function (accordionId) {
     }
 };
 
-function viewPatientDetails(patientId) {
+async function viewPatientDetails(patientId) {
     currentPatientDetailsId = patientId;
     const modal = document.getElementById('patientDetailsModal');
-    const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
-    const patient = patients.find(p => p.id === patientId);
+
+    // Prefer in-memory patients loaded from API
+    let patient = Array.isArray(storedPatients) ? storedPatients.find(p => p.id === patientId) : null;
+
+    // If not found yet, try fetching from API once
+    if (!patient && typeof fetchPatientsFromAPI === 'function') {
+        try {
+            await fetchPatientsFromAPI();
+        } catch (e) {
+            console.error('Error fetching patients from API for details view:', e);
+        }
+        patient = Array.isArray(storedPatients) ? storedPatients.find(p => p.id === patientId) : null;
+    }
 
     if (!patient) {
         alert('Patient not found.');
@@ -2342,37 +2338,135 @@ function loadPatientDocuments(patientId) {
     const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
     const certificates = JSON.parse(localStorage.getItem('medical_certificates') || '[]');
     const labAssessments = JSON.parse(localStorage.getItem('lab_assessments') || '[]');
-    const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
     const documentsList = document.getElementById('patientDocumentsList');
 
     if (!documentsList) return;
 
     // Collect all documents for this patient
     const allDocuments = [];
+    const seenDocIds = new Set();
     
-    // Get patient data
-    const patient = patients.find(p => p.id === patientId);
+    // Get patient data from in-memory cache
+    const patient = Array.isArray(storedPatients) ? storedPatients.find(p => p.id === patientId) : null;
 
-    // Add patient documents from stored JSON field (supports both patientDoc and patient_doc)
-    const patientDocJson = patient ? (patient.patientDoc || patient.patient_doc || '') : '';
-    if (patientDocJson) {
-        try {
-            const patientDocs = JSON.parse(patientDocJson);
-            if (Array.isArray(patientDocs)) {
-                patientDocs.forEach((doc, index) => {
-                    allDocuments.push({
-                        type: 'patient_doc',
-                        title: doc.name || `Patient Document ${index + 1}`,
-                        // Prefer the actual document id if present so preview can find it reliably
-                        id: doc.id || `patient-doc-${patientId}-${index}`,
-                        date: doc.uploadedAt || patient.createdAt || new Date().toISOString(),
-                        data: doc,
-                        isPatientDoc: true
-                    });
-                });
+    // 1) Add patient documents from in-memory/local `documents` array (e.g. newly uploaded docs)
+    if (patient && Array.isArray(patient.documents) && patient.documents.length > 0) {
+        patient.documents.forEach((doc, index) => {
+            const id = doc.id || `patient-doc-${patientId}-local-${index}`;
+            if (seenDocIds.has(id)) return;
+            seenDocIds.add(id);
+            const baseTitle = doc.name || `Patient Document ${index + 1}`;
+            allDocuments.push({
+                type: 'patient_doc',
+                title: `Patient doc - ${baseTitle}`,
+                id,
+                date: doc.uploadedAt || doc.createdAt || patient.createdAt || new Date().toISOString(),
+                data: doc,
+                isPatientDoc: true
+            });
+        });
+    }
+
+    // 2) Add patient documents from stored JSON field (supports both patientDoc and patient_doc)
+    const patientDocSource = patient ? (patient.patientDoc !== undefined ? patient.patientDoc : patient.patient_doc) : '';
+    if (patientDocSource) {
+        let normalizedDocs = [];
+
+        // If already an array (rare but possible), use directly
+        if (Array.isArray(patientDocSource)) {
+            normalizedDocs = patientDocSource;
+        } else if (typeof patientDocSource === 'string') {
+            const raw = patientDocSource.trim();
+            if (raw) {
+                const parsePatientDocJson = (jsonText) => {
+                    let parsed = JSON.parse(jsonText);
+
+                    // Handle double-encoded JSON (string that itself contains JSON)
+                    if (typeof parsed === 'string') {
+                        try {
+                            const second = JSON.parse(parsed);
+                            parsed = second;
+                        } catch (_) {
+                            // leave as string
+                        }
+                    }
+
+                    if (Array.isArray(parsed)) {
+                        return parsed;
+                    } else if (parsed && typeof parsed === 'object') {
+                        return [parsed];
+                    } else if (typeof parsed === 'string') {
+                        // Legacy format: plain string stored inside JSON
+                        return [{ id: parsed, name: parsed }];
+                    }
+                    return [];
+                };
+
+                try {
+                    normalizedDocs = parsePatientDocJson(raw);
+                } catch (e) {
+                    console.error('Error parsing patient_doc JSON (raw):', e);
+
+                    // Helper: try to salvage basic metadata from a possibly truncated JSON string
+                    const buildMetaFromRaw = (text) => {
+                        const search = text.replace(/\\"/g, '"');
+                        const meta = {};
+
+                        const idMatch = search.match(/"id"\s*:\s*"([^"\\]+)"/);
+                        const nameMatch = search.match(/"name"\s*:\s*"([^"\\]+)"/);
+                        const typeMatch = search.match(/"type"\s*:\s*"([^"\\]+)"/);
+                        const sizeMatch = search.match(/"size"\s*:\s*(\d+)/);
+                        const uploadedAtMatch = search.match(/"uploadedAt"\s*:\s*"([^"\\]+)"/);
+
+                        if (idMatch) meta.id = idMatch[1];
+                        if (nameMatch) meta.name = nameMatch[1];
+                        if (typeMatch) meta.type = typeMatch[1];
+                        if (sizeMatch) meta.size = parseInt(sizeMatch[1], 10);
+                        if (uploadedAtMatch) meta.uploadedAt = uploadedAtMatch[1];
+
+                        if (!meta.id && text) meta.id = text.slice(0, 50);
+                        if (!meta.name) meta.name = 'Patient Document';
+
+                        return meta;
+                    };
+
+                    // Some legacy records may have escaped quotes, e.g. [{\"id\":\"...\"}]
+                    if (raw.includes('\\"')) {
+                        try {
+                            const cleaned = raw.replace(/\\"/g, '"');
+                            normalizedDocs = parsePatientDocJson(cleaned);
+                        } catch (e2) {
+                            console.error('Error parsing patient_doc JSON (cleaned):', e2);
+                            // Fallback: build a minimal doc object from the raw string
+                            normalizedDocs = [buildMetaFromRaw(raw)];
+                        }
+                    } else {
+                        // Fallback: build a minimal doc object from the raw string
+                        normalizedDocs = [buildMetaFromRaw(raw)];
+                    }
+                }
             }
-        } catch (e) {
-            console.error('Error parsing patient_doc:', e);
+        } else if (patientDocSource && typeof patientDocSource === 'object') {
+            // Single object stored directly
+            normalizedDocs = [patientDocSource];
+        }
+
+        if (Array.isArray(normalizedDocs) && normalizedDocs.length > 0) {
+            normalizedDocs.forEach((doc, index) => {
+                const id = (doc && doc.id) || `patient-doc-${patientId}-${index}`;
+                if (seenDocIds.has(id)) return;
+                seenDocIds.add(id);
+                const baseTitle = (doc && doc.name) || `Patient Document ${index + 1}`;
+                allDocuments.push({
+                    type: 'patient_doc',
+                    title: `Patient doc - ${baseTitle}`,
+                    // Prefer the actual document id if present so preview can find it reliably
+                    id,
+                    date: (doc && (doc.uploadedAt || doc.createdAt)) || (patient && patient.createdAt) || new Date().toISOString(),
+                    data: doc,
+                    isPatientDoc: true
+                });
+            });
         }
     }
 
@@ -2550,20 +2644,95 @@ window.previewPatientDocument = function (docType, docId, consultIdFromDoc) {
     // Get document based on type
     switch (docType) {
         case 'patient_doc': {
-            // Handle patient documents stored on the patient record
-            const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
-            const currentPatient = patients.find(p => p.id === currentPatientDetailsId);
+            // Handle patient documents stored on the patient record (from in-memory patients)
+            const currentPatient = Array.isArray(storedPatients)
+                ? storedPatients.find(p => p.id === currentPatientDetailsId)
+                : null;
 
             if (currentPatient) {
-                const patientDocJson = currentPatient.patientDoc || currentPatient.patient_doc || '';
-                if (patientDocJson) {
-                    try {
-                        const patientDocs = JSON.parse(patientDocJson);
+                const hasInMemoryDocs = Array.isArray(currentPatient.documents) && currentPatient.documents.length > 0;
+                const patientDocSource = currentPatient.patientDoc !== undefined ? currentPatient.patientDoc : currentPatient.patient_doc;
 
-                        if (Array.isArray(patientDocs)) {
+                if (hasInMemoryDocs || patientDocSource) {
+                    try {
+                        const allPatientDocs = [];
+
+                        // 1) In-memory documents array (newly uploaded and not yet synced)
+                        if (hasInMemoryDocs) {
+                            currentPatient.documents.forEach(doc => {
+                                if (doc) allPatientDocs.push(doc);
+                            });
+                        }
+
+                        // 2) Documents from stored JSON field (supports both patientDoc and patient_doc)
+                        if (patientDocSource) {
+                            let normalizedDocs = [];
+
+                            // If already an array (rare but possible), use directly
+                            if (Array.isArray(patientDocSource)) {
+                                normalizedDocs = patientDocSource;
+                            } else if (typeof patientDocSource === 'string') {
+                                const raw = patientDocSource.trim();
+                                if (raw) {
+                                    const parsePatientDocJson = (jsonText) => {
+                                        let parsed = JSON.parse(jsonText);
+
+                                        // Handle double-encoded JSON (string that itself contains JSON)
+                                        if (typeof parsed === 'string') {
+                                            try {
+                                                const second = JSON.parse(parsed);
+                                                parsed = second;
+                                            } catch (_) {
+                                                // leave as string
+                                            }
+                                        }
+
+                                        if (Array.isArray(parsed)) {
+                                            return parsed;
+                                        } else if (parsed && typeof parsed === 'object') {
+                                            return [parsed];
+                                        } else if (typeof parsed === 'string') {
+                                            // Legacy format: plain string stored inside JSON
+                                            return [{ id: parsed, name: parsed }];
+                                        }
+                                        return [];
+                                    };
+
+                                    try {
+                                        normalizedDocs = parsePatientDocJson(raw);
+                                    } catch (e) {
+                                        console.error('Error parsing patient_doc JSON in preview (raw):', e);
+
+                                        // Some legacy records may have escaped quotes, e.g. [{\"id\":\"...\"}]
+                                        if (raw.includes('\\"')) {
+                                            try {
+                                                const cleaned = raw.replace(/\\"/g, '"');
+                                                normalizedDocs = parsePatientDocJson(cleaned);
+                                            } catch (e2) {
+                                                console.error('Error parsing patient_doc JSON in preview (cleaned):', e2);
+                                                normalizedDocs = [{ id: raw, name: raw }];
+                                            }
+                                        } else {
+                                            normalizedDocs = [{ id: raw, name: raw }];
+                                        }
+                                    }
+                                }
+                            } else if (patientDocSource && typeof patientDocSource === 'object') {
+                                // Single object stored directly
+                                normalizedDocs = [patientDocSource];
+                            }
+
+                            if (Array.isArray(normalizedDocs) && normalizedDocs.length > 0) {
+                                normalizedDocs.forEach(doc => {
+                                    if (doc) allPatientDocs.push(doc);
+                                });
+                            }
+                        }
+
+                        if (allPatientDocs.length > 0) {
                             // First try to find by real document id
                             if (docId) {
-                                documentData = patientDocs.find(d => d.id === docId) || null;
+                                documentData = allPatientDocs.find(d => d && d.id === docId) || null;
                             }
 
                             // Fallback: if not found by id, try index encoded in synthetic id "patient-doc-<patientId>-<index>"
@@ -2571,8 +2740,8 @@ window.previewPatientDocument = function (docType, docId, consultIdFromDoc) {
                                 const match = docId.match(/patient-doc-[^-]+-(\d+)$/);
                                 if (match) {
                                     const index = parseInt(match[1], 10);
-                                    if (!Number.isNaN(index) && index >= 0 && index < patientDocs.length) {
-                                        documentData = patientDocs[index];
+                                    if (!Number.isNaN(index) && index >= 0 && index < allPatientDocs.length) {
+                                        documentData = allPatientDocs[index];
                                     }
                                 }
                             }
@@ -2939,14 +3108,16 @@ function closePatientDetailsModal() {
 
 function editPatientFromDetails() {
     if (currentPatientDetailsId) {
+        // Preserve the current patient ID before closing the modal,
+        // because closePatientDetailsModal() resets currentPatientDetailsId to null.
+        const patientId = currentPatientDetailsId;
         closePatientDetailsModal();
-        editPatient(currentPatientDetailsId);
+        editPatient(patientId);
     }
 }
 
 function downloadPatientFile(patientId, fileIndex) {
-    const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
-    const patient = patients.find(p => p.id === patientId);
+    const patient = storedPatients.find(p => p.id === patientId);
 
     if (patient && patient.medicalFiles && patient.medicalFiles[fileIndex]) {
         const file = patient.medicalFiles[fileIndex];
@@ -3063,10 +3234,8 @@ function validatePatientForm(data) {
 
     // Ensure unique file number: if duplicate, auto-generate a new unique one and update the form
     try {
-        const lsPatients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
         const existingSet = new Set([
-            ...((storedPatients || []).map(p => p && p.fileNumber).filter(Boolean)),
-            ...(lsPatients.map(p => p && p.fileNumber).filter(Boolean))
+            ...((storedPatients || []).map(p => p && p.fileNumber).filter(Boolean))
         ]);
 
         if (existingSet.has(data.fileNumber)) {
@@ -3252,9 +3421,15 @@ function syncConsultationToDatabase(consultation) {
             temperature: consultation.temperature !== null && consultation.temperature !== undefined ? consultation.temperature : null,
             heartRate: consultation.heartRate !== null && consultation.heartRate !== undefined ? consultation.heartRate : null,
             bloodSugar: consultation.bloodSugar !== null && consultation.bloodSugar !== undefined ? consultation.bloodSugar : null,
-            bloodPressure: consultation.bloodPressure || null,
+            bloodPressure: consultation.bloodPressure
+                ? consultation.bloodPressure
+                : (consultation.bpSystolic !== null && consultation.bpSystolic !== undefined &&
+                   consultation.bpDiastolic !== null && consultation.bpDiastolic !== undefined
+                      ? `${consultation.bpSystolic}/${consultation.bpDiastolic}`
+                      : null),
             imc: consultation.imc !== null && consultation.imc !== undefined ? consultation.imc : null,
             bmiCategory: consultation.bmiCategory || null,
+            consultationAct: consultation.consultationAct || null,
             clinicalNote: consultation.clinicalNote || consultation.vitalNotes || '',
             radiologyResult: consultation.radiologyResult || '',
             radiologyDiagnostics: consultation.radiologyDiagnostics || '',
@@ -3696,15 +3871,30 @@ async function fetchPatientsFromAPI() {
         const data = await response.json();
 
         if (data.status === 'ok' && Array.isArray(data.patients)) {
-            // Use only API patients (database is the source of truth)
-            storedPatients = data.patients;
-            saveStoredPatients(); // Sync to localStorage for offline access
+            // Merge API patients into existing in-memory patients by id
+            const apiPatients = data.patients;
+            const byId = new Map();
+            // Start with API patients from the database
+            apiPatients.forEach(p => {
+                if (p && p.id) {
+                    byId.set(p.id, p);
+                }
+            });
+            // Overlay any already-loaded patients (e.g. newly added or edited in this session)
+            if (Array.isArray(storedPatients)) {
+                storedPatients.forEach(p => {
+                    if (p && p.id) {
+                        byId.set(p.id, p);
+                    }
+                });
+            }
+            storedPatients = Array.from(byId.values());
+            saveStoredPatients(); // no-op: patients are stored only in the database now
 
             // Refresh consultation patient dropdown if modal is open
             if (typeof window.populateConsultationPatientDropdown === 'function') {
                 window.populateConsultationPatientDropdown();
             }
-
             return true;
         } else {
             console.warn('API returned unexpected format:', data);
@@ -3720,21 +3910,26 @@ function loadPatientsList() {
     const patientsList = document.getElementById('patientsList');
     if (!patientsList) return;
 
-    // Show loading state
-    patientsList.innerHTML = `
-                <div class="text-center py-8 text-gray-500">
-                    <svg class="w-8 h-8 mx-auto mb-4 text-gray-300 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                    <p>Loading patients...</p>
-                </div>
-            `;
+    // If we already have patients in memory, render them immediately
+    if (Array.isArray(storedPatients) && storedPatients.length > 0) {
+        renderPatientsList();
+    } else {
+        // Show loading state while we fetch from API
+        patientsList.innerHTML = `
+            <div class="text-center py-8 text-gray-500">
+                <svg class="w-8 h-8 mx-auto mb-4 text-gray-300 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                <p>Loading patients...</p>
+            </div>
+        `;
+    }
 
-    // Fetch from API first, then render
+    // Fetch from API, then render with freshest data
     fetchPatientsFromAPI().then(() => {
         renderPatientsList();
     }).catch(() => {
-        // If API fails, still try to render from localStorage
+        // If API fails, still try to render from storedPatients
         renderPatientsList();
     });
 }
@@ -3839,15 +4034,9 @@ function calculateAge(dateOfBirth) {
 function generatePatientFileNumber() {
     const year = new Date().getFullYear();
     let maxSeq = 0;
-    // Build a set of existing numbers across both in-memory and localStorage
+    // Build a set of existing numbers
     const existingNumbers = new Set();
-    try {
-        const lsPatients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
-        lsPatients.forEach(p => { if (p && p.fileNumber) existingNumbers.add(p.fileNumber); });
-    } catch { }
-    try {
-        (storedPatients || []).forEach(p => { if (p && p.fileNumber) existingNumbers.add(p.fileNumber); });
-    } catch { }
+    (storedPatients || []).forEach(p => { if (p && p.fileNumber) existingNumbers.add(p.fileNumber); });
 
     // Determine the current max sequence for this year
     existingNumbers.forEach(fn => {
@@ -3982,32 +4171,7 @@ function clearPatientSearch() {
     loadPatientsList();
 }
 function editPatient(patientId) {
-	// Ensure storedPatients is hydrated from localStorage if empty
-	if (!Array.isArray(storedPatients) || storedPatients.length === 0) {
-		try {
-			const lsPatients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
-			if (Array.isArray(lsPatients) && lsPatients.length > 0) {
-				storedPatients = lsPatients;
-			}
-		} catch (e) {
-			console.error('Error hydrating storedPatients from localStorage:', e);
-		}
-	}
-
-	let patient = storedPatients.find(p => p.id === patientId);
-	if (!patient) {
-		// Fallback: try to load from localStorage cache
-		try {
-			const lsPatients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
-			patient = lsPatients.find(p => p.id === patientId);
-			if (patient) {
-				// Keep storedPatients in sync so subsequent operations work
-				storedPatients.push(patient);
-			}
-		} catch (e) {
-			console.error('Error loading patient from localStorage for edit:', e);
-		}
-	}
+	let patient = Array.isArray(storedPatients) ? storedPatients.find(p => p.id === patientId) : null;
 	if (!patient) {
 		showTranslatedAlert('patient_not_found');
 		return;
@@ -4444,9 +4608,9 @@ async function renderReadyBills() {
         });
     }
 
-    const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
-
     // Sort by most recent
+    const patients = Array.isArray(storedPatients) ? storedPatients : [];
+
     const sorted = readyConsultations.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     if (sorted.length === 0) {
@@ -4511,8 +4675,6 @@ async function renderDoneBills(searchTerm = '') {
         // On error, fall back to any locally stored bills
         bills = JSON.parse(localStorage.getItem('healthcareBills') || '[]');
     }
-
-    patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
 
     // Sort by creation date (newest first)
     let sortedBills = bills.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -4687,7 +4849,7 @@ function viewConsultationDetails(consultationId) {
         const modal = document.getElementById('consultationDetailModal');
         const content = document.getElementById('consultationDetailContent');
         if (modal && content) {
-            const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
+            const patients = Array.isArray(storedPatients) ? storedPatients : [];
             const patient = patients.find(p => p.id === c.patientId);
             const patientName = patient ? patient.fullName : 'Unknown Patient';
             content.innerHTML = `
@@ -4714,7 +4876,7 @@ function viewConsultationDetails(consultationId) {
 function createBillFromConsultation(consultationId) {
     try {
         const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
-        const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
+        const patients = Array.isArray(storedPatients) ? storedPatients : [];
         const c = consultations.find(x => x.id === consultationId);
         if (!c) return;
 
@@ -5599,6 +5761,11 @@ function getBillDescriptions() {
                     if (typeof renderBillDescriptionsList === 'function') {
                         renderBillDescriptionsList();
                     }
+
+                    // Refresh consultation act dropdown if present
+                    if (typeof window.populateConsultationActSelect === 'function') {
+                        window.populateConsultationActSelect();
+                    }
                 } else {
                     console.warn('get_bill_descriptions.php returned no services');
                     window.billDescriptionsCache = [];
@@ -5702,13 +5869,13 @@ function renderBillDescriptionsList(searchTerm = '') {
                         <div class="text-sm text-gray-600">${Number(desc.price).toFixed(2)} TND</div>
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="editBillDescription(${desc.id})" class="btn btn-sm btn-outline">
+                        <button onclick="editBillDescription('${desc.id}')" class="btn btn-sm btn-outline">
                             <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                             </svg>
                             <span data-translate="edit">${translations[currentLanguage].edit || 'Edit'}</span>
                         </button>
-                        <button onclick="deleteBillDescription(${desc.id})" class="btn btn-sm btn-outline text-red-600 hover:bg-red-50">
+                        <button onclick="deleteBillDescription('${desc.id}')" class="btn btn-sm btn-outline text-red-600 hover:bg-red-50">
                             <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                             </svg>
@@ -5725,7 +5892,7 @@ function searchBillDescriptions() {
 }
 function editBillDescription(id) {
     const descriptions = getBillDescriptions();
-    const desc = descriptions.find(d => d.id === id);
+    const desc = descriptions.find(d => String(d.id) === String(id));
     if (!desc) return;
 
     document.getElementById('editDescriptionId').value = desc.id;
@@ -5747,7 +5914,7 @@ function deleteBillDescription(id) {
     if (!confirm(confirmMessage)) return;
 
     const descriptions = getBillDescriptions();
-    const filtered = descriptions.filter(d => d.id !== id);
+    const filtered = descriptions.filter(d => String(d.id) !== String(id));
     saveBillDescriptions(filtered);
 
     // Call backend to delete from database
@@ -5934,13 +6101,13 @@ function renderMedicinesList(searchTerm = '') {
                         ${med.dosage ? `<div class="text-sm text-gray-600">${window.t ? window.t('dosage', 'Dosage') : 'Dosage'}: ${med.dosage}</div>` : ''}
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="editMedicine(${med.id})" class="btn btn-sm btn-outline">
+                        <button onclick="editMedicine('${med.id}')" class="btn btn-sm btn-outline">
                             <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                             </svg>
                             <span data-translate="edit">${window.t ? window.t('edit', 'Edit') : 'Edit'}</span>
                         </button>
-                        <button onclick="deleteMedicine(${med.id})" class="btn btn-sm btn-outline text-red-600 hover:bg-red-50">
+                        <button onclick="deleteMedicine('${med.id}')" class="btn btn-sm btn-outline text-red-600 hover:bg-red-50">
                             <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                             </svg>
@@ -5957,7 +6124,7 @@ function searchMedicines() {
 }
 window.editMedicine = function (id) {
     const medicines = getMedicines();
-    const med = medicines.find(m => m.id === id);
+    const med = medicines.find(m => String(m.id) === String(id));
     if (!med) return;
 
     const editIdInput = document.getElementById('editMedicineId');
@@ -5985,7 +6152,7 @@ window.deleteMedicine = function (id) {
     if (!confirm(confirmMessage)) return;
 
     const medicines = getMedicines();
-    const filtered = medicines.filter(m => m.id !== id);
+    const filtered = medicines.filter(m => String(m.id) !== String(id));
     saveMedicines(filtered);
 
     // Call backend to delete from database
@@ -6808,6 +6975,16 @@ function getBillDescriptionOptionsHTML() {
     return optionsHTML;
 }
 
+function populateConsultationActSelect() {
+    try {
+        const select = document.getElementById('consultationAct');
+        if (!select) return;
+        select.innerHTML = getBillDescriptionOptionsHTML();
+    } catch (e) {
+        console.error('Error populating consultationAct select:', e);
+    }
+}
+
 function createBillItemHTML(itemNumber) {
     return `
                 <div class="bill-item border border-gray-200 rounded-lg p-4">
@@ -7064,13 +7241,29 @@ function generatePrintableBill(bill) {
         return fallback || key;
     };
 
+    // Get cabinet phone for footer (fallback to empty string if unavailable)
+    let cabinetPhone = '';
+    try {
+        const s = getCabinetSettings && getCabinetSettings();
+        if (s && s.phone && s.phone.trim()) {
+            cabinetPhone = s.phone.trim();
+        }
+    } catch (e) { }
+
+    // Helper to translate bill status (e.g., pending/paid/overdue) using existing keys
+    const formatBillStatus = (status) => {
+        if (!status) return '';
+        const key = status.toString().trim().toLowerCase().replace(/\s+/g, '_');
+        return t(key, status);
+    };
+
     const billHTML = `
                 <!DOCTYPE html>
                 <html lang="${lang}">
                 <head>
                     <meta charset="UTF-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Bill - ${bill.id}</title>
+                    <title></title>
                     <style>
                         body {
                             font-family: Arial, sans-serif;
@@ -7257,10 +7450,9 @@ function generatePrintableBill(bill) {
                             
                             <div class="bill-section">
                                 <h3>${t('bill_information', 'Bill Information:')}</h3>
-                                <p><strong>${t('bill_id', 'Bill ID')}:</strong> ${bill.id}</p>
                                 <p><strong>${t('bill_date', 'Bill Date')}:</strong> ${billDate}</p>
                                 <p><strong>${t('due_date', 'Due Date')}:</strong> ${dueDate}</p>
-                                <p><strong>Status:</strong> ${bill.status}</p>
+                                <p><strong>${t('status', 'Status')}:</strong> ${formatBillStatus(bill.status)}</p>
                             </div>
                         </div>
                         
@@ -7296,15 +7488,16 @@ function generatePrintableBill(bill) {
                             </div>
                         </div>
                         
-                        ${bill.notes ? `
-                            <div class="bill-notes">
-                                <h4>${t('notes', 'Notes')}:</h4>
-                                <p>${bill.notes}</p>
-                            </div>
-                        ` : ''}
                         <div class="bill-footer">
                             <p>${t('thank_you_message', 'Thank you for choosing our healthcare services.')}</p>
-                            <p>${t('for_questions_contact', 'For questions about this bill, please contact us at')} (555) 123-4567</p>
+                            <p>${t('for_questions_contact', 'For questions about this bill, please contact us at')} ${(function () {
+            try {
+                const s = getCabinetSettings();
+                return s.phone;
+            } catch (e) {
+                return '';
+            }
+        })()}</p>
                             <p>${t('generated_on', 'Generated on')} ${createdDate}</p>
                         </div>
                     </div>
@@ -7367,7 +7560,7 @@ function showAlternativePrint(bill) {
     modal.innerHTML = `
                 <div class="modal-content" style="max-width: 90%; max-height: 90%; overflow-y: auto;">
                     <div class="modal-header">
-                        <h2 class="modal-title" data-translate="printable_bill">Printable Bill - ${bill.id}</h2>
+                        <h2 class="modal-title" data-translate="printable_bill">Printable Bill</h2>
                         <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
                     </div>
                     <div style="padding: 1rem;">
@@ -7487,7 +7680,7 @@ function generatePrintableBillContent(bill) {
                     
                     <div class="bill-footer">
                         <p>${t('thank_you_message', 'Thank you for choosing our healthcare services.')}</p>
-                        <p>${t('for_questions_contact', 'For questions about this bill, please contact us at')} (555) 123-4567</p>
+                        <p>${t('for_questions_contact', 'For questions about this bill, please contact us at')} ${cabinetPhone || ''}</p>
                         <p>${t('generated_on', 'Generated on')} ${createdDate}</p>
                     </div>
                 </div>
@@ -7700,7 +7893,7 @@ if (editMedicineForm) {
     editMedicineForm.addEventListener('submit', (e) => {
         e.preventDefault();
 
-        const id = parseInt(document.getElementById('editMedicineId').value);
+        const id = document.getElementById('editMedicineId').value;
         const name = document.getElementById('editMedicineName').value.trim();
         const dosage = document.getElementById('editMedicineDosage').value.trim();
 
@@ -7710,7 +7903,7 @@ if (editMedicineForm) {
         }
 
         const medicines = getMedicines();
-        const index = medicines.findIndex(m => m.id === id);
+        const index = medicines.findIndex(m => String(m.id) === String(id));
 
         if (index !== -1) {
             medicines[index].name = name;

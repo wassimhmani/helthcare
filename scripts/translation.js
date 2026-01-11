@@ -8,7 +8,9 @@
   var setLang = function(lang){
     localStorage.setItem('app_lang', lang);
     localStorage.setItem('selectedLanguage', lang);
+    // Keep both the local and global language indicators in sync
     currentLanguage = lang;
+    window.currentLanguage = lang;
   };
   
   // Expose currentLanguage as a global var (and window prop)
@@ -180,6 +182,7 @@
       clinical_examination: 'Clinical Examination',
       clinical_notes: 'Clinical Note',
       prescription: 'Prescription',
+      consultation_act: 'Consultation Act',
       payment_status: 'Payment Status',
       paying_patient: 'Paying Patient',
       non_paying_patient: 'Non-Paying Patient',
@@ -280,6 +283,8 @@
       additional_notes: 'Additional Notes',
       certificate_info: 'Certificate Information',
       certificate_info_text: 'After saving, you can view and print the certificate from the consultation details.',
+      print_certificate: 'Print Certificate',
+      print_prescription: 'Print Prescription',
       save_certificate: 'Save Certificate',
       certificate_saved: 'Medical certificate saved successfully!',
       date: 'Date'
@@ -446,6 +451,7 @@
       clinical_examination: 'Examen Clinique',
       clinical_notes: 'Notes clinique',
       prescription: 'Prescription',
+      consultation_act: 'Acte de consultation',
       payment_status: 'Statut de Paiement',
       paying_patient: 'Patient Payant',
       non_paying_patient: 'Patient Non-Payant',
@@ -533,9 +539,9 @@
       save_assessment: 'Enregistrer l\'évaluation',
       assessment_saved: 'Évaluation de laboratoire enregistrée avec succès!',
       radiology_result: 'Résultat de Radiologie',
-      diagnostics: 'Diagnostics',
+      diagnostics: 'Notes d’évaluation de radiologie',
       enter_radiology_result: 'Entrez le résultat de radiologie...',
-      enter_diagnostics: 'Entrez les diagnostics...',
+      enter_diagnostics: 'Entrez les notes d’évaluation de radiologie...',
       no_files_selected: 'Aucun fichier sélectionné',
       file_uploaded: 'Fichier téléchargé',
       remove_file: 'Supprimer le fichier',
@@ -548,7 +554,9 @@
       recommendations: 'Recommandations',
       additional_notes: 'Notes supplémentaires',
       certificate_info: 'Informations sur le certificat',
-      certificate_info_text: 'Après l\'enregistrement, vous pouvez consulter et imprimer le certificat à partir des détails de la consultation.',
+      certificate_info_text: 'Après l\'enregistrement, vous pouvez consulter et imprimer le certificat depuis les détails de la consultation.',
+      print_certificate: 'Imprimer le certificat',
+      print_prescription: 'Imprimer l\'ordonnance',
       save_certificate: 'Enregistrer le certificat',
       certificate_saved: 'Certificat médical enregistré avec succès!',
       date: 'Date'

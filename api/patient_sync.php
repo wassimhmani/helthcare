@@ -68,7 +68,7 @@ $createSql = "CREATE TABLE IF NOT EXISTS `Patient` (
   `gender` VARCHAR(20) NULL,
   `address` TEXT NULL,
   `medical_history` TEXT NULL,
-  `patient_doc` TEXT NULL,
+  `patient_doc` LONGTEXT NULL,
   `created_at` DATETIME NULL,
   `updated_at` DATETIME NULL,
   PRIMARY KEY (`id`)
