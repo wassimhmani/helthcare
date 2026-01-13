@@ -4546,22 +4546,45 @@ function closeReadyBillsModal() {
 }
 
 function switchBillsTab(tab) {
+    const paymentContent = document.getElementById('paymentBillsContent');
     const readyContent = document.getElementById('readyBillsContent');
     const doneContent = document.getElementById('doneBillsContent');
+
+    const paymentTab = document.getElementById('paymentBillsTab');
     const readyTab = document.getElementById('readyBillsTab');
     const doneTab = document.getElementById('doneBillsTab');
 
-    if (tab === 'ready') {
-        readyContent.style.display = 'block';
-        doneContent.style.display = 'none';
-        readyTab.className = 'btn btn-primary';
-        doneTab.className = 'btn btn-secondary';
+    if (tab === 'payment') {
+        if (paymentContent) paymentContent.style.display = 'block';
+        if (readyContent) readyContent.style.display = 'none';
+        if (doneContent) doneContent.style.display = 'none';
+
+        if (paymentTab) paymentTab.className = 'btn btn-primary';
+        if (readyTab) readyTab.className = 'btn btn-secondary';
+        if (doneTab) doneTab.className = 'btn btn-secondary';
+
+        if (typeof window.renderPaymentConsultations === 'function') {
+            window.renderPaymentConsultations();
+        }
+    } else if (tab === 'ready') {
+        if (paymentContent) paymentContent.style.display = 'none';
+        if (readyContent) readyContent.style.display = 'block';
+        if (doneContent) doneContent.style.display = 'none';
+
+        if (paymentTab) paymentTab.className = 'btn btn-secondary';
+        if (readyTab) readyTab.className = 'btn btn-primary';
+        if (doneTab) doneTab.className = 'btn btn-secondary';
+
         renderReadyBills();
-    } else {
-        readyContent.style.display = 'none';
-        doneContent.style.display = 'block';
-        readyTab.className = 'btn btn-secondary';
-        doneTab.className = 'btn btn-primary';
+    } else if (tab === 'done') {
+        if (paymentContent) paymentContent.style.display = 'none';
+        if (readyContent) readyContent.style.display = 'none';
+        if (doneContent) doneContent.style.display = 'block';
+
+        if (paymentTab) paymentTab.className = 'btn btn-secondary';
+        if (readyTab) readyTab.className = 'btn btn-secondary';
+        if (doneTab) doneTab.className = 'btn btn-primary';
+
         renderDoneBills();
     }
 }
@@ -4607,6 +4630,12 @@ async function renderReadyBills() {
             return !hasBill;
         });
     }
+
+    // Keep only fully paid consultations in Ready Bills
+    readyConsultations = readyConsultations.filter(c => {
+        const status = (c.paymentStatus || '').toLowerCase();
+        return status === 'paid';
+    });
 
     // Sort by most recent
     const patients = Array.isArray(storedPatients) ? storedPatients : [];
@@ -4775,6 +4804,9 @@ async function renderDoneBills(searchTerm = '') {
                                 </div>
                             </div>
                             <div class="flex gap-2">
+                                <button onclick="if (window.Payment && Payment.selectBillForPayment) { Payment.selectBillForPayment('${bill.id}'); }" class="btn btn-sm bg-green-600 hover:bg-green-700 text-white">
+                                    <span data-translate="payment_section">Payment</span>
+                                </button>
                                 <button onclick="viewFullBillDetails('${bill.id}')" class="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white">
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -4901,25 +4933,69 @@ function createBillFromConsultation(consultationId) {
             }
         }
 
-        // Fill first item description and an example price if missing
+        // Fill bill items from consultation acts (one bill item per act)
         setTimeout(() => {
-            const desc = document.getElementById('itemDescription1');
-            const qty = document.getElementById('itemQuantity1');
-            const price = document.getElementById('itemPrice1');
+            try {
+                const billItemsContainer = document.getElementById('billItems');
+                if (!billItemsContainer) return;
 
-            // Try to set 'General Consultation' if it exists in the bill descriptions
-            if (desc) {
-                const generalConsultOption = Array.from(desc.options).find(o => o.value === 'General Consultation');
-                if (generalConsultOption) {
-                    desc.value = 'General Consultation';
-                    // Trigger autoFillPrice
-                    if (typeof autoFillPrice === 'function') autoFillPrice(desc);
+                const rawActs = c.consultationAct || '';
+                const actNames = rawActs
+                    ? rawActs.split('|').map(s => s.trim()).filter(Boolean)
+                    : [];
+
+                if (actNames.length > 0) {
+                    // Ensure there are at least as many bill items as acts
+                    let existingItems = billItemsContainer.querySelectorAll('.bill-item').length;
+                    while (existingItems < actNames.length) {
+                        if (typeof addBillItem === 'function') {
+                            addBillItem();
+                        }
+                        existingItems = billItemsContainer.querySelectorAll('.bill-item').length;
+                    }
+
+                    const descSelects = billItemsContainer.querySelectorAll('select[id^="itemDescription"]');
+                    const qtyInputs = billItemsContainer.querySelectorAll('input[id^="itemQuantity"]');
+
+                    actNames.forEach((actName, index) => {
+                        const descSelect = descSelects[index];
+                        if (descSelect) {
+                            descSelect.value = actName;
+                            if (typeof autoFillPrice === 'function') {
+                                autoFillPrice(descSelect);
+                            }
+                        }
+
+                        const qtyInput = qtyInputs[index];
+                        if (qtyInput) {
+                            qtyInput.value = 1;
+                        }
+                    });
+
+                    if (typeof calculateBillTotal === 'function') {
+                        calculateBillTotal();
+                    }
+                } else {
+                    // Fallback: keep legacy behaviour when no acts are defined
+                    const desc = document.getElementById('itemDescription1');
+                    const qty = document.getElementById('itemQuantity1');
+                    const price = document.getElementById('itemPrice1');
+
+                    if (desc) {
+                        const generalConsultOption = Array.from(desc.options).find(o => o.value === 'General Consultation');
+                        if (generalConsultOption) {
+                            desc.value = 'General Consultation';
+                            if (typeof autoFillPrice === 'function') autoFillPrice(desc);
+                        }
+                    }
+                    if (qty) qty.value = 1;
+                    if (price && !price.value) price.value = 50;
+                    if (typeof calculateBillTotal === 'function') calculateBillTotal();
                 }
+            } catch (e) {
+                console.error('Error pre-filling bill from consultation acts:', e);
             }
-            if (qty) qty.value = 1;
-            if (price && !price.value) price.value = 50;
-            if (typeof calculateBillTotal === 'function') calculateBillTotal();
-        }, 100);
+        }, 250);
     } catch { }
 }
 

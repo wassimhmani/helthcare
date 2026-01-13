@@ -4,9 +4,11 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET');
 header('Access-Control-Allow-Headers: Content-Type');
 
-// Get optional date parameter (defaults to today)
+// Get optional date parameter (defaults to today) and optional "all" flag
 $dateParam = isset($_GET['date']) ? trim($_GET['date']) : null;
 $today = date('Y-m-d');
+$allParam = isset($_GET['all']) ? trim($_GET['all']) : null;
+$fetchAll = $allParam === '1' || strtolower($allParam) === 'true';
 
 // If date parameter is provided, use it; otherwise use today
 $targetDate = $dateParam ? $dateParam : $today;
@@ -32,17 +34,37 @@ if ($tableCheck->num_rows === 0) {
     echo json_encode(['status' => 'ok', 'consultations' => [], 'date' => $targetDate]);
     exit;
 }
+$tableCheck->close();
 
-// Fetch consultations for the target date (based on created_at)
-$sql = "SELECT id, patient_id, height, weight, temperature, heart_rate, blood_sugar, 
-        blood_pressure, imc, bmi_category, consultation_act, clinical_note, 
-        radiology_result, radiology_diagnostics, lab_results, lab_notes, 
-        prescription, payment_status, documents, doctor, created_at, updated_at 
-        FROM `consultation` 
-        WHERE DATE(created_at) = ? 
-        ORDER BY created_at DESC";
+// Ensure partial_payment_amount column exists for partial payment tracking
+$columnCheck = $mysqli->query("SHOW COLUMNS FROM `consultation` LIKE 'partial_payment_amount'");
+if ($columnCheck && $columnCheck->num_rows === 0) {
+    $mysqli->query("ALTER TABLE `consultation` ADD COLUMN `partial_payment_amount` DECIMAL(10,2) DEFAULT NULL");
+}
+if ($columnCheck instanceof mysqli_result) {
+    $columnCheck->close();
+}
 
-$stmt = $mysqli->prepare($sql);
+// Fetch consultations: either all dates or for the target date (based on created_at)
+if ($fetchAll) {
+    $sql = "SELECT id, patient_id, height, weight, temperature, heart_rate, blood_sugar, 
+            blood_pressure, imc, bmi_category, consultation_act, clinical_note, 
+            radiology_result, radiology_diagnostics, lab_results, lab_notes, 
+            prescription, payment_status, partial_payment_amount, documents, doctor, created_at, updated_at 
+            FROM `consultation` 
+            ORDER BY created_at DESC";
+    $stmt = $mysqli->prepare($sql);
+} else {
+    $sql = "SELECT id, patient_id, height, weight, temperature, heart_rate, blood_sugar, 
+            blood_pressure, imc, bmi_category, consultation_act, clinical_note, 
+            radiology_result, radiology_diagnostics, lab_results, lab_notes, 
+            prescription, payment_status, partial_payment_amount, documents, doctor, created_at, updated_at 
+            FROM `consultation` 
+            WHERE DATE(created_at) = ? 
+            ORDER BY created_at DESC";
+    $stmt = $mysqli->prepare($sql);
+}
+
 if (!$stmt) {
     http_response_code(500);
     echo json_encode(['status' => 'error', 'message' => 'Failed to prepare query', 'error' => $mysqli->error]);
@@ -50,7 +72,10 @@ if (!$stmt) {
     exit;
 }
 
-$stmt->bind_param('s', $targetDate);
+if (!$fetchAll) {
+    $stmt->bind_param('s', $targetDate);
+}
+
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -84,6 +109,9 @@ while ($row = $result->fetch_assoc()) {
         'labNotes' => $row['lab_notes'] ?? '',
         'prescription' => $row['prescription'] ?? '',
         'paymentStatus' => $row['payment_status'] ?? 'paying',
+        'partialPaymentAmount' => isset($row['partial_payment_amount']) && $row['partial_payment_amount'] !== null
+            ? (float)$row['partial_payment_amount']
+            : null,
         'documents' => $documents,
         'doctor' => $row['doctor'] ?? '',
         'createdAt' => $row['created_at'] ?? '',

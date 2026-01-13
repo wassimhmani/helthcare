@@ -50,6 +50,15 @@ if ($mysqli->connect_errno) {
 }
 $mysqli->set_charset('utf8mb4');
 
+// Ensure partial_payment_amount column exists for partial payment tracking
+$columnCheck = $mysqli->query("SHOW COLUMNS FROM `consultation` LIKE 'partial_payment_amount'");
+if ($columnCheck && $columnCheck->num_rows === 0) {
+    $mysqli->query("ALTER TABLE `consultation` ADD COLUMN `partial_payment_amount` DECIMAL(10,2) DEFAULT NULL");
+}
+if ($columnCheck instanceof mysqli_result) {
+    $columnCheck->close();
+}
+
 // Check if consultation exists and get current data
 $checkSql = "SELECT id FROM `consultation` WHERE id = ? LIMIT 1";
 $checkStmt = $mysqli->prepare($checkSql);
@@ -98,6 +107,7 @@ $fieldMappings = [
     'labNotes' => ['db' => 'lab_notes', 'type' => 's'],
     'prescription' => ['db' => 'prescription', 'type' => 's'],
     'paymentStatus' => ['db' => 'payment_status', 'type' => 's'],
+    'partialPaymentAmount' => ['db' => 'partial_payment_amount', 'type' => 'd'],
     'documents' => ['db' => 'documents', 'type' => 's', 'json' => true],
     'doctor' => ['db' => 'doctor', 'type' => 's']
 ];

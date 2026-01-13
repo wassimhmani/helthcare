@@ -391,17 +391,18 @@
                 <!-- Consultation Act (from bill descriptions) -->
                 <div class="form-group">
                     <label class="form-label" for="consultationAct" data-translate="consultation_act">Consultation Act</label>
-                    <select id="consultationAct" class="form-input">
+                    <!-- Allow selecting multiple acts for a single consultation -->
+                    <select id="consultationAct" class="form-input" multiple size="6">
                         <!-- Options will be populated from bill descriptions via JS -->
                     </select>
                 </div>
                 
                 <!-- Payment Status -->
-                <div class="form-group">
+                <!--<div class="form-group">
                     <label class="form-label" data-translate="payment_status">Payment Status</label>
                     <div class="flex items-center gap-4">
                         <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="paymentStatus" value="paying" id="payingPatient" class="form-radio" checked>
+                           <input type="radio" name="paymentStatus" value="paying" id="payingPatient" class="form-radio" checked>
                             <span data-translate="paying_patient">Paying Patient</span>
                         </label>
                         <label class="flex items-center gap-2 cursor-pointer">
@@ -409,7 +410,7 @@
                             <span data-translate="non_paying_patient">Non-Paying Patient</span>
                         </label>
                     </div>
-                    </div>
+                    </div>-->
                 </div>
                 
                 <!-- Lab Assessment Section -->
@@ -1172,15 +1173,23 @@
                 <button class="modal-close" onclick="closeReadyBillsModal()">&times;</button>
             </div>
 
-            <!-- Tabs for Ready Bills and Done Bills -->
+            <!-- Tabs for Payment, Ready Bills and Done Bills -->
             <div class="flex gap-4 mb-6">
+                <button id="paymentBillsTab" class="btn btn-secondary" onclick="switchBillsTab('payment')"
+                    data-translate="payment_tab">Payment</button>
                 <button id="readyBillsTab" class="btn btn-primary" onclick="switchBillsTab('ready')"
                     data-translate="ready_bills">Ready Bills</button>
                 <button id="doneBillsTab" class="btn btn-secondary" onclick="switchBillsTab('done')"
                     data-translate="done_bills">Done Bills</button>
             </div>
 
-            <div class="modal-body">
+            <div class="modal-body space-y-4">
+                <!-- Payment Tab Content -->
+                <div id="paymentBillsContent" class="space-y-3" style="display: none;">
+                    <!-- Consultations list for Payment tab -->
+                    <div id="paymentConsultationsContainer" class="space-y-3"></div>
+                </div>
+
                 <!-- Ready Bills Content -->
                 <div id="readyBillsContent" class="space-y-3">
                     <div id="readyBillsContainer" class="space-y-3"></div>
@@ -2446,6 +2455,7 @@
     <script src="scripts/medicalPrescription.js"></script>
     <script src="scripts/consultation.js"></script>
     <script src="scripts/app_script.js"></script>
+    <script src="scripts/payement.js"></script>
     <script>
         // Verify and ensure showDoctorDashboard is available
         (function() {

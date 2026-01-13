@@ -618,7 +618,16 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
     const bloodSugarVal = document.getElementById('consultBloodSugar')?.value;
     const bpInputVal = document.getElementById('consultBloodPressure')?.value;
     const consultationActSelect = document.getElementById('consultationAct');
-    const consultationAct = consultationActSelect ? consultationActSelect.value : '';
+    let consultationAct = '';
+    if (consultationActSelect) {
+      if (consultationActSelect.multiple) {
+        const selectedOptions = Array.from(consultationActSelect.selectedOptions || []);
+        const acts = selectedOptions.map(o => o.value).filter(v => v && v.trim());
+        consultationAct = acts.join(' | ');
+      } else {
+        consultationAct = consultationActSelect.value || '';
+      }
+    }
     // Clinical note: use the Clinical Note textarea; fallback to old vital-notes field only if present
     const clinicalNoteInput = document.getElementById('consultNotes') || document.getElementById('consultVitalNotes');
     const clinicalNote = clinicalNoteInput && typeof clinicalNoteInput.value === 'string'
@@ -1226,7 +1235,13 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
       }
       const consultationActSelect = document.getElementById('consultationAct');
       if (consultationActSelect) {
-        consultationActSelect.value = c.consultationAct || '';
+        const rawActs = c.consultationAct || '';
+        const values = rawActs
+          ? rawActs.split('|').map(s => s.trim()).filter(Boolean)
+          : [];
+        Array.from(consultationActSelect.options || []).forEach(opt => {
+          opt.selected = values.includes(opt.value);
+        });
       }
       set('consultPrescription', c.prescription);
       set('radiologyResult', c.radiologyResult || '');
