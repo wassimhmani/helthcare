@@ -4749,6 +4749,35 @@ async function renderDoneBills(searchTerm = '') {
         const patient = patients.find(p => p.id === bill.patientId);
         const patientFileNumber = patient ? patient.fileNumber : 'N/A';
 
+        const isPaid = bill.status === 'Paid';
+        const actionsHtml = isPaid
+            ? `
+                                <button onclick="printBill('${bill.id}')" class="btn btn-sm bg-gray-600 hover:bg-gray-700 text-white">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                                    </svg>
+                                    <span data-translate="print">Print</span>
+                                </button>
+                            `
+            : `
+                                <button onclick="if (window.Payment && Payment.selectBillForPayment) { Payment.selectBillForPayment('${bill.id}'); }" class="btn btn-sm bg-green-600 hover:bg-green-700 text-white">
+                                    <span data-translate="payment_section">Payment</span>
+                                </button>
+                                <button onclick="viewFullBillDetails('${bill.id}')" class="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                    <span data-translate="view_details">View Details</span>
+                                </button>
+                                <button onclick="printBill('${bill.id}')" class="btn btn-sm bg-gray-600 hover:bg-gray-700 text-white">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                                    </svg>
+                                    <span data-translate="print">Print</span>
+                                </button>
+                            `;
+
         return `
                     <div class="card p-4 hover:shadow-lg transition-shadow">
                         <div class="flex justify-between items-start mb-3">
@@ -4804,22 +4833,7 @@ async function renderDoneBills(searchTerm = '') {
                                 </div>
                             </div>
                             <div class="flex gap-2">
-                                <button onclick="if (window.Payment && Payment.selectBillForPayment) { Payment.selectBillForPayment('${bill.id}'); }" class="btn btn-sm bg-green-600 hover:bg-green-700 text-white">
-                                    <span data-translate="payment_section">Payment</span>
-                                </button>
-                                <button onclick="viewFullBillDetails('${bill.id}')" class="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                    </svg>
-                                    <span data-translate="view_details">View Details</span>
-                                </button>
-                                <button onclick="printBill('${bill.id}')" class="btn btn-sm bg-gray-600 hover:bg-gray-700 text-white">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
-                                    </svg>
-                                    <span data-translate="print">Print</span>
-                                </button>
+                                ${actionsHtml}
                             </div>
                         </div>
                     </div>
@@ -6298,6 +6312,16 @@ function showReportsModal() {
     document.getElementById('monthlyReportMonth').value = today.getMonth();
     document.getElementById('monthlyReportYear').value = today.getFullYear();
 
+    const unpaidPatientsMonth = document.getElementById('unpaidPatientsMonth');
+    const unpaidPatientsYear = document.getElementById('unpaidPatientsYear');
+    if (unpaidPatientsMonth) unpaidPatientsMonth.value = String(today.getMonth());
+    if (unpaidPatientsYear) unpaidPatientsYear.value = String(today.getFullYear());
+
+    const inProgressPaymentsMonth = document.getElementById('inProgressPaymentsMonth');
+    const inProgressPaymentsYear = document.getElementById('inProgressPaymentsYear');
+    if (inProgressPaymentsMonth) inProgressPaymentsMonth.value = String(today.getMonth());
+    if (inProgressPaymentsYear) inProgressPaymentsYear.value = String(today.getFullYear());
+
     // Default to daily report
     switchReportTab('daily');
 }
@@ -6314,19 +6338,31 @@ function switchReportTab(tab) {
     const weeklyContent = document.getElementById('weeklyReportContent');
     const monthlyContent = document.getElementById('monthlyReportContent');
 
+    const unpaidPatientsContent = document.getElementById('unpaidPatientsContent');
+    const inProgressPaymentsContent = document.getElementById('inProgressPaymentsContent');
+
     const dailyTab = document.getElementById('dailyReportTab');
     const weeklyTab = document.getElementById('weeklyReportTab');
     const monthlyTab = document.getElementById('monthlyReportTab');
+
+    const unpaidPatientsTab = document.getElementById('unpaidPatientsTab');
+    const inProgressPaymentsTab = document.getElementById('inProgressPaymentsTab');
 
     // Hide all content
     dailyContent.style.display = 'none';
     weeklyContent.style.display = 'none';
     monthlyContent.style.display = 'none';
 
+    if (unpaidPatientsContent) unpaidPatientsContent.style.display = 'none';
+    if (inProgressPaymentsContent) inProgressPaymentsContent.style.display = 'none';
+
     // Reset all tabs
     dailyTab.className = 'btn btn-secondary';
     weeklyTab.className = 'btn btn-secondary';
     monthlyTab.className = 'btn btn-secondary';
+
+    if (unpaidPatientsTab) unpaidPatientsTab.className = 'btn btn-secondary';
+    if (inProgressPaymentsTab) inProgressPaymentsTab.className = 'btn btn-secondary';
 
     // Show selected content
     if (tab === 'daily') {
@@ -6341,21 +6377,39 @@ function switchReportTab(tab) {
         monthlyContent.style.display = 'block';
         monthlyTab.className = 'btn btn-primary';
         renderMonthlyReport();
+    } else if (tab === 'unpaidPatients' && unpaidPatientsContent && unpaidPatientsTab) {
+        unpaidPatientsContent.style.display = 'block';
+        unpaidPatientsTab.className = 'btn btn-primary';
+        if (typeof renderUnpaidPatientsReport === 'function') {
+            renderUnpaidPatientsReport();
+        }
+    } else if (tab === 'inProgressPayments' && inProgressPaymentsContent && inProgressPaymentsTab) {
+        inProgressPaymentsContent.style.display = 'block';
+        inProgressPaymentsTab.className = 'btn btn-primary';
+        if (typeof renderInProgressPaymentsReport === 'function') {
+            renderInProgressPaymentsReport();
+        }
     }
 }
 
 function initializeYearsDropdown() {
-    const yearSelect = document.getElementById('monthlyReportYear');
     const currentYear = new Date().getFullYear();
-    yearSelect.innerHTML = '';
+    const yearSelects = [
+        document.getElementById('monthlyReportYear'),
+        document.getElementById('unpaidPatientsYear'),
+        document.getElementById('inProgressPaymentsYear')
+    ].filter(function (el) { return !!el; });
 
     // Add years from 5 years ago to current year
-    for (let year = currentYear; year >= currentYear - 5; year--) {
-        const option = document.createElement('option');
-        option.value = year;
-        option.textContent = year;
-        yearSelect.appendChild(option);
-    }
+    yearSelects.forEach(function (yearSelect) {
+        yearSelect.innerHTML = '';
+        for (let year = currentYear; year >= currentYear - 5; year--) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            yearSelect.appendChild(option);
+        }
+    });
 }
 function getDoctorBillsForPeriod(startDate, endDate) {
     const session = JSON.parse(localStorage.getItem('medconnect_session') || '{}');
@@ -6406,7 +6460,339 @@ function getDoctorBillsForPeriod(startDate, endDate) {
     };
 }
 
+function normalizeConsultationPaymentStatusForReports(consultation) {
+    const rawStatus = (consultation.paymentStatus || '').toLowerCase();
+    const hasAct = !!(consultation.consultationAct && String(consultation.consultationAct).trim());
+    let normalizedStatus = 'unpaid';
 
+    if (!hasAct) {
+        normalizedStatus = 'paid';
+    } else if (rawStatus === 'paid') {
+        normalizedStatus = 'paid';
+    } else if (rawStatus === 'partial' || rawStatus === 'partially_paid') {
+        normalizedStatus = 'partial';
+    }
+
+    return normalizedStatus;
+}
+
+function buildConsultationPaymentRowForReports(consultation, patients) {
+    const patient = patients.find(function (p) {
+        if (!p) return false;
+        return String(p.id) === String(consultation.patientId);
+    });
+
+    let patientName = consultation.patientName || consultation.patientFullName || '';
+    if (!patientName && patient) {
+        patientName = patient.fullName || patient.name || '';
+    }
+    if (!patientName && consultation.patient && typeof consultation.patient === 'object') {
+        patientName = consultation.patient.fullName || consultation.patient.name || '';
+    }
+    if (!patientName) {
+        patientName = 'Unknown Patient';
+    }
+
+    const normalizedStatus = normalizeConsultationPaymentStatusForReports(consultation);
+
+    const paymentStatusLabel = (function () {
+        if (normalizedStatus === 'paid') {
+            return window.t ? window.t('paid_status', 'Paid') : 'Paid';
+        }
+        if (normalizedStatus === 'partial') {
+            return window.t ? window.t('partially_paid_status', 'Partially Paid') : 'Partially Paid';
+        }
+        return window.t ? window.t('unpaid_status', 'Unpaid') : 'Unpaid';
+    })();
+
+    const paymentStatusClass = normalizedStatus === 'paid'
+        ? 'bg-green-100 text-green-800'
+        : (normalizedStatus === 'partial'
+            ? 'bg-yellow-100 text-yellow-800'
+            : 'bg-red-100 text-red-800');
+
+    const created = new Date(consultation.createdAt || consultation.date);
+    const dateStr = isNaN(created) ? '' : created.toLocaleString();
+
+    let consultationAmountLabel = '-';
+    let numericAmount = null;
+    try {
+        const rawActs = consultation.consultationAct || '';
+        const actNames = rawActs
+            ? rawActs.split('|').map(function (s) { return s.trim(); }).filter(function (v) { return v; })
+            : [];
+        const hasActs = actNames.length > 0;
+        let amount = null;
+
+        if (hasActs && typeof window.getBillDescriptions === 'function') {
+            const descriptions = window.getBillDescriptions();
+            if (Array.isArray(descriptions)) {
+                actNames.forEach(function (actName) {
+                    const match = descriptions.find(function (d) {
+                        return d && d.name === actName;
+                    });
+                    if (match) {
+                        const price = typeof match.price === 'number' ? match.price : Number(match.price || 0);
+                        if (!isNaN(price)) {
+                            if (amount === null) amount = 0;
+                            amount += price;
+                        }
+                    }
+                });
+            }
+        }
+
+        if (amount === null && typeof consultation.consultationAmount === 'number' && !isNaN(consultation.consultationAmount)) {
+            amount = consultation.consultationAmount;
+        }
+
+        if (!hasActs && amount === null) {
+            amount = 0;
+        }
+
+        if (amount !== null) {
+            numericAmount = amount;
+            consultationAmountLabel = amount.toFixed(2) + ' TND';
+        }
+    } catch (e) {
+        console.error('Error computing consultation amount in reports tab:', e);
+    }
+
+    let partialProgressHtml = '';
+    let partialAmount = null;
+    if (typeof consultation.partialPaymentAmount === 'number' && !isNaN(consultation.partialPaymentAmount)) {
+        partialAmount = consultation.partialPaymentAmount;
+    } else if (consultation.partialPaymentAmount !== undefined && consultation.partialPaymentAmount !== null && consultation.partialPaymentAmount !== '') {
+        const parsedPartial = Number(consultation.partialPaymentAmount);
+        if (!isNaN(parsedPartial)) {
+            partialAmount = parsedPartial;
+        }
+    }
+
+    if (normalizedStatus === 'partial' && numericAmount !== null && numericAmount > 0 && partialAmount !== null && partialAmount >= 0) {
+        const clampedPartial = Math.min(partialAmount, numericAmount);
+        const progressPercent = Math.round((clampedPartial / numericAmount) * 100);
+        const paidLabel = clampedPartial.toFixed(2) + ' / ' + numericAmount.toFixed(2) + ' TND';
+        const progressLabel = window.t ? window.t('partial_payment_progress', 'Payment progress') : 'Payment progress';
+
+        partialProgressHtml = `
+                        <div class="mt-2">
+                            <div class="flex justify-between text-[11px] text-gray-500 mb-1">
+                                <span>${progressLabel}</span>
+                                <span>${paidLabel}</span>
+                            </div>
+                            <div class="w-full h-1 bg-gray-200 rounded overflow-hidden">
+                                <div class="h-1 bg-yellow-400 rounded" style="width: ${progressPercent}%;"></div>
+                            </div>
+                        </div>
+                    `;
+    }
+
+    return `
+        <div class="border-b border-gray-200 py-3 px-4 flex flex-col gap-2">
+            <div class="flex items-center justify-between gap-3">
+                <div>
+                    <div class="font-semibold text-gray-900">${patientName}</div>
+                    <div class="text-xs text-gray-500">${dateStr}</div>
+                    <div class="text-xs text-gray-500">${window.t ? window.t('consultation_amount', 'Consultation Amount') : 'Consultation Amount'}: ${consultationAmountLabel}</div>
+                </div>
+                <div class="text-right">
+                    <span class="px-2 py-0.5 rounded-full text-xs font-semibold ${paymentStatusClass}">${paymentStatusLabel}</span>
+                </div>
+            </div>
+            ${partialProgressHtml}
+            <div class="mt-1">
+                <button class="btn btn-sm btn-outline" onclick="viewConsultationDetail('${consultation.id}')">${window.t ? window.t('view_details', 'View Details') : 'View Details'}</button>
+            </div>
+        </div>
+    `;
+}
+
+async function renderUnpaidPatientsReport() {
+    const container = document.getElementById('unpaidPatientsContainer');
+    if (!container) return;
+
+    const monthSelect = document.getElementById('unpaidPatientsMonth');
+    const yearSelect = document.getElementById('unpaidPatientsYear');
+    const today = new Date();
+
+    let month;
+    let year;
+    if (monthSelect && yearSelect && yearSelect.value) {
+        month = monthSelect.value !== '' ? parseInt(monthSelect.value, 10) : today.getMonth();
+        year = parseInt(yearSelect.value, 10) || today.getFullYear();
+    } else {
+        month = today.getMonth();
+        year = today.getFullYear();
+        if (monthSelect) monthSelect.value = String(month);
+        if (yearSelect) yearSelect.value = String(year);
+    }
+
+    const startDate = new Date(year, month, 1);
+    startDate.setHours(0, 0, 0, 0);
+
+    const endDate = new Date(year, month + 1, 0);
+    endDate.setHours(23, 59, 59, 999);
+
+    container.innerHTML = `
+            <div class="text-center py-6 text-gray-500">
+                <span>${window.t ? window.t('loading_unpaid_patients', 'Loading unpaid patients...') : 'Loading unpaid patients...'}</span>
+            </div>
+        `;
+
+    let consultations = [];
+    try {
+        const response = await fetch('api/get_consultations.php?all=1');
+        if (!response.ok) {
+            throw new Error('Failed to fetch consultations for unpaid patients report: ' + response.status);
+        }
+
+        const data = await response.json();
+        if (data && data.status === 'ok' && Array.isArray(data.consultations)) {
+            consultations = data.consultations;
+        }
+    } catch (err) {
+        console.error('Error loading consultations for unpaid patients report:', err);
+        consultations = [];
+    }
+
+    const session = JSON.parse(localStorage.getItem('medconnect_session') || '{}');
+    const doctorName = session.name || '';
+
+    const filtered = consultations.filter(function (c) {
+        const consultDate = new Date(c.createdAt || c.date || 0);
+        if (!(consultDate >= startDate && consultDate <= endDate)) return false;
+
+        const consultDoctor = c.doctor || c.doctorName || '';
+        const isByThisDoctor = !doctorName
+            ? true
+            : (consultDoctor === doctorName || consultDoctor.includes(doctorName) || doctorName.includes(consultDoctor));
+
+        if (!isByThisDoctor) return false;
+
+        const status = normalizeConsultationPaymentStatusForReports(c);
+        return status === 'unpaid';
+    });
+
+    const patients = Array.isArray(window.storedPatients)
+        ? window.storedPatients
+        : (typeof window.getPatients === 'function' ? window.getPatients() : []);
+
+    if (filtered.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-center py-6" data-translate="no_data_for_period">' + (window.t ? window.t('no_data_for_period', 'No data for this period') : 'No data for this period') + '</p>';
+        if (typeof applyTranslations === 'function') {
+            applyTranslations(container);
+        }
+        return;
+    }
+
+    const sorted = filtered.slice().sort(function (a, b) {
+        const dateA = new Date(a.createdAt || a.date || 0);
+        const dateB = new Date(b.createdAt || b.date || 0);
+        return dateB - dateA;
+    });
+
+    container.innerHTML = sorted.map(function (c) {
+        return buildConsultationPaymentRowForReports(c, patients);
+    }).join('');
+
+    if (typeof applyTranslations === 'function') {
+        applyTranslations(container);
+    }
+}
+
+async function renderInProgressPaymentsReport() {
+    const container = document.getElementById('inProgressPaymentsContainer');
+    if (!container) return;
+
+    const monthSelect = document.getElementById('inProgressPaymentsMonth');
+    const yearSelect = document.getElementById('inProgressPaymentsYear');
+    const today = new Date();
+
+    let month;
+    let year;
+    if (monthSelect && yearSelect && yearSelect.value) {
+        month = monthSelect.value !== '' ? parseInt(monthSelect.value, 10) : today.getMonth();
+        year = parseInt(yearSelect.value, 10) || today.getFullYear();
+    } else {
+        month = today.getMonth();
+        year = today.getFullYear();
+        if (monthSelect) monthSelect.value = String(month);
+        if (yearSelect) yearSelect.value = String(year);
+    }
+
+    const startDate = new Date(year, month, 1);
+    startDate.setHours(0, 0, 0, 0);
+
+    const endDate = new Date(year, month + 1, 0);
+    endDate.setHours(23, 59, 59, 999);
+
+    container.innerHTML = `
+            <div class="text-center py-6 text-gray-500">
+                <span>${window.t ? window.t('loading_in_progress_payments', 'Loading patients with payments in progress...') : 'Loading patients with payments in progress...'}</span>
+            </div>
+        `;
+
+    let consultations = [];
+    try {
+        const response = await fetch('api/get_consultations.php?all=1');
+        if (!response.ok) {
+            throw new Error('Failed to fetch consultations for in-progress payments report: ' + response.status);
+        }
+
+        const data = await response.json();
+        if (data && data.status === 'ok' && Array.isArray(data.consultations)) {
+            consultations = data.consultations;
+        }
+    } catch (err) {
+        console.error('Error loading consultations for in-progress payments report:', err);
+        consultations = [];
+    }
+
+    const session = JSON.parse(localStorage.getItem('medconnect_session') || '{}');
+    const doctorName = session.name || '';
+
+    const filtered = consultations.filter(function (c) {
+        const consultDate = new Date(c.createdAt || c.date || 0);
+        if (!(consultDate >= startDate && consultDate <= endDate)) return false;
+
+        const consultDoctor = c.doctor || c.doctorName || '';
+        const isByThisDoctor = !doctorName
+            ? true
+            : (consultDoctor === doctorName || consultDoctor.includes(doctorName) || doctorName.includes(consultDoctor));
+
+        if (!isByThisDoctor) return false;
+
+        const status = normalizeConsultationPaymentStatusForReports(c);
+        return status === 'partial';
+    });
+
+    const patients = Array.isArray(window.storedPatients)
+        ? window.storedPatients
+        : (typeof window.getPatients === 'function' ? window.getPatients() : []);
+
+    if (filtered.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-center py-6" data-translate="no_data_for_period">' + (window.t ? window.t('no_data_for_period', 'No data for this period') : 'No data for this period') + '</p>';
+        if (typeof applyTranslations === 'function') {
+            applyTranslations(container);
+        }
+        return;
+    }
+
+    const sorted = filtered.slice().sort(function (a, b) {
+        const dateA = new Date(a.createdAt || a.date || 0);
+        const dateB = new Date(b.createdAt || b.date || 0);
+        return dateB - dateA;
+    });
+
+    container.innerHTML = sorted.map(function (c) {
+        return buildConsultationPaymentRowForReports(c, patients);
+    }).join('');
+
+    if (typeof applyTranslations === 'function') {
+        applyTranslations(container);
+    }
+}
 
 function renderDailyReport() {
     const dateInput = document.getElementById('dailyReportDate');

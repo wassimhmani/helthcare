@@ -100,6 +100,8 @@
   "daily_report": "Rapport quotidien",
   "weekly_report": "Rapport hebdomadaire",
   "monthly_report": "Rapport mensuel",
+  "unpaid_patients": "Patients impayés",
+  "in_progress_payments": "Patients en cours de paiement",
   "select_date": "Sélectionner la date",
   "select_week": "Sélectionner la date de début de semaine",
   "select_month": "Sélectionner le mois",

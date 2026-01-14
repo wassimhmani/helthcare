@@ -637,7 +637,7 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
     const radiologyDiagnostics = document.getElementById('radiologyDiagnostics')?.value.trim() || '';
     const labResults = document.getElementById('labResults')?.value.trim() || '';
     const labNotes = document.getElementById('labNotes')?.value.trim() || '';
-    const paymentStatus = document.querySelector('input[name="paymentStatus"]:checked')?.value || 'paying';
+    //const paymentStatus = document.querySelector('input[name="paymentStatus"]:checked')?.value || 'paying';
 
     // Prescription: rely on textarea kept in sync by medicalPrescription.js
     const prescription = document.getElementById('consultPrescription')?.value.trim() || '';

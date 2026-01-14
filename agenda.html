@@ -2092,10 +2092,13 @@
                     data-translate="weekly_report">Weekly Report</button>
                 <button id="monthlyReportTab" class="btn btn-secondary" onclick="switchReportTab('monthly')"
                     data-translate="monthly_report">Monthly Report</button>
+                <button id="unpaidPatientsTab" class="btn btn-secondary" onclick="switchReportTab('unpaidPatients')"
+                    data-translate="unpaid_patients">Patient impayé</button>
+                <button id="inProgressPaymentsTab" class="btn btn-secondary" onclick="switchReportTab('inProgressPayments')"
+                    data-translate="in_progress_payments">Encours paiement</button>
             </div>
 
             <div class="modal-body">
-                <!-- Daily Report Content -->
                 <div id="dailyReportContent">
                     <div class="mb-4">
                         <label class="form-label" data-translate="select_date">Select Date:</label>
@@ -2105,7 +2108,6 @@
                     <div id="dailyReportContainer"></div>
                 </div>
 
-                <!-- Weekly Report Content -->
                 <div id="weeklyReportContent" style="display: none;">
                     <div class="mb-4">
                         <label class="form-label" data-translate="select_week">Select Week Start Date:</label>
@@ -2115,7 +2117,6 @@
                     <div id="weeklyReportContainer"></div>
                 </div>
 
-                <!-- Monthly Report Content -->
                 <div id="monthlyReportContent" style="display: none;">
                     <div class="mb-4 flex gap-4">
                         <div>
@@ -2143,6 +2144,64 @@
                         </div>
                     </div>
                     <div id="monthlyReportContainer"></div>
+                </div>
+
+                <div id="unpaidPatientsContent" style="display: none;">
+                    <div class="mb-4 flex gap-4">
+                        <div>
+                            <label class="form-label" data-translate="select_month">Select Month:</label>
+                            <select id="unpaidPatientsMonth" class="form-input" onchange="renderUnpaidPatientsReport()">
+                                <option value="0" data-translate="january">January</option>
+                                <option value="1" data-translate="february">February</option>
+                                <option value="2" data-translate="march">March</option>
+                                <option value="3" data-translate="april">April</option>
+                                <option value="4" data-translate="may">May</option>
+                                <option value="5" data-translate="june">June</option>
+                                <option value="6" data-translate="july">July</option>
+                                <option value="7" data-translate="august">August</option>
+                                <option value="8" data-translate="september">September</option>
+                                <option value="9" data-translate="october">October</option>
+                                <option value="10" data-translate="november">November</option>
+                                <option value="11" data-translate="december">December</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label" data-translate="select_year">Select Year:</label>
+                            <select id="unpaidPatientsYear" class="form-input" onchange="renderUnpaidPatientsReport()">
+                                <!-- Years will be populated by JavaScript -->
+                            </select>
+                        </div>
+                    </div>
+                    <div id="unpaidPatientsContainer"></div>
+                </div>
+
+                <div id="inProgressPaymentsContent" style="display: none;">
+                    <div class="mb-4 flex gap-4">
+                        <div>
+                            <label class="form-label" data-translate="select_month">Select Month:</label>
+                            <select id="inProgressPaymentsMonth" class="form-input" onchange="renderInProgressPaymentsReport()">
+                                <option value="0" data-translate="january">January</option>
+                                <option value="1" data-translate="february">February</option>
+                                <option value="2" data-translate="march">March</option>
+                                <option value="3" data-translate="april">April</option>
+                                <option value="4" data-translate="may">May</option>
+                                <option value="5" data-translate="june">June</option>
+                                <option value="6" data-translate="july">July</option>
+                                <option value="7" data-translate="august">August</option>
+                                <option value="8" data-translate="september">September</option>
+                                <option value="9" data-translate="october">October</option>
+                                <option value="10" data-translate="november">November</option>
+                                <option value="11" data-translate="december">December</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label" data-translate="select_year">Select Year:</label>
+                            <select id="inProgressPaymentsYear" class="form-input" onchange="renderInProgressPaymentsReport()">
+                                <!-- Years will be populated by JavaScript -->
+                            </select>
+                        </div>
+                    </div>
+                    <div id="inProgressPaymentsContainer"></div>
                 </div>
             </div>
 
