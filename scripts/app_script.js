@@ -521,6 +521,7 @@ const renderAgendaWithAppointments = (appointments, dateStr) => {
 
     const badgeConfigs = [
         {
+            key: 'total_appointments',
             label: window.t ? window.t('total', 'Total') : 'Total',
             value: appointmentCount,
             classes: 'bg-slate-900 text-white',
@@ -528,36 +529,43 @@ const renderAgendaWithAppointments = (appointments, dateStr) => {
             icon: '<svg viewBox="0 0 24 24" class="w-4 h-4"><path fill="currentColor" d="M5 3h14a2 2 0 0 1 2 2v14a1 1 0 0 1-1.447.894L12 16.618l-7.553 3.276A1 1 0 0 1 3 19V5a2 2 0 0 1 2-2Z"/></svg>'
         },
         {
+            key: 'pre_validation',
             label: window.t ? window.t('pre_validation', 'Pre-validation') : 'Pre-validation',
             value: preValidationCount,
             classes: 'bg-orange-100 text-orange-800'
         },
         {
+            key: 'validated',
             label: window.t ? window.t('validated', 'Validated') : 'Validated',
             value: confirmedCount,
             classes: 'bg-green-100 text-green-800'
         },
         {
+            key: 'cancelled',
             label: window.t ? window.t('cancelled', 'Cancelled') : 'Cancelled',
             value: cancelledCount,
             classes: 'bg-red-100 text-red-800'
         },
         {
+            key: 'consultations_done',
             label: window.t ? window.t('consultations_done', 'Consultations Done') : 'Consultations Done',
             value: consultationsCount,
             classes: 'bg-purple-100 text-purple-800'
         },
         {
+            key: 'cash_entry',
             label: window.t ? window.t('cash_entry', 'Cash Entry') : 'Cash Entry',
             value: `${cashEntryAmount.toFixed(2)} TND`,
             classes: 'bg-blue-100 text-blue-800'
         },
         {
+            key: 'expenses',
             label: window.t ? window.t('expenses', 'Expenses') : 'Expenses',
             value: `${expensesAmount.toFixed(2)} TND`,
             classes: 'bg-gray-100 text-gray-800'
         },
         {
+            key: 'cabinet_cash',
             label: window.t ? window.t('cabinet_cash', 'Cabinet Cash') : 'Cabinet Cash',
             value: `${cabinetCashAmount.toFixed(2)} TND`,
             classes: 'bg-indigo-100 text-indigo-800'
@@ -567,9 +575,9 @@ const renderAgendaWithAppointments = (appointments, dateStr) => {
     const summaryBadgesHTML = `
                 <div class="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-8 gap-2">
                     ${badgeConfigs.map(cfg => `
-                        <div class="rounded-lg px-2 py-2 shadow-sm border border-gray-200 ${cfg.classes}">
+                        <div class="rounded-lg px-2 py-2 shadow-sm border border-gray-200 ${cfg.classes}" data-summary-key="${cfg.key || ''}">
                             <div class="text-[0.6rem] uppercase tracking-wide font-semibold opacity-75 mb-1">${cfg.label}</div>
-                            <div class="text-sm font-semibold">${cfg.value}</div>
+                            <div class="text-sm font-semibold" data-summary-value-for="${cfg.key || ''}">${cfg.value}</div>
                         </div>
                     `).join('')}
                 </div>
@@ -588,6 +596,66 @@ const renderAgendaWithAppointments = (appointments, dateStr) => {
         fallbackContainer.classList.remove('hidden');
         fallbackContainer.innerHTML = summaryBadgesHTML;
         summaryHTMLForAgenda = '';
+    }
+
+    // After rendering the summary, refine the consultations_done value using the
+    // consultations API (database is the source of truth) and fall back to
+    // localStorage helper if the API is not available.
+    if (dateStr) {
+        try {
+            fetch(`api/get_consultations.php?date=${encodeURIComponent(dateStr)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch consultations for summary');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data || data.status !== 'ok' || !Array.isArray(data.consultations)) {
+                        return;
+                    }
+                    const apiConsultationsCount = data.consultations.length;
+
+                    const updateContainer = (container) => {
+                        if (!container) return;
+                        const valueNode = container.querySelector('[data-summary-value-for="consultations_done"]');
+                        if (valueNode) {
+                            valueNode.textContent = apiConsultationsCount;
+                        }
+                    };
+
+                    updateContainer(summaryContainer);
+                    if (!summaryContainer) {
+                        updateContainer(fallbackContainer);
+                    }
+                })
+                .catch(err => {
+                    console.error('Error fetching consultations count for summary:', err);
+
+                    // Fallback: use local consultations helper if available
+                    if (typeof window.getConsultationsForDate === 'function') {
+                        try {
+                            const localCount = window.getConsultationsForDate(dateStr);
+                            const updateContainer = (container) => {
+                                if (!container) return;
+                                const valueNode = container.querySelector('[data-summary-value-for="consultations_done"]');
+                                if (valueNode) {
+                                    valueNode.textContent = localCount;
+                                }
+                            };
+
+                            updateContainer(summaryContainer);
+                            if (!summaryContainer) {
+                                updateContainer(fallbackContainer);
+                            }
+                        } catch (e) {
+                            console.error('Error using local consultations count for summary:', e);
+                        }
+                    }
+                });
+        } catch (err) {
+            console.error('Exception while updating consultations_done summary from API:', err);
+        }
     }
 
     window.openClinicalExaminationModal = function () {
