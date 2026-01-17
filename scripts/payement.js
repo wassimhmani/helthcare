@@ -447,9 +447,12 @@
                     amount = 0;
                 }
 
+                // Apply 8% tax to the consultation base amount (align with bill total)
                 if (amount !== null) {
-                    numericAmount = amount;
-                    consultationAmountLabel = amount.toFixed(2) + ' TND';
+                    const taxRate = 0.08;
+                    const totalWithTax = amount + (amount * taxRate);
+                    numericAmount = totalWithTax;
+                    consultationAmountLabel = totalWithTax.toFixed(2) + ' TND';
                 }
             } catch (e) {
                 console.error('Error computing consultation amount in payment tab:', e);

@@ -169,8 +169,8 @@
       return;
     }
 
-    const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
-    const patient = patients.find(p => p.id === c.patientId);
+    const patients = Array.isArray(window.storedPatients) ? window.storedPatients : [];
+    const patient = patients.find(p => String(p.id) === String(c.patientId));
     const cabinetSettings = JSON.parse(localStorage.getItem('cabinetSettings') || '{}');
 
     const title = t('medical_prescription', 'Medical Prescription');

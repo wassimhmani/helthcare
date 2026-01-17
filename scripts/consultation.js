@@ -66,8 +66,12 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
   }
   function t(key, fallback){ try { return (window.t ? window.t(key, fallback) : fallback); } catch { return fallback; } }
 
+  // Patients are now loaded from the backend via fetchPatientsFromAPI and kept in-memory
   function getPatients(){
-    try { return JSON.parse(localStorage.getItem('healthcarePatients')||'[]'); } catch { return []; }
+    if (Array.isArray(window.storedPatients)) {
+      return window.storedPatients;
+    }
+    return [];
   }
   
   // Alias for backward compatibility in case somewhere getPatient() is called instead of getPatients()
@@ -387,7 +391,7 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
     const consultation = consultations.find(c=>c.id===consultationId);
     if (!consultation){ if (typeof window.showTranslatedAlert==='function') window.showTranslatedAlert('Consultation not found.'); return; }
     const patients = (window.storedPatients && Array.isArray(window.storedPatients)) ? window.storedPatients : getPatients();
-    const patient = patients.find(p=>p.id===consultation.patientId);
+    const patient = patients.find(p=> String(p.id) === String(consultation.patientId));
     const patientName = patient ? patient.fullName : 'Unknown Patient';
     const consultationTime = new Date(consultation.createdAt).toLocaleString('en-US', {year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
     const content = document.getElementById('consultationDetailContent'); if (!content) return;
@@ -637,7 +641,7 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
     const radiologyDiagnostics = document.getElementById('radiologyDiagnostics')?.value.trim() || '';
     const labResults = document.getElementById('labResults')?.value.trim() || '';
     const labNotes = document.getElementById('labNotes')?.value.trim() || '';
-    //const paymentStatus = document.querySelector('input[name="paymentStatus"]:checked')?.value || 'paying';
+    const paymentStatus = document.querySelector('input[name="paymentStatus"]:checked')?.value || 'paying';
 
     // Prescription: rely on textarea kept in sync by medicalPrescription.js
     const prescription = document.getElementById('consultPrescription')?.value.trim() || '';
@@ -796,8 +800,8 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
     try { if (typeof window.linkTempCertificatesToConsultation==='function') window.linkTempCertificatesToConsultation(patientId, id); window.currentConsultationPatientId = null; } catch(err){ console.error('Error linking medical certificates:', err); }
 
     // Update patient's latest vitals
-    try {
-      const patients = getPatients();
+    try{
+      const patients = Array.isArray(window.storedPatients) ? window.storedPatients : [];
       const idx = patients.findIndex(p=>p.id===patientId);
       if (idx!==-1){
         if (height!==null) patients[idx].height = height;
@@ -811,8 +815,7 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
         if (!Array.isArray(patients[idx].vitalsHistory)) patients[idx].vitalsHistory = [];
         if (height!==null || weight!==null || bmi!==null || temperature!==null || heartRate!==null || bloodSugar!==null || bpSystolic!==null || bpDiastolic!==null) patients[idx].vitalsHistory.push(entry);
         patients[idx].lastUpdated = new Date().toISOString();
-        localStorage.setItem('healthcarePatients', JSON.stringify(patients));
-        if (typeof window.storedPatients!=='undefined') window.storedPatients = patients;
+        window.storedPatients = patients;
       }
     } catch {}
 
@@ -966,6 +969,23 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
       consultationsListEl.innerHTML = '<p class="text-gray-500 text-center py-4" data-translate="loading">Loading...</p>';
     }
     
+    const havePatientsInMemory = Array.isArray(window.storedPatients) && window.storedPatients.length > 0;
+    const alreadyTriedFetch = !!window._consultPatientsTriedFetch;
+    if (!havePatientsInMemory && typeof window.fetchPatientsFromAPI === 'function' && !window._consultPatientsLoading && !alreadyTriedFetch) {
+      window._consultPatientsLoading = true;
+      window._consultPatientsTriedFetch = true;
+      window.fetchPatientsFromAPI()
+        .then(() => {
+          window._consultPatientsLoading = false;
+          loadTodayConsultations();
+        })
+        .catch(e => {
+          console.error('Error fetching patients for today consultations:', e);
+          window._consultPatientsLoading = false;
+        });
+      return;
+    }
+    
     // Get today's date in YYYY-MM-DD format (using local timezone, not UTC)
     const today = new Date();
     // Use formatDateForStorage if available, otherwise format manually
@@ -1017,20 +1037,35 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
             return;
           }
           
-          // Get patients for patient name lookup (try API first, then localStorage)
-          const patients = (window.storedPatients && Array.isArray(window.storedPatients)) ? window.storedPatients : getPatients();
+          // Get patients for patient name lookup (from in-memory cache populated via API)
+          let patients = [];
+          if (Array.isArray(window.storedPatients) && window.storedPatients.length > 0) {
+            patients = window.storedPatients;
+          } else {
+            patients = getPatients();
+          }
+
+          // Track any consultations whose patient we couldn't resolve so we can
+          // asynchronously fetch them from the API and update the UI in place.
+          const missingPatientIds = new Set();
           
           consultationsListEl.innerHTML = todayConsultations.map(consultation => {
-            // Try to find patient in local array first
-            let patient = patients.find(p => p.id === consultation.patientId);
-            
-            // If patient not found, try to fetch from API
-            if (!patient && consultation.patientId && typeof window.fetchPatientsFromAPI === 'function') {
-              // Note: We'll fetch patient name asynchronously if needed, but for now use Unknown
-              // In a production app, you might want to batch fetch all missing patients
+            // Try to find patient in local array first (normalize ids as strings to avoid type mismatches)
+            let patient = patients.find(p => String(p.id) === String(consultation.patientId));
+
+            if (!patient && consultation.patientId) {
+              missingPatientIds.add(String(consultation.patientId));
             }
-            
-            const patientName = patient ? patient.fullName : 'Unknown Patient';
+
+            // Prefer patient object name, then any name stored on consultation, then fallback label
+            let resolvedName = '';
+            if (patient) {
+              resolvedName = patient.fullName || patient.name || '';
+            }
+            if (!resolvedName) {
+              resolvedName = consultation.patientName || consultation.patientFullName || '';
+            }
+            const patientName = resolvedName || 'Unknown Patient';
             // Format time in 12-hour format with AM/PM
             const consultationTime = new Date(consultation.createdAt).toLocaleTimeString('en-US', {
               hour: '2-digit',
@@ -1039,7 +1074,7 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
             });
             return `
               <div class="consultation-item">
-                <div class="patient-name">${patientName}</div>
+                <div class="patient-name" data-patient-id="${consultation.patientId || ''}">${patientName}</div>
                 <div class="consultation-time">${consultationTime}</div>
 		        <div class="consultation-notes">${(consultation.clinicalNote||consultation.vitalNotes||'').substring(0,100)}${(consultation.clinicalNote||consultation.vitalNotes||'').length>100?'...':''}</div>
                 <div class="flex gap-2 mt-3 flex-wrap">
@@ -1047,6 +1082,49 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
                 </div>
               </div>`;
           }).join('');
+          
+          // Asynchronously resolve any missing patients from the API and update
+          // the rendered list without reloading the whole consultations view.
+          if (missingPatientIds.size > 0) {
+            missingPatientIds.forEach(function (id) {
+              if (!id) return;
+              fetch('api/get_patient.php?id=' + encodeURIComponent(id))
+                .then(function (res) {
+                  if (!res.ok) return null;
+                  return res.json().catch(function () { return null; });
+                })
+                .then(function (data) {
+                  if (!data || data.status !== 'ok' || !data.patient) return;
+
+                  const patient = data.patient;
+                  const name = patient.fullName || patient.name || '';
+                  if (!name) return;
+
+                  // Merge into in-memory patients cache
+                  if (!Array.isArray(window.storedPatients)) window.storedPatients = [];
+                  const existingIndex = window.storedPatients.findIndex(function (p) {
+                    return p && String(p.id) === String(patient.id);
+                  });
+                  if (existingIndex !== -1) {
+                    window.storedPatients[existingIndex] = patient;
+                  } else {
+                    window.storedPatients.push(patient);
+                  }
+
+                  // Update any currently rendered cards for this patient ID
+                  const nameNodes = consultationsListEl.querySelectorAll('.consultation-item .patient-name');
+                  nameNodes.forEach(function (node) {
+                    const nodeId = node.getAttribute('data-patient-id');
+                    if (String(nodeId) === String(id)) {
+                      node.textContent = name;
+                    }
+                  });
+                })
+                .catch(function (err) {
+                  console.error('Error resolving patient for today consultations list:', err);
+                });
+            });
+          }
           
           // Apply translations
           if (window.I18n && window.I18n.walkAndTranslate) {
@@ -1074,9 +1152,9 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
           consultationsListEl.innerHTML = `<p class="text-gray-500 text-center py-4" data-translate="no_consultations_today">${t('no_consultations_today','No consultations conducted today.')}</p>`;
           return;
         }
-        const patients = (window.storedPatients||[]);
+        const patients = (Array.isArray(window.storedPatients) && window.storedPatients.length > 0) ? window.storedPatients : getPatients();
         consultationsListEl.innerHTML = todayConsultations.map(consultation => {
-          const patient = patients.find(p => p.id === consultation.patientId);
+          const patient = patients.find(p => String(p.id) === String(consultation.patientId));
           const patientName = patient ? patient.fullName : 'Unknown Patient';
           const consultationTime = new Date(consultation.createdAt).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
           return `
@@ -1186,8 +1264,8 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
         window.consultationDocuments = [];
       }
       
-      const patients = (window.storedPatients||JSON.parse(localStorage.getItem('healthcarePatients')||'[]'));
-      const p = patients.find(pt=>pt.id===c.patientId);
+      const patients = Array.isArray(window.storedPatients) ? window.storedPatients : [];
+      const p = patients.find(pt=> String(pt.id) === String(c.patientId));
       const set = (id,val)=>{ const el=document.getElementById(id); if(el) el.value=(val??''); };
       const patientInput=document.getElementById('consultPatient'); const patientIdInput=document.getElementById('consultPatientId');
       
@@ -1331,11 +1409,10 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
   window.editConsultation = editConsultation;
   window.updateLastConsultation = updateLastConsultation;
   window.getConsultationsForDate = getConsultationsForDate;
-  
+
   // Ensure showDoctorDashboard is available (double-check)
   window.showDoctorDashboard = showDoctorDashboard;
 })();
-
 
 // Reason, Diagnosis, Clinical Exam Modal Functions
 window.openReasonModal = function () {
@@ -1446,9 +1523,9 @@ window.editConsultation = function (consultationId) {
             }
         window.editingConsultationId = consultationId;
 
-        // Set patient display and hidden id
-        const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
-        const p = patients.find(pt => pt.id === c.patientId);
+        // Set patient display and hidden id (patients loaded from API into window.storedPatients)
+        const patients = Array.isArray(window.storedPatients) ? window.storedPatients : [];
+        const p = patients.find(pt => String(pt.id) === String(c.patientId));
         const patientInput = document.getElementById('consultPatient');
         const patientIdInput = document.getElementById('consultPatientId');
         if (p && patientInput) {
@@ -1662,8 +1739,8 @@ window.viewConsultationDetail = function (consultationId) {
                 return;
             }
             
-            const patients = (window.storedPatients && Array.isArray(window.storedPatients)) ? window.storedPatients : getPatients();
-            const patient = patients.find(p => p.id === consultation.patientId);
+            const patients = (Array.isArray(window.storedPatients) && window.storedPatients.length > 0) ? window.storedPatients : getPatients();
+            const patient = patients.find(p => String(p.id) === String(consultation.patientId));
             const patientName = patient ? patient.fullName : 'Unknown Patient';
             const consultationTime = new Date(consultation.createdAt).toLocaleString('en-US', {
                 year: 'numeric',

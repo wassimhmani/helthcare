@@ -4631,11 +4631,14 @@ async function renderReadyBills() {
         });
     }
 
-    // Keep only fully paid consultations in Ready Bills
+    // Keep consultations that are fully paid or partially paid in Ready Bills
     readyConsultations = readyConsultations.filter(c => {
         const status = (c.paymentStatus || '').toLowerCase();
-        return status === 'paid';
+        return status === 'paid' || status === 'partial' || status === 'partially_paid';
     });
+
+    // Cache ready consultations so actions can fall back when localStorage is missing data
+    window.readyConsultationsCache = readyConsultations;
 
     // Sort by most recent
     const patients = Array.isArray(storedPatients) ? storedPatients : [];
@@ -4648,19 +4651,95 @@ async function renderReadyBills() {
     }
 
     container.innerHTML = sorted.map(c => {
-        const patient = patients.find(p => p.id === c.patientId);
+        const patient = patients.find(p => String(p.id) === String(c.patientId));
         const patientName = patient ? patient.fullName : 'Unknown Patient';
         const created = new Date(c.createdAt);
         const dateStr = isNaN(created) ? '' : created.toLocaleString();
-        const imcStr = (typeof c.imc === 'number' && !isNaN(c.imc)) ? c.imc.toFixed(1) : '-';
-        const doctorName = c.doctor || 'Doctor';
+
+        // Compute consultation amount similar to payment tab
+        let consultationAmountLabel = '-';
+        try {
+            const rawActs = c.consultationAct || '';
+            const actNames = rawActs
+                ? rawActs.split('|').map(function (s) { return s.trim(); }).filter(function (v) { return v; })
+                : [];
+            const hasActs = actNames.length > 0;
+            let amount = null;
+
+            if (hasActs && typeof window.getBillDescriptions === 'function') {
+                const descriptions = window.getBillDescriptions();
+                if (Array.isArray(descriptions)) {
+                    actNames.forEach(function (actName) {
+                        const match = descriptions.find(function (d) {
+                            return d && d.name === actName;
+                        });
+                        if (match) {
+                            const price = typeof match.price === 'number' ? match.price : Number(match.price || 0);
+                            if (!isNaN(price)) {
+                                if (amount === null) amount = 0;
+                                amount += price;
+                            }
+                        }
+                    });
+                }
+            }
+
+            // Fallback: use any amount stored directly on consultation
+            if (amount === null && typeof c.consultationAmount === 'number' && !isNaN(c.consultationAmount)) {
+                amount = c.consultationAmount;
+            }
+
+            // If no act and no explicit amount, treat consultation as free (0 TND)
+            if (!hasActs && amount === null) {
+                amount = 0;
+            }
+
+            // Apply 8% tax to the consultation base amount (align with bill total)
+            if (amount !== null) {
+                const taxRate = 0.08;
+                const totalWithTax = amount + (amount * taxRate);
+                consultationAmountLabel = totalWithTax.toFixed(2) + ' TND';
+            }
+        } catch (e) {
+            console.error('Error computing consultation amount in ready bills:', e);
+        }
+
+        // Normalize payment status similar to payment tab (paid / partial / unpaid)
+        const rawStatus = (c.paymentStatus || '').toLowerCase();
+        let normalizedStatus = 'unpaid';
+        if (rawStatus === 'paid') {
+            normalizedStatus = 'paid';
+        } else if (rawStatus === 'partial' || rawStatus === 'partially_paid') {
+            normalizedStatus = 'partial';
+        }
+
+        const paymentStatusLabel = (function () {
+            if (normalizedStatus === 'paid') {
+                return window.t ? window.t('paid_status', 'Paid') : 'Paid';
+            }
+            if (normalizedStatus === 'partial') {
+                return window.t ? window.t('partially_paid_status', 'Partially Paid') : 'Partially Paid';
+            }
+            return window.t ? window.t('unpaid_status', 'Unpaid') : 'Unpaid';
+        })();
+
+        const paymentStatusClass = normalizedStatus === 'paid'
+            ? 'bg-green-100 text-green-800'
+            : (normalizedStatus === 'partial'
+                ? 'bg-yellow-100 text-yellow-800'
+                : 'bg-red-100 text-red-800');
+
         return `
                     <div class="card p-4">
                         <div class="flex items-center justify-between">
                             <div>
                                 <div class="font-semibold">${patientName}</div>
                                 <div class="text-sm text-gray-600">Consultation • ${dateStr}</div>
-                                <div class="text-xs text-gray-500">Doctor: ${doctorName} • BMI: ${imcStr}</div>
+                                <div class="text-xs text-gray-500">${window.t ? window.t('consultation_amount', 'Consultation Amount') : 'Consultation Amount'}: ${consultationAmountLabel}</div>
+                                <div class="text-xs mt-1">
+                                    <span class="font-medium">${window.t ? window.t('payment_status', 'Payment Status') : 'Payment Status'}:</span>
+                                    <span class="ml-1 px-2 py-0.5 rounded-full ${paymentStatusClass}">${paymentStatusLabel}</span>
+                                </div>
                             </div>
                             <div class="flex items-center gap-2">
                                 <button class="btn btn-secondary" onclick="viewConsultationDetails('${c.id}')" data-translate="view">${window.t ? window.t('view', 'View') : 'View'}</button>
@@ -4705,6 +4784,22 @@ async function renderDoneBills(searchTerm = '') {
         bills = JSON.parse(localStorage.getItem('healthcareBills') || '[]');
     }
 
+    // Load consultations so we can reflect their payment status on bills
+    let consultationsById = {};
+    try {
+        const consultResponse = await fetch('api/get_consultations.php?all=1');
+        if (consultResponse.ok) {
+            const consultData = await consultResponse.json();
+            if (consultData && consultData.status === 'ok' && Array.isArray(consultData.consultations)) {
+                consultData.consultations.forEach(function (c) {
+                    consultationsById[String(c.id)] = c;
+                });
+            }
+        }
+    } catch (e) {
+        console.error('Error loading consultations for done bills:', e);
+    }
+
     // Sort by creation date (newest first)
     let sortedBills = bills.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
@@ -4734,22 +4829,57 @@ async function renderDoneBills(searchTerm = '') {
         const billDate = new Date(bill.billDate).toLocaleDateString();
         const dueDate = new Date(bill.dueDate).toLocaleDateString();
         const createdDate = new Date(bill.createdAt).toLocaleDateString();
+        const consultation = bill.consultationId ? consultationsById[String(bill.consultationId)] : null;
 
-        // Status badge styling
-        let statusClass = 'bg-yellow-100 text-yellow-800';
-        if (bill.status === 'Paid') {
-            statusClass = 'bg-green-100 text-green-800';
-        } else if (bill.status === 'Overdue') {
-            statusClass = 'bg-red-100 text-red-800';
-        } else if (bill.status === 'Cancelled') {
-            statusClass = 'bg-gray-100 text-gray-800';
+        // Derive payment status primarily from linked consultation when available
+        let normalizedConsultStatus = null;
+        if (consultation && typeof normalizeConsultationPaymentStatusForReports === 'function') {
+            normalizedConsultStatus = normalizeConsultationPaymentStatusForReports(consultation);
+        }
+
+        let statusClass;
+        let statusLabel;
+
+        if (normalizedConsultStatus) {
+            statusLabel = (function () {
+                if (normalizedConsultStatus === 'paid') {
+                    return window.t ? window.t('paid_status', 'Paid') : 'Paid';
+                }
+                if (normalizedConsultStatus === 'partial') {
+                    return window.t ? window.t('partially_paid_status', 'Partially Paid') : 'Partially Paid';
+                }
+                return window.t ? window.t('unpaid_status', 'Unpaid') : 'Unpaid';
+            })();
+
+            statusClass = normalizedConsultStatus === 'paid'
+                ? 'bg-green-100 text-green-800'
+                : (normalizedConsultStatus === 'partial'
+                    ? 'bg-yellow-100 text-yellow-800'
+                    : 'bg-red-100 text-red-800');
+        } else {
+            // Fallback to bill.status when no linked consultation is available
+            const rawBillStatus = (bill.status || '').trim();
+            const lowerStatus = rawBillStatus.toLowerCase();
+
+            statusClass = 'bg-yellow-100 text-yellow-800';
+            if (lowerStatus === 'paid') {
+                statusClass = 'bg-green-100 text-green-800';
+            } else if (lowerStatus === 'overdue') {
+                statusClass = 'bg-red-100 text-red-800';
+            } else if (lowerStatus === 'cancelled') {
+                statusClass = 'bg-gray-100 text-gray-800';
+            }
+
+            statusLabel = window.t ? window.t(lowerStatus, rawBillStatus) : rawBillStatus;
         }
 
         // Get patient info
         const patient = patients.find(p => p.id === bill.patientId);
         const patientFileNumber = patient ? patient.fileNumber : 'N/A';
 
-        const isPaid = bill.status === 'Paid';
+        const isPaid = normalizedConsultStatus
+            ? normalizedConsultStatus === 'paid'
+            : (bill.status === 'Paid');
         const actionsHtml = isPaid
             ? `
                                 <button onclick="printBill('${bill.id}')" class="btn btn-sm bg-gray-600 hover:bg-gray-700 text-white">
@@ -4805,7 +4935,7 @@ async function renderDoneBills(searchTerm = '') {
                                 </div>
                             </div>
                             <span class="badge ${statusClass} px-3 py-1 rounded-full text-xs font-semibold ml-4">
-                                ${window.t ? window.t(bill.status.toLowerCase(), bill.status) : bill.status}
+                                ${statusLabel}
                             </span>
                         </div>
 
@@ -4889,14 +5019,20 @@ function printBill(billId) {
 function viewConsultationDetails(consultationId) {
     try {
         const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
-        const c = consultations.find(x => x.id === consultationId);
+        let c = consultations.find(x => String(x.id) === String(consultationId));
+
+        // Fallback: use ready consultations loaded from API if not present in localStorage
+        if (!c && Array.isArray(window.readyConsultationsCache)) {
+            c = window.readyConsultationsCache.find(x => String(x.id) === String(consultationId));
+        }
+
         if (!c) return;
         // Reuse existing detail modal when available
         const modal = document.getElementById('consultationDetailModal');
         const content = document.getElementById('consultationDetailContent');
         if (modal && content) {
             const patients = Array.isArray(storedPatients) ? storedPatients : [];
-            const patient = patients.find(p => p.id === c.patientId);
+            const patient = patients.find(p => String(p.id) === String(c.patientId));
             const patientName = patient ? patient.fullName : 'Unknown Patient';
             content.innerHTML = `
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -4923,7 +5059,13 @@ function createBillFromConsultation(consultationId) {
     try {
         const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
         const patients = Array.isArray(storedPatients) ? storedPatients : [];
-        const c = consultations.find(x => x.id === consultationId);
+        let c = consultations.find(x => String(x.id) === String(consultationId));
+
+        // Fallback: use ready consultations loaded from API if not present in localStorage
+        if (!c && Array.isArray(window.readyConsultationsCache)) {
+            c = window.readyConsultationsCache.find(x => String(x.id) === String(consultationId));
+        }
+
         if (!c) return;
 
         // Prefill billing with patient and one item (Consultation)
@@ -6550,9 +6692,12 @@ function buildConsultationPaymentRowForReports(consultation, patients) {
             amount = 0;
         }
 
+        // Apply 8% tax to the consultation base amount (align with bill total)
         if (amount !== null) {
-            numericAmount = amount;
-            consultationAmountLabel = amount.toFixed(2) + ' TND';
+            const taxRate = 0.08;
+            const totalWithTax = amount + (amount * taxRate);
+            numericAmount = totalWithTax;
+            consultationAmountLabel = totalWithTax.toFixed(2) + ' TND';
         }
     } catch (e) {
         console.error('Error computing consultation amount in reports tab:', e);
@@ -7442,6 +7587,18 @@ function populateConsultationActSelect() {
         const select = document.getElementById('consultationAct');
         if (!select) return;
         select.innerHTML = getBillDescriptionOptionsHTML();
+
+        if (select.multiple && !select.dataset.clickToggleBound) {
+            select.addEventListener('mousedown', function (e) {
+                const option = e.target;
+                if (!option || option.tagName !== 'OPTION') return;
+                e.preventDefault();
+                option.selected = !option.selected;
+                const evt = new Event('change', { bubbles: true });
+                select.dispatchEvent(evt);
+            });
+            select.dataset.clickToggleBound = '1';
+        }
     } catch (e) {
         console.error('Error populating consultationAct select:', e);
     }
@@ -8285,7 +8442,7 @@ document.getElementById('addDescriptionForm').addEventListener('submit', (e) => 
 document.getElementById('editDescriptionForm').addEventListener('submit', (e) => {
     e.preventDefault();
 
-    const id = parseInt(document.getElementById('editDescriptionId').value);
+    const id = document.getElementById('editDescriptionId').value;
     const name = document.getElementById('editDescriptionName').value.trim();
     const price = parseFloat(document.getElementById('editDescriptionPrice').value);
 
@@ -8295,7 +8452,7 @@ document.getElementById('editDescriptionForm').addEventListener('submit', (e) =>
     }
 
     const descriptions = getBillDescriptions();
-    const index = descriptions.findIndex(d => d.id === id);
+    const index = descriptions.findIndex(d => String(d.id) === String(id));
 
     if (index !== -1) {
         descriptions[index].name = name;

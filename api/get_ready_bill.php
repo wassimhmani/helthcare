@@ -52,7 +52,7 @@ if ($billCheck && $billCheck->num_rows > 0) {
 // Build query: consultations that do not have a related bill (no date filter)
 if ($billTableExists) {
     $sql = "SELECT c.id, c.patient_id, c.height, c.weight, c.temperature, c.heart_rate, c.blood_sugar,
-                   c.blood_pressure, c.imc, c.bmi_category, c.clinical_note,
+                   c.blood_pressure, c.imc, c.bmi_category, c.consultation_act, c.clinical_note,
                    c.radiology_result, c.radiology_diagnostics, c.lab_results, c.lab_notes,
                    c.prescription, c.payment_status, c.documents, c.doctor, c.created_at, c.updated_at
             FROM consultation c
@@ -62,7 +62,7 @@ if ($billTableExists) {
 } else {
     // No bill table yet: by definition, all consultations are "ready" (no bills)
     $sql = "SELECT id, patient_id, height, weight, temperature, heart_rate, blood_sugar,
-                   blood_pressure, imc, bmi_category, clinical_note,
+                   blood_pressure, imc, bmi_category, consultation_act, clinical_note,
                    radiology_result, radiology_diagnostics, lab_results, lab_notes,
                    prescription, payment_status, documents, doctor, created_at, updated_at
             FROM consultation
@@ -117,6 +117,7 @@ while ($row = $result->fetch_assoc()) {
         'bloodPressure' => $row['blood_pressure'] ?? null,
         'imc' => $row['imc'] !== null ? (float)$row['imc'] : null,
         'bmiCategory' => $row['bmi_category'] ?? null,
+        'consultationAct' => $row['consultation_act'] ?? '',
         'clinicalNote' => $row['clinical_note'] ?? '',
         'radiologyResult' => $row['radiology_result'] ?? '',
         'radiologyDiagnostics' => $row['radiology_diagnostics'] ?? '',

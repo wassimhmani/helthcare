@@ -36,8 +36,8 @@
 
     try {
       const certificates = JSON.parse(localStorage.getItem('medical_certificates') || '[]');
-      const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
-      const patient = patients.find(p => p.id === patientId);
+      const patients = Array.isArray(window.storedPatients) ? window.storedPatients : [];
+      const patient = patients.find(p => String(p.id) === String(patientId));
       const session = JSON.parse(localStorage.getItem('medconnect_session') || '{}');
 
       const existingIndex = certificates.findIndex(c => c.consultationId === consultationId);
@@ -128,9 +128,9 @@
       return;
     }
 
-    // Patient information
-    const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
-    const patient = cert.patientId ? patients.find(p => p.id === cert.patientId) : null;
+    // Patient information (loaded from API into window.storedPatients)
+    const patients = Array.isArray(window.storedPatients) ? window.storedPatients : [];
+    const patient = cert.patientId ? patients.find(p => String(p.id) === String(cert.patientId)) : null;
 
     // Consultation date
     const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
@@ -275,9 +275,9 @@ window.printCertificateFromForm = function() {
     return;
   }
   
-  // Get patient information
-  const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
-  const patient = patients.find(p => p.id === patientId);
+  // Get patient information (loaded from API into window.storedPatients)
+  const patients = Array.isArray(window.storedPatients) ? window.storedPatients : [];
+  const patient = patients.find(p => String(p.id) === String(patientId));
   
   if (!patient) {
     if (typeof window.showTranslatedAlert === 'function') {
@@ -461,8 +461,8 @@ const notes = document.getElementById('consultCertNotes')?.value?.trim() || '';
 if (!startDate && !endDate && !restPeriod) return; // nothing to save
 
 const certificates = JSON.parse(localStorage.getItem('medical_certificates') || '[]');
-const patients = JSON.parse(localStorage.getItem('healthcarePatients') || '[]');
-const patient = patients.find(p => p.id === patientId);
+const patients = Array.isArray(window.storedPatients) ? window.storedPatients : [];
+const patient = patients.find(p => String(p.id) === String(patientId));
 const session = JSON.parse(localStorage.getItem('medconnect_session') || '{}');
 
 const existingIdx = certificates.findIndex(c => c.consultationId === consultationId);
