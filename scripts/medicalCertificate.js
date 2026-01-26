@@ -174,6 +174,21 @@
     const cabinetLocation = cabinetSettings.address ?
       (cabinetSettings.address.split(',')[0] || cabinetSettings.address) : 'Tunis';
 
+    // Cabinet header data (logo + text), similar to bill header
+    const cabinetName = (cabinetSettings && cabinetSettings.name && cabinetSettings.name.trim()) ? cabinetSettings.name : 'Medical Center';
+    const cabinetAddressFull = (cabinetSettings && cabinetSettings.address && cabinetSettings.address.trim()) ? cabinetSettings.address : '';
+    const cabinetPhoneDisplay = (cabinetSettings && cabinetSettings.phone && cabinetSettings.phone.trim()) ? cabinetSettings.phone.trim() : '';
+    let cabinetLogoHtml = '';
+    try {
+      if (cabinetSettings && cabinetSettings.logo && /^data:image\//.test(cabinetSettings.logo)) {
+        cabinetLogoHtml = '<img src="' + cabinetSettings.logo + '" alt="Logo" style="width:48px;height:48px;object-fit:contain;"/>';
+      } else {
+        cabinetLogoHtml = '<svg width="48" height="48" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg"><path d="M28 8 L22 34 L40 34 Z" fill="#2563eb"/><path d="M28 8 L26 34 L34 34 Z" fill="#3b82f6" opacity="0.85"/><path d="M12 42 Q22 36 28 42 Q34 36 44 42 Q34 48 28 42 Q22 48 12 42 Z" fill="#2563eb"/></svg>';
+      }
+    } catch (e) {
+      cabinetLogoHtml = '<svg width="48" height="48" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg"><path d="M28 8 L22 34 L40 34 Z" fill="#2563eb"/><path d="M28 8 L26 34 L34 34 Z" fill="#3b82f6" opacity="0.85"/><path d="M12 42 Q22 36 28 42 Q34 36 44 42 Q34 48 28 42 Q22 48 12 42 Z" fill="#2563eb"/></svg>';
+    }
+
     // Build printable HTML
     const printWindow = window.open('', '_blank');
     let certificateHTML = '<!DOCTYPE html><html><head>';
@@ -181,6 +196,12 @@
     certificateHTML += '<meta charset="UTF-8">';
     certificateHTML += '<style>';
     certificateHTML += 'body { font-family: "Times New Roman", serif; max-width: 800px; margin: 0 auto; padding: 40px; line-height: 1.8; font-size: 14px; }';
+    certificateHTML += '.certificate-header { display:flex; align-items:center; gap:16px; border-bottom:3px solid #2563eb; padding-bottom:16px; margin-bottom:24px; }';
+    certificateHTML += '.certificate-logo { flex-shrink:0; }';
+    certificateHTML += '.certificate-header-text { display:flex; flex-direction:column; }';
+    certificateHTML += '.certificate-header-name { font-weight:bold; font-size:18px; color:#1e40af; }';
+    certificateHTML += '.certificate-header-address { color:#2563eb; font-size:13px; }';
+    certificateHTML += '.certificate-header-phone { color:#6b7280; font-size:12px; }';
     certificateHTML += '.certificate-title { font-weight: bold; font-size: 18px; margin-bottom: 30px; }';
     certificateHTML += '.cert-body { text-align: justify; margin: 20px 0; }';
     certificateHTML += '.cert-body p { margin: 15px 0; }';
@@ -190,6 +211,19 @@
     certificateHTML += '.signature-box div { margin: 5px 0; }';
     certificateHTML += '@media print { body { padding: 20px; } }';
     certificateHTML += '</style></head><body>';
+
+    // Header (logo + cabinet details)
+    certificateHTML += '<div class="certificate-header">';
+    certificateHTML += '<div class="certificate-logo" aria-hidden="true">' + cabinetLogoHtml + '</div>';
+    certificateHTML += '<div class="certificate-header-text">';
+    certificateHTML += '<div class="certificate-header-name">' + cabinetName + '</div>';
+    if (cabinetAddressFull) {
+      certificateHTML += '<div class="certificate-header-address">' + cabinetAddressFull + '</div>';
+    }
+    if (cabinetPhoneDisplay) {
+      certificateHTML += '<div class="certificate-header-phone">Tel: ' + cabinetPhoneDisplay + '</div>';
+    }
+    certificateHTML += '</div></div>';
 
     // Title
     certificateHTML += '<div class="certificate-title">CERTIFICAT MÉDICAL</div>';
@@ -274,6 +308,17 @@ printWindow.document.close();
     }
     return;
   }
+
+  // Require at least one certificate field before printing
+  if (!certRestPeriod) {
+    const fallbackMsg = 'Please fill the rest period (days) before printing the certificate.';
+    if (typeof window.showTranslatedAlert === 'function') {
+      window.showTranslatedAlert('certificate_fields_required', fallbackMsg);
+    } else {
+      alert(fallbackMsg);
+    }
+    return;
+  }
   
   // Get patient information (loaded from API into window.storedPatients).
   // If not available there (e.g., patients not yet fetched), fall back to the
@@ -330,6 +375,21 @@ printWindow.document.close();
   // Cabinet location
   const cabinetLocation = cabinetSettings.address ?
     (cabinetSettings.address.split(',')[0] || cabinetSettings.address) : 'Tunis';
+
+  // Cabinet header data (logo + text), similar to bill header
+  const cabinetName = (cabinetSettings && cabinetSettings.name && cabinetSettings.name.trim()) ? cabinetSettings.name : 'Medical Center';
+  const cabinetAddressFull = (cabinetSettings && cabinetSettings.address && cabinetSettings.address.trim()) ? cabinetSettings.address : '';
+  const cabinetPhoneDisplay = (cabinetSettings && cabinetSettings.phone && cabinetSettings.phone.trim()) ? cabinetSettings.phone.trim() : '';
+  let cabinetLogoHtml = '';
+  try {
+    if (cabinetSettings && cabinetSettings.logo && /^data:image\//.test(cabinetSettings.logo)) {
+      cabinetLogoHtml = '<img src="' + cabinetSettings.logo + '" alt="Logo" style="width:48px;height:48px;object-fit:contain;"/>';
+    } else {
+      cabinetLogoHtml = '<svg width="48" height="48" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg"><path d="M28 8 L22 34 L40 34 Z" fill="#2563eb"/><path d="M28 8 L26 34 L34 34 Z" fill="#3b82f6" opacity="0.85"/><path d="M12 42 Q22 36 28 42 Q34 36 44 42 Q34 48 28 42 Q22 48 12 42 Z" fill="#2563eb"/></svg>';
+    }
+  } catch (e) {
+    cabinetLogoHtml = '<svg width="48" height="48" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg"><path d="M28 8 L22 34 L40 34 Z" fill="#2563eb"/><path d="M28 8 L26 34 L34 34 Z" fill="#3b82f6" opacity="0.85"/><path d="M12 42 Q22 36 28 42 Q34 36 44 42 Q34 48 28 42 Q22 48 12 42 Z" fill="#2563eb"/></svg>';
+  }
   
   // Certificate type - using default since field was removed
   const certTypeName = 'Certificat médical';
@@ -352,6 +412,12 @@ printWindow.document.close();
   certificateHTML += '<meta charset="UTF-8">';
   certificateHTML += '<style>';
   certificateHTML += 'body { font-family: "Times New Roman", serif; max-width: 800px; margin: 0 auto; padding: 40px; line-height: 1.8; font-size: 14px; }';
+  certificateHTML += '.certificate-header { display:flex; align-items:center; gap:16px; border-bottom:3px solid #2563eb; padding-bottom:16px; margin-bottom:24px; }';
+  certificateHTML += '.certificate-logo { flex-shrink:0; }';
+  certificateHTML += '.certificate-header-text { display:flex; flex-direction:column; }';
+  certificateHTML += '.certificate-header-name { font-weight:bold; font-size:18px; color:#1e40af; }';
+  certificateHTML += '.certificate-header-address { color:#2563eb; font-size:13px; }';
+  certificateHTML += '.certificate-header-phone { color:#6b7280; font-size:12px; }';
   certificateHTML += '.certificate-title { font-weight: bold; font-size: 18px; margin-bottom: 30px; text-align: center; }';
   certificateHTML += '.cert-body { text-align: justify; margin: 20px 0; }';
   certificateHTML += '.cert-body p { margin: 15px 0; }';
@@ -361,6 +427,19 @@ printWindow.document.close();
   certificateHTML += '.signature-box div { margin: 5px 0; }';
   certificateHTML += '@media print { body { padding: 20px; } }';
   certificateHTML += '</style></head><body>';
+  
+  // Header (logo + cabinet details)
+  certificateHTML += '<div class="certificate-header">';
+  certificateHTML += '<div class="certificate-logo" aria-hidden="true">' + cabinetLogoHtml + '</div>';
+  certificateHTML += '<div class="certificate-header-text">';
+  certificateHTML += '<div class="certificate-header-name">' + cabinetName + '</div>';
+  if (cabinetAddressFull) {
+    certificateHTML += '<div class="certificate-header-address">' + cabinetAddressFull + '</div>';
+  }
+  if (cabinetPhoneDisplay) {
+    certificateHTML += '<div class="certificate-header-phone">Tel: ' + cabinetPhoneDisplay + '</div>';
+  }
+  certificateHTML += '</div></div>';
   
   // Title
   certificateHTML += '<div class="certificate-title">' + certTypeName.toUpperCase() + '</div>';

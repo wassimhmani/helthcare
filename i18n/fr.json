@@ -539,6 +539,7 @@
   "rest_period": "Période de repos (jours)",
   "start_date": "Date de début",
   "end_date": "Date de fin",
+  "certificate_fields_required": "Veuillez remplir la période de repos (jours) avant d'imprimer le certificat.",
   "diagnosis_condition": "Diagnostic / État médical",
   "recommendations": "Recommandations",
   "additional_notes": "Notes supplémentaires",

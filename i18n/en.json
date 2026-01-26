@@ -536,6 +536,7 @@
   "rest_period": "Rest Period (Days)",
   "start_date": "Start Date",
   "end_date": "End Date",
+  "certificate_fields_required": "Please fill the rest period (days) before printing the certificate.",
   "diagnosis_condition": "Diagnosis / Medical Condition",
   "recommendations": "Recommendations",
   "additional_notes": "Additional Notes",
