@@ -75,6 +75,7 @@
   "tax": "Tax",
   "total": "Total",
   "total_amount": "Total Amount",
+  "payment_section": "Payment",
   "bill_to": "Bill To:",
   "bill_information": "Bill Information:",
   "thank_you_message": "Thank you for choosing our healthcare services.",
@@ -115,6 +116,7 @@
   "weekly_breakdown": "Weekly Breakdown",
   "no_data_for_period": "No data for this period",
   "export_report": "Export Report",
+  "print_report": "Print Report",
   
   "dashboard": "Dashboard",
   "add_appointment": "Add Appointment",
@@ -293,6 +295,7 @@
   "add_item": "Add Item",
   
   "new_consultation": "New Consultation",
+  "patient": "Patient",
   "patient_info": "Patient Info",
   "name": "Name",
   "phone": "Phone",
@@ -364,6 +367,7 @@
   "patient_added": "Patient added successfully!",
   "patient_updated": "Patient updated successfully!",
   "patient_deleted": "Patient deleted successfully!",
+  "patient_added_to_system": "The patient has been added to the system. You can now schedule appointments for this patient.",
   
   "bill_created": "Bill created successfully!",
   "bill_updated": "Bill updated successfully!",
@@ -500,6 +504,7 @@
   "no_consultations_today": "No consultations conducted today.",
   "consult": "Consult",
   "reject": "Reject",
+  "edit_consultation": "Edit consultation",
   "selected_patient_details": "Selected Patient Details",
   "name": "Name:",
   "phone": "Phone:",
@@ -609,5 +614,15 @@
   "no_documents_found": "No documents found for this patient.",
   "document_id": "Document ID:",
   "document_preview": "Document Preview",
-  "click_to_preview": "Click to preview"
+  "click_to_preview": "Click to preview",
+  "summary": "Summary",
+  "total_revenue": "Total Revenue",
+  "total_expenses": "Total Expenses",
+  "net_profit": "Net Profit",
+  "report_type": "Report Type",
+  "period": "Period",
+  "report_exported_successfully": "Report exported successfully!",
+  "paid_amount": "Paid Amount",
+  "remaining_amount": "Remaining Amount",
+  "total_amount": "Total Amount"
 }

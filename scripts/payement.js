@@ -214,6 +214,42 @@
                 return;
             }
 
+            // Sync local consultations cache so cash entry / cabinet cash reflect the new payment
+            try {
+                const rawConsultations = localStorage.getItem('consultations') || '[]';
+                const consultations = JSON.parse(rawConsultations);
+                if (Array.isArray(consultations)) {
+                    const idx = consultations.findIndex(function (c) {
+                        return c && String(c.id) === String(consultationId);
+                    });
+                    if (idx !== -1) {
+                        const updated = Object.assign({}, consultations[idx]);
+                        updated.paymentStatus = newStatus;
+                        if (hasPartialAmount) {
+                            updated.partialPaymentAmount = partialPaymentAmount;
+                        }
+                        updated.updatedAt = new Date().toISOString();
+                        consultations[idx] = updated;
+                        localStorage.setItem('consultations', JSON.stringify(consultations));
+                    }
+                }
+            } catch (syncErr) {
+                console.error('Error syncing local consultations after payment update:', syncErr);
+            }
+
+            // After local data is in sync, refresh cabinet cash and the daily agenda
+            // so that the top "Cash Entry" badge reflects the new payment immediately.
+            try {
+                if (typeof window.updateCabinetCashDisplay === 'function') {
+                    window.updateCabinetCashDisplay();
+                }
+                if (typeof window.renderDailyAgenda === 'function') {
+                    window.renderDailyAgenda();
+                }
+            } catch (uiErr) {
+                console.error('Error refreshing cash entry after payment update:', uiErr);
+            }
+
             if (!skipAlerts && typeof window.showTranslatedAlert === 'function') {
                 window.showTranslatedAlert('payment_status_updated');
             }
@@ -502,6 +538,32 @@
                                 </button>
                             `;
             }
+
+            // Only allow changing status when NOT already fully paid
+            let statusControlsHtml = '';
+            if (normalizedStatus !== 'paid') {
+                // When partially paid, do not allow going back to unpaid
+                if (normalizedStatus === 'partial') {
+                    statusControlsHtml = `
+                                <select class="form-select text-xs" onchange="if (window.Payment && Payment.handleConsultationPaymentStatusChange) { Payment.handleConsultationPaymentStatusChange(this, '${c.id}', '${normalizedStatus}'); }">
+                                    <option value="partial" selected>${window.t ? window.t('partially_paid_status', 'Partially Paid') : 'Partially Paid'}</option>
+                                    <option value="paid">${window.t ? window.t('paid_status', 'Paid') : 'Paid'}</option>
+                                </select>
+                                ${addPartialPaymentButtonHtml}
+                    `;
+                } else {
+                    // Unpaid: allow switching to partial or paid
+                    statusControlsHtml = `
+                                <select class="form-select text-xs" onchange="if (window.Payment && Payment.handleConsultationPaymentStatusChange) { Payment.handleConsultationPaymentStatusChange(this, '${c.id}', '${normalizedStatus}'); }">
+                                    <option value="unpaid" selected>${window.t ? window.t('unpaid_status', 'Unpaid') : 'Unpaid'}</option>
+                                    <option value="partial">${window.t ? window.t('partially_paid_status', 'Partially Paid') : 'Partially Paid'}</option>
+                                    <option value="paid">${window.t ? window.t('paid_status', 'Paid') : 'Paid'}</option>
+                                </select>
+                                ${addPartialPaymentButtonHtml}
+                    `;
+                }
+            }
+
             return `
                     <div class="card p-4">
                         <div class="flex items-center justify-between">
@@ -516,12 +578,7 @@
                                 ${partialProgressHtml}
                             </div>
                             <div class="flex items-center gap-2">
-                                <select class="form-select text-xs" onchange="if (window.Payment && Payment.handleConsultationPaymentStatusChange) { Payment.handleConsultationPaymentStatusChange(this, '${c.id}', '${normalizedStatus}'); }">
-                                    <option value="unpaid" ${normalizedStatus === 'unpaid' ? 'selected' : ''}>${window.t ? window.t('unpaid_status', 'Unpaid') : 'Unpaid'}</option>
-                                    <option value="partial" ${normalizedStatus === 'partial' ? 'selected' : ''}>${window.t ? window.t('partially_paid_status', 'Partially Paid') : 'Partially Paid'}</option>
-                                    <option value="paid" ${normalizedStatus === 'paid' ? 'selected' : ''}>${window.t ? window.t('paid_status', 'Paid') : 'Paid'}</option>
-                                </select>
-                                ${addPartialPaymentButtonHtml}
+                                ${statusControlsHtml}
                             </div>
                         </div>
                     </div>
@@ -530,6 +587,20 @@
 
         if (window.I18n && window.I18n.walkAndTranslate) {
             window.I18n.walkAndTranslate();
+        }
+
+        // After re-rendering the payment consultations list, also refresh
+        // the cabinet cash widget and the daily agenda so that the top
+        // "Cash Entry" badge reflects the latest payments without reload.
+        try {
+            if (typeof window.updateCabinetCashDisplay === 'function') {
+                window.updateCabinetCashDisplay();
+            }
+            if (typeof window.renderDailyAgenda === 'function') {
+                window.renderDailyAgenda();
+            }
+        } catch (e) {
+            console.error('Error refreshing cash entry from payment tab:', e);
         }
     }
 

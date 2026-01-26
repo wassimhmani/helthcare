@@ -250,7 +250,7 @@ printWindow.document.close();
 };
 
   // Print certificate from form data (without saving)
-window.printCertificateFromForm = function() {
+  window.printCertificateFromForm = function() {
   // Get form data
   const certStartDateEl = document.getElementById('consultCertStartDate');
   const certEndDateEl = document.getElementById('consultCertEndDate');
@@ -275,18 +275,15 @@ window.printCertificateFromForm = function() {
     return;
   }
   
-  // Get patient information (loaded from API into window.storedPatients)
+  // Get patient information (loaded from API into window.storedPatients).
+  // If not available there (e.g., patients not yet fetched), fall back to the
+  // patient name currently entered in the consultation form so printing
+  // still works and does not fail with a "patient not found" alert.
   const patients = Array.isArray(window.storedPatients) ? window.storedPatients : [];
-  const patient = patients.find(p => String(p.id) === String(patientId));
-  
-  if (!patient) {
-    if (typeof window.showTranslatedAlert === 'function') {
-      window.showTranslatedAlert('Patient not found.');
-    } else {
-      alert('Patient not found.');
-    }
-    return;
-  }
+  const patientFromCache = patients.find(p => String(p.id) === String(patientId)) || null;
+
+  const patientNameFromInput = document.getElementById('consultPatient')?.value?.trim() || '';
+  const patientFullName = (patientFromCache && patientFromCache.fullName) || patientNameFromInput || '';
   
   // Get consultation information
   const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
@@ -316,11 +313,14 @@ window.printCertificateFromForm = function() {
   const startDateFR = formatDateFR(certStartDate);
   const endDateFR = formatDateFR(certEndDate);
   const certificateDateFR = formatDateFR(new Date().toISOString());
-  const patientBirthDateFR = patient.dateOfBirth ? formatDateFR(patient.dateOfBirth) : '';
+  const patientBirthDateFR = (patientFromCache && patientFromCache.dateOfBirth)
+    ? formatDateFR(patientFromCache.dateOfBirth)
+    : '';
   
   // Patient title
-  const patientTitle = patient.gender ?
-    (patient.gender.toLowerCase() === 'male' || patient.gender.toLowerCase() === 'homme' ? 'M.' : 'Mme') :
+  const patientGender = patientFromCache && patientFromCache.gender ? String(patientFromCache.gender) : '';
+  const patientTitle = patientGender ?
+    (patientGender.toLowerCase() === 'male' || patientGender.toLowerCase() === 'homme' ? 'M.' : 'Mme') :
     'M.';
   
   // Rest period calculation
@@ -345,8 +345,10 @@ window.printCertificateFromForm = function() {
     return;
   }
   
+  const displayPatientName = patientFullName || 'Patient';
+
   let certificateHTML = '<!DOCTYPE html><html><head>';
-  certificateHTML += '<title>' + certTypeName + ' - ' + patient.fullName + '</title>';
+  certificateHTML += '<title>' + certTypeName + ' - ' + displayPatientName + '</title>';
   certificateHTML += '<meta charset="UTF-8">';
   certificateHTML += '<style>';
   certificateHTML += 'body { font-family: "Times New Roman", serif; max-width: 800px; margin: 0 auto; padding: 40px; line-height: 1.8; font-size: 14px; }';
@@ -370,7 +372,7 @@ window.printCertificateFromForm = function() {
   certificateHTML += '<p>Je soussigné(e), Dr ' + doctorName + ', Médecin généraliste, certifie que :</p>';
   
   // Patient and consultation info
-  certificateHTML += '<p>' + patientTitle + ' ' + patient.fullName;
+  certificateHTML += '<p>' + patientTitle + ' ' + displayPatientName;
   if (patientBirthDateFR) {
     certificateHTML += ', né(e) le ' + patientBirthDateFR;
   }

@@ -160,6 +160,33 @@
     }
   }
 
+  // Reset prescription medicines state and UI without confirmation.
+  // Intended for use when closing the consultation modal so that
+  // any selected medicines are cleared automatically.
+  function resetPrescriptionState(){
+    // Clear in-memory list
+    prescriptionMedicines = [];
+
+    // Re-render list (will clear container and update textarea)
+    renderPrescriptionMedicinesList();
+
+    // Ensure consult prescription textarea is empty
+    const textarea = document.getElementById('consultPrescription');
+    if (textarea) {
+      textarea.value = '';
+    }
+
+    // Clear prescription inputs in the medicines UI
+    const select = document.getElementById('prescriptionMedicineSelect');
+    if (select) select.value = '';
+
+    const dosageInput = document.getElementById('prescriptionDosage');
+    if (dosageInput) dosageInput.value = '';
+
+    const instructionsInput = document.getElementById('prescriptionInstructions');
+    if (instructionsInput) instructionsInput.value = '';
+  }
+
   // Printing a consultation prescription by consultation id
   function printPrescription(consultationId){
     const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
@@ -349,4 +376,5 @@
   window.printPrescription = printPrescription;
   window.printPrescriptionMedicinesList = printPrescriptionMedicinesList;
   window.clearPrescriptionMedicinesList = clearPrescriptionMedicinesList;
+  window.resetPrescriptionState = resetPrescriptionState;
 })();

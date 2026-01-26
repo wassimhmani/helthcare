@@ -263,7 +263,13 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
     if (form) form.reset();
     const imcEl = document.getElementById('consultIMCValue'); if (imcEl) imcEl.textContent='—';
     const cat = document.getElementById('consultBMICategory'); if (cat){ cat.textContent=''; cat.className='text-sm text-gray-500'; }
-    if (typeof window.renderPrescriptionMedicinesList==='function') window.renderPrescriptionMedicinesList();
+    // Clear any selected medicines/prescription state when closing
+    if (typeof window.resetPrescriptionState === 'function') {
+      window.resetPrescriptionState();
+    } else if (typeof window.renderPrescriptionMedicinesList === 'function') {
+      // Fallback: at least re-render current list
+      window.renderPrescriptionMedicinesList();
+    }
     document.querySelectorAll('.consult-section').forEach(sec=>sec.classList.add('hidden'));
     const consultSection = document.getElementById('consultSectionConsultation'); if (consultSection) consultSection.classList.remove('hidden');
     
@@ -923,6 +929,17 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
       if (button) {
         const translationKey = buttonTranslations[section];
         const translatedText = window.t ? window.t(translationKey, button.textContent.trim()) : button.textContent.trim();
+
+        // For Lab and Radiology, button label should be a single word:
+        // the last word of the translated text (e.g. "Bilan de laboratoire" -> "laboratoire"),
+        // forced to lowercase so we get exactly "laboratoire" / "radiologie".
+        if (section === 'lab' || section === 'radiology') {
+          const wordsForButton = translatedText.split(' ').filter(Boolean);
+          const lastWord = wordsForButton.length > 0 ? wordsForButton[wordsForButton.length - 1] : translatedText;
+          const displayWord = lastWord.toLowerCase();
+          button.innerHTML = `<span style="display: block;">${displayWord}</span>`;
+          return;
+        }
         
         // Keep single-line sections on one line
         if (singleLineSections.includes(section)) {
@@ -1079,6 +1096,7 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
 		        <div class="consultation-notes">${(consultation.clinicalNote||consultation.vitalNotes||'').substring(0,100)}${(consultation.clinicalNote||consultation.vitalNotes||'').length>100?'...':''}</div>
                 <div class="flex gap-2 mt-3 flex-wrap">
                   <button class="btn btn-sm btn-primary" onclick="viewConsultationDetail('${consultation.id}')" data-translate="view_details">View Details</button>
+                  <button class="btn btn-sm btn-secondary" onclick="editConsultation('${consultation.id}')" data-translate="edit_consultation">Edit consultation</button>
                 </div>
               </div>`;
           }).join('');
@@ -1320,6 +1338,9 @@ window.showDoctorDashboard = window.showDoctorDashboard || function() {
         Array.from(consultationActSelect.options || []).forEach(opt => {
           opt.selected = values.includes(opt.value);
         });
+        if (typeof window.refreshConsultationActMultiSelect === 'function') {
+          window.refreshConsultationActMultiSelect();
+        }
       }
       set('consultPrescription', c.prescription);
       set('radiologyResult', c.radiologyResult || '');
@@ -1486,9 +1507,9 @@ window.updateLastConsultation = function (appointmentId, patientName) {
             return;
         }
 
-        // Find all consultations for this patient
+        // Find all consultations for this patient (normalize IDs to avoid type mismatches)
         const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
-        const patientConsultations = consultations.filter(c => c.patientId === patient.id);
+        const patientConsultations = consultations.filter(c => String(c.patientId) === String(patient.id));
 
         if (patientConsultations.length === 0) {
             showTranslatedAlert('No consultations found for this patient.');
@@ -1514,14 +1535,20 @@ window.updateLastConsultation = function (appointmentId, patientName) {
     }
 };
 window.editConsultation = function (consultationId) {
-    try {
-            const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
-        const c = consultations.find(x => x.id === consultationId);
-        if (!c) {
-                showTranslatedAlert('Consultation not found.');
-                return;
-            }
-        window.editingConsultationId = consultationId;
+	try {
+		const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+		// Normalize IDs to strings so we match even if one side is number and the other is string
+		let c = consultations.find(x => x && String(x.id) === String(consultationId));
+		// Fallback to todayConsultationsFromAPI if not yet merged into localStorage
+		if (!c && Array.isArray(window.todayConsultationsFromAPI)) {
+			c = window.todayConsultationsFromAPI.find(x => x && String(x.id) === String(consultationId));
+		}
+		if (!c) {
+			showTranslatedAlert('Consultation not found.');
+			return;
+		}
+
+		window.editingConsultationId = consultationId;
 
         // Set patient display and hidden id (patients loaded from API into window.storedPatients)
         const patients = Array.isArray(window.storedPatients) ? window.storedPatients : [];
@@ -1555,6 +1582,24 @@ window.editConsultation = function (consultationId) {
         } else if (document.getElementById('consultVitalNotes')) {
           set('consultVitalNotes', noteVal);
         }
+
+        // Restore consultation acts into the multi-select (same logic as main editConsultation)
+        const consultationActSelect = document.getElementById('consultationAct');
+        if (consultationActSelect) {
+          const rawActs = c.consultationAct || '';
+          const values = rawActs
+            ? rawActs.split('|').map(s => s.trim()).filter(Boolean)
+            : [];
+
+          Array.from(consultationActSelect.options || []).forEach(opt => {
+            opt.selected = values.includes(opt.value);
+          });
+
+          if (typeof window.refreshConsultationActMultiSelect === 'function') {
+            window.refreshConsultationActMultiSelect();
+          }
+        }
+
         set('consultPrescription', c.prescription);
         set('radiologyResult', c.radiologyResult || '');
         set('radiologyDiagnostics', c.radiologyDiagnostics || '');
@@ -1579,7 +1624,7 @@ window.editConsultation = function (consultationId) {
                 if (detailsBox && detailsInfo) {
                     // Calculate number of visits (consultations)
                     const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
-                    const visitsCount = consultations.filter(c => c.patientId === p.id).length;
+                    const visitsCount = consultations.filter(c => String(c.patientId) === String(p.id)).length;
 
                     const age = p.dateOfBirth ? calculateAge(p.dateOfBirth) : 'N/A';
                     const genderText = p.gender ? (window.t ? window.t(p.gender.toLowerCase(), p.gender) : p.gender) : 'N/A';

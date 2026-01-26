@@ -144,18 +144,141 @@ const addAppointment = (appointmentData) => {
 
 // getConsultationsForDate now provided by consultation.js
 
-// Function to get cash entry (bills total) for a specific date
+// Function to get cash entry (total payments) for a specific date, based on consultations
 const getCashEntryForDate = (date) => {
     const dateStr = formatDateForStorage(date);
-    const bills = JSON.parse(localStorage.getItem('healthcareBills') || '[]');
 
-    const billsForDate = bills.filter(bill => bill.billDate === dateStr);
-    const totalCashEntry = billsForDate.reduce((sum, bill) => sum + (parseFloat(bill.total) || 0), 0);
+    try {
+        // Load consultations snapshot from localStorage
+        const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
 
-    return totalCashEntry;
+        // Load bill descriptions so we can compute consultation tariffs when needed
+        let billDescriptions = [];
+        try {
+            if (typeof window.getBillDescriptions === 'function') {
+                const desc = window.getBillDescriptions();
+                if (Array.isArray(desc)) {
+                    billDescriptions = desc;
+                }
+            }
+        } catch (e) {
+            console.error('Error loading bill descriptions for cash entry:', e);
+        }
+
+        const computePaidForConsultationOnDate = (consultation, targetDateStr) => {
+            if (!consultation) return 0;
+
+            // Only consider consultations created on the target date
+            const created = new Date(consultation.createdAt || consultation.date || 0);
+            if (isNaN(created)) return 0;
+            const consultDateStr = created.toISOString().split('T')[0];
+            if (consultDateStr !== targetDateStr) return 0;
+
+            // Compute consultation total amount with tax (8%)
+            let amount = null;
+            try {
+                const rawActs = consultation.consultationAct || '';
+                const actNames = rawActs
+                    ? rawActs.split('|').map(s => s.trim()).filter(Boolean)
+                    : [];
+                const hasActs = actNames.length > 0;
+
+                if (hasActs && Array.isArray(billDescriptions) && billDescriptions.length > 0) {
+                    actNames.forEach((actName) => {
+                        const match = billDescriptions.find((d) => d && d.name === actName);
+                        if (match) {
+                            const price = typeof match.price === 'number'
+                                ? match.price
+                                : Number(match.price || 0);
+                            if (!isNaN(price)) {
+                                if (amount === null) amount = 0;
+                                amount += price;
+                            }
+                        }
+                    });
+                }
+
+                if (amount === null && typeof consultation.consultationAmount === 'number' && !isNaN(consultation.consultationAmount)) {
+                    amount = consultation.consultationAmount;
+                }
+
+                // If no act and no explicit amount, treat consultation as free (0 TND)
+                if (!hasActs && amount === null) {
+                    amount = 0;
+                }
+            } catch (e) {
+                console.error('Error computing consultation amount for cash entry:', e);
+            }
+
+            let totalWithTax = 0;
+            if (amount !== null) {
+                const taxRate = 0.08;
+                totalWithTax = amount + (amount * taxRate);
+            }
+
+            // Normalize payment status into paid / partial / unpaid
+            let normalizedStatus = 'unpaid';
+            try {
+                if (typeof normalizeConsultationPaymentStatusForReports === 'function') {
+                    normalizedStatus = normalizeConsultationPaymentStatusForReports(consultation);
+                } else {
+                    const rawStatus = (consultation.paymentStatus || '').toLowerCase();
+                    const hasAct = !!(consultation.consultationAct && String(consultation.consultationAct).trim());
+                    if (!hasAct) {
+                        normalizedStatus = 'paid';
+                    } else if (rawStatus === 'paid') {
+                        normalizedStatus = 'paid';
+                    } else if (rawStatus === 'partial' || rawStatus === 'partially_paid') {
+                        normalizedStatus = 'partial';
+                    }
+                }
+            } catch (e) {
+                console.error('Error normalizing payment status for cash entry:', e);
+            }
+
+            let paidAmount = 0;
+
+            if (normalizedStatus === 'paid') {
+                // Fully paid consultation contributes its full amount (with tax)
+                paidAmount = totalWithTax;
+            } else if (normalizedStatus === 'partial') {
+                // Partially paid: use partialPaymentAmount, clamped to full amount
+                let partialAmount = null;
+                if (typeof consultation.partialPaymentAmount === 'number' && !isNaN(consultation.partialPaymentAmount)) {
+                    partialAmount = consultation.partialPaymentAmount;
+                } else if (consultation.partialPaymentAmount !== undefined && consultation.partialPaymentAmount !== null && consultation.partialPaymentAmount !== '') {
+                    const parsedPartial = Number(consultation.partialPaymentAmount);
+                    if (!isNaN(parsedPartial)) {
+                        partialAmount = parsedPartial;
+                    }
+                }
+
+                if (partialAmount !== null && partialAmount > 0) {
+                    if (totalWithTax > 0) {
+                        paidAmount = Math.min(partialAmount, totalWithTax);
+                    } else {
+                        paidAmount = partialAmount;
+                    }
+                }
+            }
+
+            return paidAmount > 0 ? paidAmount : 0;
+        };
+
+        let totalPaidForDate = 0;
+        consultations.forEach((c) => {
+            const paid = computePaidForConsultationOnDate(c, dateStr);
+            if (paid > 0) {
+                totalPaidForDate += paid;
+            }
+        });
+
+        return totalPaidForDate;
+    } catch (error) {
+        console.error('Error calculating cash entry from consultations for date:', error);
+        return 0;
+    }
 };
-
-
 
 // Function to get net cabinet cash for a specific date
 const getCabinetCashForDate = (date) => {
@@ -1112,29 +1235,148 @@ const renderCalendar = () => {
 // Expose renderCalendar to global scope for language switching
 window.renderCalendar = renderCalendar;
 
-// Function to calculate today's cabinet cash from bills
+// Function to calculate today's cabinet cash based on consultation payments
 const calculateTodayCabinetCash = () => {
     try {
-        const bills = JSON.parse(localStorage.getItem('healthcareBills') || '[]');
         const today = new Date();
-        // Use local date string format (YYYY-MM-DD) instead of UTC
-        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        const todayStr = formatDateForStorage(today);
 
-        const todayBills = bills.filter(bill => {
-            // Use billDate (set on bill creation) instead of createdAt
-            return bill.billDate === todayStr;
+        // Load consultations snapshot from localStorage
+        const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+
+        // Load bill descriptions once so we can compute consultation tariffs
+        let billDescriptions = [];
+        try {
+            if (typeof window.getBillDescriptions === 'function') {
+                const desc = window.getBillDescriptions();
+                if (Array.isArray(desc)) {
+                    billDescriptions = desc;
+                }
+            }
+        } catch (e) {
+            console.error('Error loading bill descriptions for cabinet cash:', e);
+        }
+
+        const computePaidForConsultation = (consultation) => {
+            if (!consultation) return 0;
+
+            // Only consider consultations created today
+            const created = new Date(consultation.createdAt || consultation.date || 0);
+            if (isNaN(created)) return 0;
+            const consultDateStr = created.toISOString().split('T')[0];
+            if (consultDateStr !== todayStr) return 0;
+
+            // Compute consultation total amount with tax (8%), mirroring payment/report logic
+            let amount = null;
+            try {
+                const rawActs = consultation.consultationAct || '';
+                const actNames = rawActs
+                    ? rawActs.split('|').map(s => s.trim()).filter(Boolean)
+                    : [];
+                const hasActs = actNames.length > 0;
+
+                if (hasActs && Array.isArray(billDescriptions) && billDescriptions.length > 0) {
+                    actNames.forEach((actName) => {
+                        const match = billDescriptions.find((d) => d && d.name === actName);
+                        if (match) {
+                            const price = typeof match.price === 'number'
+                                ? match.price
+                                : Number(match.price || 0);
+                            if (!isNaN(price)) {
+                                if (amount === null) amount = 0;
+                                amount += price;
+                            }
+                        }
+                    });
+                }
+
+                if (amount === null && typeof consultation.consultationAmount === 'number' && !isNaN(consultation.consultationAmount)) {
+                    amount = consultation.consultationAmount;
+                }
+
+                // If no act and no explicit amount, treat consultation as free (0 TND)
+                if (!hasActs && amount === null) {
+                    amount = 0;
+                }
+            } catch (e) {
+                console.error('Error computing consultation amount for cabinet cash:', e);
+            }
+
+            let totalWithTax = 0;
+            if (amount !== null) {
+                const taxRate = 0.08;
+                totalWithTax = amount + (amount * taxRate);
+            }
+
+            // Normalize payment status into paid / partial / unpaid
+            let normalizedStatus = 'unpaid';
+            try {
+                if (typeof normalizeConsultationPaymentStatusForReports === 'function') {
+                    normalizedStatus = normalizeConsultationPaymentStatusForReports(consultation);
+                } else {
+                    const rawStatus = (consultation.paymentStatus || '').toLowerCase();
+                    const hasAct = !!(consultation.consultationAct && String(consultation.consultationAct).trim());
+                    if (!hasAct) {
+                        normalizedStatus = 'paid';
+                    } else if (rawStatus === 'paid') {
+                        normalizedStatus = 'paid';
+                    } else if (rawStatus === 'partial' || rawStatus === 'partially_paid') {
+                        normalizedStatus = 'partial';
+                    }
+                }
+            } catch (e) {
+                console.error('Error normalizing payment status for cabinet cash:', e);
+            }
+
+            let paidAmount = 0;
+
+            if (normalizedStatus === 'paid') {
+                // Fully paid consultation contributes its full amount (with tax)
+                paidAmount = totalWithTax;
+            } else if (normalizedStatus === 'partial') {
+                // Partially paid: use partialPaymentAmount, clamped to full amount
+                let partialAmount = null;
+                if (typeof consultation.partialPaymentAmount === 'number' && !isNaN(consultation.partialPaymentAmount)) {
+                    partialAmount = consultation.partialPaymentAmount;
+                } else if (consultation.partialPaymentAmount !== undefined && consultation.partialPaymentAmount !== null && consultation.partialPaymentAmount !== '') {
+                    const parsedPartial = Number(consultation.partialPaymentAmount);
+                    if (!isNaN(parsedPartial)) {
+                        partialAmount = parsedPartial;
+                    }
+                }
+
+                if (partialAmount !== null && partialAmount > 0) {
+                    if (totalWithTax > 0) {
+                        paidAmount = Math.min(partialAmount, totalWithTax);
+                    } else {
+                        paidAmount = partialAmount;
+                    }
+                }
+            }
+
+            return paidAmount > 0 ? paidAmount : 0;
+        };
+
+        let totalPaidToday = 0;
+        let paidConsultationsCount = 0;
+
+        consultations.forEach((c) => {
+            const paid = computePaidForConsultation(c);
+            if (paid > 0) {
+                totalPaidToday += paid;
+                paidConsultationsCount += 1;
+            }
         });
 
-        const todayTotal = todayBills.reduce((sum, bill) => sum + (bill.total || 0), 0);
-        const billCount = todayBills.length;
-
         return {
-            total: todayTotal,
-            count: billCount,
-            bills: todayBills
+            total: totalPaidToday,
+            count: paidConsultationsCount,
+            // Keep the property for backward compatibility, even though
+            // it now conceptually represents payments from consultations.
+            bills: []
         };
     } catch (error) {
-        console.error('Error calculating today\'s cabinet cash:', error);
+        console.error("Error calculating today's cabinet cash from consultations:", error);
         return { total: 0, count: 0, bills: [] };
     }
 };
@@ -1182,6 +1424,7 @@ const updateCabinetCashDisplay = () => {
 // Expose functions to global scope
 window.calculateTodayCabinetCash = calculateTodayCabinetCash;
 window.updateCabinetCashDisplay = updateCabinetCashDisplay;
+window.renderDailyAgenda = renderDailyAgenda;
 
 // Navigation functions
 const goToPreviousDay = () => {
@@ -3653,6 +3896,7 @@ function updateConsultationInDatabase(consultation) {
                       : null),
             imc: consultation.imc !== null && consultation.imc !== undefined ? consultation.imc : null,
             bmiCategory: consultation.bmiCategory || null,
+            consultationAct: consultation.consultationAct || null,
             clinicalNote: consultation.clinicalNote || consultation.vitalNotes || '',
             radiologyResult: consultation.radiologyResult || '',
             radiologyDiagnostics: consultation.radiologyDiagnostics || '',
@@ -3894,15 +4138,15 @@ function showPatientSuccess(patient) {
                         <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #059669;">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
-                        <h3 style="font-size: 1.125rem; font-weight: 600; color: #065f46; margin: 0;">Patient Added Successfully!</h3>
+                        <h3 style="font-size: 1.125rem; font-weight: 600; color: #065f46; margin: 0;">${window.t ? window.t('patient_added', 'Patient Added Successfully!') : 'Patient Added Successfully!'}</h3>
                     </div>
                     <div style="font-size: 0.875rem; color: #047857; margin-bottom: 0.75rem;">
-                        <p><strong>Name:</strong> ${patient.fullName}</p>
-                        <p><strong>Email:</strong> ${patient.email}</p>
-                        <p><strong>Phone:</strong> ${patient.phone}</p>
+                        <p><strong>${window.t ? window.t('name', 'Name') : 'Name'}:</strong> ${patient.fullName}</p>
+                        <p><strong>${window.t ? window.t('email', 'Email') : 'Email'}:</strong> ${patient.email}</p>
+                        <p><strong>${window.t ? window.t('phone', 'Phone') : 'Phone'}:</strong> ${patient.phone}</p>
                     </div>
                     <p style="font-size: 0.875rem; color: #059669; margin: 0;">
-                        The patient has been added to the system. You can now schedule appointments for this patient.
+                        ${window.t ? window.t('patient_added_to_system', 'The patient has been added to the system. You can now schedule appointments for this patient.') : 'The patient has been added to the system. You can now schedule appointments for this patient.'}
                     </p>
                 </div>
             `;
@@ -4699,10 +4943,16 @@ async function renderReadyBills() {
         });
     }
 
-    // Keep consultations that are fully paid or partially paid in Ready Bills
+    // Keep consultations that are ready for billing: paid, partially paid, or unpaid (no bill yet).
+    // Backend may store unpaid as NULL or 'paying', so treat those as unpaid as well.
     readyConsultations = readyConsultations.filter(c => {
         const status = (c.paymentStatus || '').toLowerCase();
-        return status === 'paid' || status === 'partial' || status === 'partially_paid';
+        return status === 'paid'
+            || status === 'partial'
+            || status === 'partially_paid'
+            || status === 'unpaid'
+            || status === 'paying'
+            || status === '';
     });
 
     // Cache ready consultations so actions can fall back when localStorage is missing data
@@ -4797,6 +5047,18 @@ async function renderReadyBills() {
                 ? 'bg-yellow-100 text-yellow-800'
                 : 'bg-red-100 text-red-800');
 
+        const isPreInvoice = normalizedStatus === 'partial' || normalizedStatus === 'unpaid';
+
+        const createBillTranslateKey = isPreInvoice
+            ? 'create_pre_invoice'
+            : 'create_bill';
+        const createBillLabel = isPreInvoice
+            ? (window.t ? window.t('create_pre_invoice', 'Créer pré-facture') : 'Créer pré-facture')
+            : (window.t ? window.t('create_bill', 'Créer une facture') : 'Créer une facture');
+        const createBillOnClick = isPreInvoice
+            ? `createPreInvoiceFromConsultation('${c.id}')`
+            : `createBillFromConsultation('${c.id}')`;
+
         return `
                     <div class="card p-4">
                         <div class="flex items-center justify-between">
@@ -4811,7 +5073,7 @@ async function renderReadyBills() {
                             </div>
                             <div class="flex items-center gap-2">
                                 <button class="btn btn-secondary" onclick="viewConsultationDetails('${c.id}')" data-translate="view">${window.t ? window.t('view', 'View') : 'View'}</button>
-                                <button class="btn btn-primary" onclick="createBillFromConsultation('${c.id}')" data-translate="create_bill">${window.t ? window.t('create_bill', 'Create Bill') : 'Create Bill'}</button>
+                                <button class="btn btn-primary" onclick="${createBillOnClick}" data-translate="${createBillTranslateKey}">${createBillLabel}</button>
                             </div>
                         </div>
                     </div>
@@ -4901,6 +5163,8 @@ async function renderDoneBills(searchTerm = '') {
 
         // Derive payment status primarily from linked consultation when available
         let normalizedConsultStatus = null;
+        let paidAmountDisplay = null;
+        let remainingAmountDisplay = null;
         if (consultation && typeof normalizeConsultationPaymentStatusForReports === 'function') {
             normalizedConsultStatus = normalizeConsultationPaymentStatusForReports(consultation);
         }
@@ -4948,6 +5212,54 @@ async function renderDoneBills(searchTerm = '') {
         const isPaid = normalizedConsultStatus
             ? normalizedConsultStatus === 'paid'
             : (bill.status === 'Paid');
+        const isPreInvoiceBill = (function () {
+            const rawStatus = (bill.status || '').toString().toLowerCase();
+            const idStr = (bill.id || '').toString().toLowerCase();
+            return rawStatus === 'preinvoice' || idStr.indexOf('pre-') === 0;
+        })();
+
+        if (isPreInvoiceBill && consultation) {
+            try {
+                let totalAmount = (typeof bill.total === 'number' && !isNaN(bill.total))
+                    ? bill.total
+                    : (Number(bill.total || 0) || 0);
+
+                let paidAmount = 0;
+                const status = (consultation.paymentStatus || '').toLowerCase();
+                if (status === 'paid') {
+                    paidAmount = totalAmount;
+                } else if (status === 'partial' || status === 'partially_paid') {
+                    if (typeof consultation.partialPaymentAmount === 'number' && !isNaN(consultation.partialPaymentAmount)) {
+                        paidAmount = consultation.partialPaymentAmount;
+                    } else if (consultation.partialPaymentAmount !== undefined && consultation.partialPaymentAmount !== null && consultation.partialPaymentAmount !== '') {
+                        const parsedPartial = Number(consultation.partialPaymentAmount);
+                        if (!isNaN(parsedPartial)) {
+                            paidAmount = parsedPartial;
+                        }
+                    }
+                }
+
+                paidAmountDisplay = paidAmount;
+                remainingAmountDisplay = Math.max(0, totalAmount - paidAmount);
+            } catch (e) {
+                console.error('Error computing paid/remaining amounts for pre-invoice bill in done bills:', e);
+            }
+        }
+
+        const paymentSummaryHtml = (function () {
+            if (!isPreInvoiceBill || paidAmountDisplay === null || remainingAmountDisplay === null) return '';
+            const paidLabel = window.t ? window.t('paid_amount', 'Montant payé') : 'Montant payé';
+            const remainingLabel = window.t ? window.t('remaining_amount', 'Montant restant') : 'Montant restant';
+            return `
+                                    <div class="text-sm text-gray-600">
+                                        <strong>${paidLabel}:</strong> ${paidAmountDisplay.toFixed(2)} TND
+                                    </div>
+                                    <div class="text-sm text-gray-600">
+                                        <strong>${remainingLabel}:</strong> ${remainingAmountDisplay.toFixed(2)} TND
+                                    </div>
+                                `;
+        })();
+
         const actionsHtml = isPaid
             ? `
                                 <button onclick="printBill('${bill.id}')" class="btn btn-sm bg-gray-600 hover:bg-gray-700 text-white">
@@ -4957,7 +5269,19 @@ async function renderDoneBills(searchTerm = '') {
                                     <span data-translate="print">Print</span>
                                 </button>
                             `
-            : `
+            : (isPreInvoiceBill
+                ? `
+                                <button onclick="if (window.Payment && Payment.selectBillForPayment) { Payment.selectBillForPayment('${bill.id}'); }" class="btn btn-sm bg-green-600 hover:bg-green-700 text-white">
+                                    <span data-translate="payment_section">Payment</span>
+                                </button>
+                                <button onclick="printBill('${bill.id}')" class="btn btn-sm bg-gray-600 hover:bg-gray-700 text-white">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                                    </svg>
+                                    <span data-translate="print">Print</span>
+                                </button>
+                            `
+                : `
                                 <button onclick="if (window.Payment && Payment.selectBillForPayment) { Payment.selectBillForPayment('${bill.id}'); }" class="btn btn-sm bg-green-600 hover:bg-green-700 text-white">
                                     <span data-translate="payment_section">Payment</span>
                                 </button>
@@ -4974,7 +5298,7 @@ async function renderDoneBills(searchTerm = '') {
                                     </svg>
                                     <span data-translate="print">Print</span>
                                 </button>
-                            `;
+                            `);
 
         return `
                     <div class="card p-4 hover:shadow-lg transition-shadow">
@@ -5000,6 +5324,7 @@ async function renderDoneBills(searchTerm = '') {
                                     <div class="text-sm text-gray-600">
                                         <strong data-translate="created_on">Created:</strong> ${createdDate}
                                     </div>
+                                    ${paymentSummaryHtml}
                                 </div>
                             </div>
                             <span class="badge ${statusClass} px-3 py-1 rounded-full text-xs font-semibold ml-4">
@@ -5076,11 +5401,253 @@ function printBill(billId) {
         return;
     }
 
+    const rawStatus = (bill.status || '').toString().toLowerCase();
+    const idStr = (bill.id || '').toString().toLowerCase();
+    const isPreInvoiceBill = rawStatus === 'preinvoice' || idStr.indexOf('pre-') === 0;
+
+    if (isPreInvoiceBill) {
+        printPreInvoiceFromBill(bill);
+        return;
+    }
+
     // Use existing bill display function if available
     if (typeof showPrintableBill === 'function') {
         showPrintableBill(bill);
     } else {
         window.print();
+    }
+}
+
+function printPreInvoiceFromBill(bill) {
+    try {
+        const totalAmount = (function () {
+            if (typeof bill.total === 'number' && !isNaN(bill.total)) return bill.total;
+            const parsed = Number(bill.total || 0);
+            return isNaN(parsed) ? 0 : parsed;
+        })();
+
+        const subtotal = (function () {
+            if (typeof bill.subtotal === 'number' && !isNaN(bill.subtotal)) return bill.subtotal;
+            const parsed = Number(bill.subtotal || 0);
+            return isNaN(parsed) ? 0 : parsed;
+        })();
+
+        const taxAmount = (function () {
+            if (typeof bill.tax === 'number' && !isNaN(bill.tax)) return bill.tax;
+            const parsed = Number(bill.tax || 0);
+            return isNaN(parsed) ? 0 : parsed;
+        })();
+
+        let createdAt = bill.createdAt || bill.billDate || new Date().toISOString();
+        let paidAmount = 0;
+
+        let consultation = null;
+        if (bill.consultationId) {
+            try {
+                const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+                consultation = consultations.find(function (c) {
+                    return c && String(c.id) === String(bill.consultationId);
+                });
+            } catch (e) {
+                console.error('Error loading consultations from localStorage for pre-invoice print:', e);
+            }
+
+            if (!consultation && Array.isArray(window.readyConsultationsCache)) {
+                consultation = window.readyConsultationsCache.find(function (c) {
+                    return c && String(c.id) === String(bill.consultationId);
+                });
+            }
+
+            if (consultation) {
+                createdAt = consultation.createdAt || consultation.date || createdAt;
+                try {
+                    const status = (consultation.paymentStatus || '').toLowerCase();
+                    if (status === 'paid') {
+                        paidAmount = totalAmount;
+                    } else if (status === 'partial' || status === 'partially_paid') {
+                        if (typeof consultation.partialPaymentAmount === 'number' && !isNaN(consultation.partialPaymentAmount)) {
+                            paidAmount = consultation.partialPaymentAmount;
+                        } else if (consultation.partialPaymentAmount !== undefined && consultation.partialPaymentAmount !== null && consultation.partialPaymentAmount !== '') {
+                            const parsedPartial = Number(consultation.partialPaymentAmount);
+                            if (!isNaN(parsedPartial)) {
+                                paidAmount = parsedPartial;
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error computing paid amount for pre-invoice from bill:', e);
+                }
+            }
+        }
+
+        if (!paidAmount || isNaN(paidAmount)) {
+            paidAmount = 0;
+        }
+
+        const remainingAmount = Math.max(0, totalAmount - paidAmount);
+
+        const pre = {
+            consultationId: bill.consultationId || null,
+            patientId: bill.patientId,
+            patientName: bill.patientName || '',
+            createdAt: createdAt,
+            totalAmount: totalAmount,
+            paidAmount: paidAmount,
+            remainingAmount: remainingAmount,
+            subtotal: subtotal,
+            taxAmount: taxAmount,
+            items: Array.isArray(bill.items)
+                ? bill.items.map(function (item) {
+                    const basePrice = (function () {
+                        if (typeof item.price === 'number' && !isNaN(item.price)) return item.price;
+                        const parsed = Number(item.price || 0);
+                        return isNaN(parsed) ? 0 : parsed;
+                    })();
+                    const qty = (typeof item.quantity === 'number' && !isNaN(item.quantity))
+                        ? item.quantity
+                        : (Number(item.quantity || 1) || 1);
+
+                    const lineTotal = basePrice * qty;
+                    const label = qty > 1
+                        ? (item.description || '') + ' (x' + qty + ')'
+                        : (item.description || '');
+
+                    return {
+                        name: label,
+                        price: lineTotal
+                    };
+                })
+                : []
+        };
+
+        const createdDate = new Date(pre.createdAt);
+        const createdStr = isNaN(createdDate) ? '' : createdDate.toLocaleString();
+
+        const lang = currentLanguage || 'fr';
+        const t = (key, fallback) => {
+            if (window.t) return window.t(key, fallback);
+            return fallback || key;
+        };
+
+        let cabinetPhone = '';
+        try {
+            const s = getCabinetSettings && getCabinetSettings();
+            if (s && s.phone && s.phone.trim()) {
+                cabinetPhone = s.phone.trim();
+            }
+        } catch (e) { }
+
+        const itemsHtml = (Array.isArray(pre.items) && pre.items.length > 0)
+            ? pre.items.map(item => `
+                        <tr>
+                            <td>${item.name}</td>
+                            <td style="text-align:right;">${(item.price || 0).toFixed(2)} TND</td>
+                        </tr>
+                    `).join('')
+            : `<tr><td colspan="2">${t('no_items', 'Aucun acte défini')}</td></tr>`;
+
+        const html = `
+                <!DOCTYPE html>
+                <html lang="${lang}">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>${t('pre_invoice_title', 'Pré-facture')}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 20px; background: #f5f5f5; }
+                        .printable-bill { max-width: 800px; margin: 0 auto; background: white; padding: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+                        .bill-header { display: flex; align-items: center; gap: 1rem; border-bottom: 3px solid #2563eb; padding-bottom: 1rem; margin-bottom: 2rem; }
+                        .bill-header-text { display: flex; flex-direction: column; }
+                        .bill-title { font-size: 2rem; font-weight: bold; color: #2563eb; margin-bottom: 0.5rem; }
+                        .bill-subtitle { color: #666; font-size: 1.1rem; }
+                        .bill-section { background: #f8fafc; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; }
+                        .bill-section h3 { margin: 0 0 0.5rem 0; color: #2563eb; font-size: 1.1rem; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+                        th, td { padding: 0.5rem; border-bottom: 1px solid #e5e7eb; }
+                        th { text-align: left; background: #eff6ff; }
+                        .totals-row td { font-weight: bold; }
+                        .text-right { text-align: right; }
+                        .mt-4 { margin-top: 1rem; }
+                    </style>
+                </head>
+                <body>
+                    <div class="printable-bill">
+                        <div class="bill-header">
+                            <div class="bill-header-text">
+                                <div class="bill-title">${t('pre_invoice_title', 'Pré-facture')}</div>
+                                <div class="bill-subtitle">${t('post_bill_subtitle', 'Document de pré-facturation (Non définitif)')}</div>
+                            </div>
+                        </div>
+
+                        <div class="bill-section">
+                            <h3>${t('patient_information', 'Informations patient')}</h3>
+                            <p><strong>${t('patient', 'Patient')}:</strong> ${pre.patientName || ''}</p>
+                            <p><strong>${t('consultation_date', 'Date de consultation')}:</strong> ${createdStr}</p>
+                        </div>
+
+                        <div class="bill-section">
+                            <h3>${t('bill_items', 'Éléments de facture')}</h3>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>${t('description', 'Description')}</th>
+                                        <th class="text-right">${t('price', 'Prix')}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${itemsHtml}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="bill-section">
+                            <h3>${t('bill_summary', 'Résumé de la facture')}</h3>
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td>${t('subtotal', 'Sous-total')}</td>
+                                        <td class="text-right">${(pre.subtotal || 0).toFixed(2)} TND</td>
+                                    </tr>
+                                    <tr>
+                                        <td>${t('tax_8_percent', 'Taxe (8%)')}</td>
+                                        <td class="text-right">${(pre.taxAmount || 0).toFixed(2)} TND</td>
+                                    </tr>
+                                    <tr class="totals-row">
+                                        <td>${t('total', 'Total')}</td>
+                                        <td class="text-right">${(pre.totalAmount || 0).toFixed(2)} TND</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="bill-section">
+                            <h3>${t('payment_status', 'Statut de paiement')}</h3>
+                            <p><strong>${t('amount_paid', 'Montant payé')}:</strong> ${(pre.paidAmount || 0).toFixed(2)} TND</p>
+                            <p><strong>${t('amount_remaining', 'Montant restant')}:</strong> ${(pre.remainingAmount || 0).toFixed(2)} TND</p>
+                        </div>
+
+                        <div class="mt-4" style="font-size: 0.85rem; color: #6b7280;">
+                            ${t('pre_invoice_footer_notice', 'Ce document est une pré-facture et ne constitue pas une facture finale.')}<br>
+                            ${cabinetPhone ? t('contact_phone', 'Téléphone du cabinet') + ': ' + cabinetPhone : ''}
+                        </div>
+                    </div>
+                    <script>
+                        window.onload = function() { window.print(); };
+                    <\/script>
+                </body>
+                </html>
+            `;
+
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) {
+            console.error('Unable to open print window for pre-invoice bill');
+            return;
+        }
+        printWindow.document.open();
+        printWindow.document.write(html);
+        printWindow.document.close();
+    } catch (e) {
+        console.error('Error printing pre-invoice from bill:', e);
     }
 }
 
@@ -5120,7 +5687,9 @@ function viewConsultationDetails(consultationId) {
                 window.I18n.walkAndTranslate();
             }
         }
-    } catch { }
+    } catch (e) {
+        console.error('Error viewing consultation details:', e);
+    }
 }
 
 function createBillFromConsultation(consultationId) {
@@ -5136,9 +5705,13 @@ function createBillFromConsultation(consultationId) {
 
         if (!c) return;
 
-        // Prefill billing with patient and one item (Consultation)
-        closeReadyBillsModal();
-        showBillingModal();
+        // Open billing modal and link this consultation
+        if (typeof closeReadyBillsModal === 'function') {
+            closeReadyBillsModal();
+        }
+        if (typeof showBillingModal === 'function') {
+            showBillingModal();
+        }
 
         // Store the consultation ID for linking the bill to this consultation
         const consultationIdField = document.getElementById('billConsultationId');
@@ -5146,10 +5719,13 @@ function createBillFromConsultation(consultationId) {
             consultationIdField.value = consultationId;
         }
 
-        const patient = patients.find(p => p.id === c.patientId);
+        // Prefill patient on the billing form
+        const patient = patients.find(p => String(p.id) === String(c.patientId));
         if (patient) {
-            // Set patient ID and populate the form
-            document.getElementById('billPatientId').value = patient.id;
+            const billPatientIdInput = document.getElementById('billPatientId');
+            if (billPatientIdInput) {
+                billPatientIdInput.value = patient.id;
+            }
             if (typeof handleBillPatientSelection === 'function') {
                 setTimeout(() => {
                     handleBillPatientSelection();
@@ -5220,7 +5796,380 @@ function createBillFromConsultation(consultationId) {
                 console.error('Error pre-filling bill from consultation acts:', e);
             }
         }, 250);
-    } catch { }
+    } catch (e) {
+        console.error('Error creating bill from consultation:', e);
+    }
+}
+
+function createPreInvoiceFromConsultation(consultationId) {
+    try {
+        const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+        const patients = Array.isArray(storedPatients) ? storedPatients : [];
+        let c = consultations.find(x => String(x.id) === String(consultationId));
+
+        if (!c && Array.isArray(window.readyConsultationsCache)) {
+            c = window.readyConsultationsCache.find(x => String(x.id) === String(consultationId));
+        }
+
+        if (!c) return;
+
+        const patient = patients.find(p => String(p.id) === String(c.patientId));
+
+        const amountInfo = (function () {
+            // Reuse the same billing logic to compute subtotal, tax and total with tax,
+            // as well as a list of line items for display in the pre-invoice modal.
+            let subtotal = 0;
+            let taxAmount = 0;
+            let totalAmount = 0;
+            let lineItems = [];
+            try {
+                const rawActs = c.consultationAct || '';
+                const actNames = rawActs
+                    ? rawActs.split('|').map(s => s.trim()).filter(Boolean)
+                    : [];
+                const hasActs = actNames.length > 0;
+                let amount = null;
+
+                if (hasActs && typeof window.getBillDescriptions === 'function') {
+                    const descriptions = window.getBillDescriptions();
+                    if (Array.isArray(descriptions)) {
+                        actNames.forEach(actName => {
+                            const match = descriptions.find(d => d && d.name === actName);
+                            if (match) {
+                                const price = typeof match.price === 'number' ? match.price : Number(match.price || 0);
+                                if (!isNaN(price)) {
+                                    if (amount === null) amount = 0;
+                                    amount += price;
+                                    lineItems.push({ name: actName, price });
+                                }
+                            }
+                        });
+                    }
+                }
+
+                if (amount === null && typeof c.consultationAmount === 'number' && !isNaN(c.consultationAmount)) {
+                    amount = c.consultationAmount;
+                }
+
+                if (!hasActs && amount === null) {
+                    amount = 0;
+                }
+
+                if (amount !== null) {
+                    const taxRate = 0.08;
+                    subtotal = amount;
+                    totalAmount = amount + (amount * taxRate);
+                    taxAmount = totalAmount - subtotal;
+                }
+            } catch (e) {
+                console.error('Error computing consultation amount for pre-invoice:', e);
+            }
+
+            let paidAmount = 0;
+            try {
+                const status = (c.paymentStatus || '').toLowerCase();
+                if (status === 'paid') {
+                    paidAmount = totalAmount;
+                } else if (status === 'partial' || status === 'partially_paid') {
+                    if (typeof c.partialPaymentAmount === 'number' && !isNaN(c.partialPaymentAmount)) {
+                        paidAmount = c.partialPaymentAmount;
+                    } else if (c.partialPaymentAmount !== undefined && c.partialPaymentAmount !== null && c.partialPaymentAmount !== '') {
+                        const parsedPartial = Number(c.partialPaymentAmount);
+                        if (!isNaN(parsedPartial)) {
+                            paidAmount = parsedPartial;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('Error computing paid amount for pre-invoice:', e);
+            }
+
+            const remainingAmount = Math.max(0, totalAmount - paidAmount);
+            return { totalAmount, paidAmount, remainingAmount, subtotal, taxAmount, lineItems };
+        })();
+
+        const modal = document.getElementById('preInvoiceModal');
+        if (!modal) {
+            console.error('preInvoiceModal not found in DOM');
+            return;
+        }
+
+        const nameSpan = document.getElementById('preInvoicePatientName');
+        const dateSpan = document.getElementById('preInvoiceConsultationDate');
+        const itemsContainer = document.getElementById('preInvoiceItemsContainer');
+        const subtotalSpan = document.getElementById('preInvoiceSubtotal');
+        const taxSpan = document.getElementById('preInvoiceTax');
+        const totalSummarySpan = document.getElementById('preInvoiceTotalSummary');
+        const paidSpan = document.getElementById('preInvoicePaid');
+        const remainingSpan = document.getElementById('preInvoiceRemaining');
+
+        if (nameSpan) nameSpan.textContent = patient ? (patient.fullName || patient.name || '-') : (c.patientName || c.patientFullName || '-');
+
+        try {
+            const created = new Date(c.createdAt || c.date);
+            dateSpan && (dateSpan.textContent = isNaN(created) ? '-' : created.toLocaleString());
+        } catch {
+            if (dateSpan) dateSpan.textContent = '-';
+        }
+
+        if (itemsContainer) {
+            if (Array.isArray(amountInfo.lineItems) && amountInfo.lineItems.length > 0) {
+                itemsContainer.innerHTML = amountInfo.lineItems.map(item => `
+                            <div class="flex justify-between">
+                                <span>${item.name}</span>
+                                <span>${item.price.toFixed(2)} TND</span>
+                            </div>
+                        `).join('');
+            } else {
+                itemsContainer.innerHTML = '<p class="text-gray-500" data-translate="no_items">Aucun acte défini</p>';
+            }
+        }
+
+        if (subtotalSpan) subtotalSpan.textContent = amountInfo.subtotal.toFixed(2) + ' TND';
+        if (taxSpan) taxSpan.textContent = amountInfo.taxAmount.toFixed(2) + ' TND';
+        if (totalSummarySpan) totalSummarySpan.textContent = amountInfo.totalAmount.toFixed(2) + ' TND';
+        if (paidSpan) paidSpan.textContent = amountInfo.paidAmount.toFixed(2) + ' TND';
+        if (remainingSpan) remainingSpan.textContent = amountInfo.remainingAmount.toFixed(2) + ' TND';
+
+        // Persist info for printing/export
+        window.currentPreInvoice = {
+            consultationId: c.id,
+            patientId: c.patientId,
+            patientName: nameSpan ? nameSpan.textContent : '',
+            createdAt: c.createdAt || c.date || new Date().toISOString(),
+            totalAmount: amountInfo.totalAmount,
+            paidAmount: amountInfo.paidAmount,
+            remainingAmount: amountInfo.remainingAmount,
+            subtotal: amountInfo.subtotal,
+            taxAmount: amountInfo.taxAmount,
+            items: amountInfo.lineItems
+        };
+
+        modal.classList.add('active');
+        if (window.I18n && window.I18n.walkAndTranslate) {
+            window.I18n.walkAndTranslate();
+        }
+    } catch (e) {
+        console.error('Error creating pre-invoice from consultation:', e);
+    }
+}
+
+function savePreInvoiceAsBill(pre) {
+    try {
+        if (!pre || !pre.consultationId) {
+            return;
+        }
+
+        const patients = Array.isArray(window.storedPatients) ? window.storedPatients : [];
+        const patient = patients.find(function (p) {
+            return p && String(p.id) === String(pre.patientId);
+        });
+
+        const todayStr = new Date().toISOString().split('T')[0];
+        const billId = 'pre-' + String(pre.consultationId);
+
+        const billItems = Array.isArray(pre.items)
+            ? pre.items.map(function (item) {
+                const priceNumber = typeof item.price === 'number' ? item.price : Number(item.price || 0);
+                return {
+                    description: item.name || '',
+                    quantity: 1,
+                    price: isNaN(priceNumber) ? 0 : priceNumber
+                };
+            })
+            : [];
+
+        const bill = {
+            id: billId,
+            patientId: pre.patientId || (patient ? patient.id : ''),
+            patientName: pre.patientName || (patient ? (patient.fullName || patient.name || '') : ''),
+            patientEmail: patient ? (patient.email || '') : '',
+            patientPhone: patient ? (patient.phone || '') : '',
+            billDate: todayStr,
+            dueDate: todayStr,
+            items: billItems,
+            subtotal: pre.subtotal || 0,
+            tax: pre.taxAmount || 0,
+            total: pre.totalAmount || 0,
+            notes: 'Pre-invoice',
+            status: 'PreInvoice',
+            consultationId: pre.consultationId || null,
+            createdAt: pre.createdAt || new Date().toISOString()
+        };
+
+        // Backend requires a patient id and dates; if missing, skip persistence
+        if (!bill.patientId) {
+            console.warn('Skipping pre-invoice persistence because patientId is missing');
+            return;
+        }
+
+        if (typeof syncBillToDatabase === 'function') {
+            syncBillToDatabase(bill);
+        }
+
+        // Keep a local copy so Done Bills can show it even before the next API refresh
+        try {
+            const existingBills = JSON.parse(localStorage.getItem('healthcareBills') || '[]');
+            const index = existingBills.findIndex(function (b) { return b && b.id === bill.id; });
+            if (index === -1) {
+                existingBills.push(bill);
+            } else {
+                existingBills[index] = bill;
+            }
+            localStorage.setItem('healthcareBills', JSON.stringify(existingBills));
+        } catch (cacheErr) {
+            console.error('Error caching pre-invoice bill locally:', cacheErr);
+        }
+    } catch (e) {
+        console.error('Error saving pre-invoice as bill:', e);
+    }
+}
+
+function printPreInvoiceModal() {
+    try {
+        const pre = window.currentPreInvoice;
+        if (!pre) {
+            console.warn('No current pre-invoice data available to print');
+            return;
+        }
+
+        // Persist pre-invoice as a bill so it appears in the Done Bills list
+        savePreInvoiceAsBill(pre);
+
+        const preInvoiceModal = document.getElementById('preInvoiceModal');
+        if (preInvoiceModal) {
+            preInvoiceModal.classList.remove('active');
+        }
+
+        const createdDate = new Date(pre.createdAt);
+        const createdStr = isNaN(createdDate) ? '' : createdDate.toLocaleString();
+
+        const lang = currentLanguage || 'fr';
+        const t = (key, fallback) => {
+            if (window.t) return window.t(key, fallback);
+            return fallback || key;
+        };
+
+        let cabinetPhone = '';
+        try {
+            const s = getCabinetSettings && getCabinetSettings();
+            if (s && s.phone && s.phone.trim()) {
+                cabinetPhone = s.phone.trim();
+            }
+        } catch (e) { }
+
+        const itemsHtml = (Array.isArray(pre.items) && pre.items.length > 0)
+            ? pre.items.map(item => `
+                        <tr>
+                            <td>${item.name}</td>
+                            <td style="text-align:right;">${(item.price || 0).toFixed(2)} TND</td>
+                        </tr>
+                    `).join('')
+            : `<tr><td colspan="2">${t('no_items', 'Aucun acte défini')}</td></tr>`;
+
+        const html = `
+                <!DOCTYPE html>
+                <html lang="${lang}">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>${t('pre_invoice_title', 'Pré-facture')}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 20px; background: #f5f5f5; }
+                        .printable-bill { max-width: 800px; margin: 0 auto; background: white; padding: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+                        .bill-header { display: flex; align-items: center; gap: 1rem; border-bottom: 3px solid #2563eb; padding-bottom: 1rem; margin-bottom: 2rem; }
+                        .bill-header-text { display: flex; flex-direction: column; }
+                        .bill-title { font-size: 2rem; font-weight: bold; color: #2563eb; margin-bottom: 0.5rem; }
+                        .bill-subtitle { color: #666; font-size: 1.1rem; }
+                        .bill-section { background: #f8fafc; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; }
+                        .bill-section h3 { margin: 0 0 0.5rem 0; color: #2563eb; font-size: 1.1rem; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+                        th, td { padding: 0.5rem; border-bottom: 1px solid #e5e7eb; }
+                        th { text-align: left; background: #eff6ff; }
+                        .totals-row td { font-weight: bold; }
+                        .text-right { text-align: right; }
+                        .mt-4 { margin-top: 1rem; }
+                    </style>
+                </head>
+                <body>
+                    <div class="printable-bill">
+                        <div class="bill-header">
+                            <div class="bill-header-text">
+                                <div class="bill-title">${t('pre_invoice_title', 'Pré-facture')}</div>
+                                <div class="bill-subtitle">${t('post_bill_subtitle', 'Document de pré-facturation (Non définitif)')}</div>
+                            </div>
+                        </div>
+
+                        <div class="bill-section">
+                            <h3>${t('patient_information', 'Informations patient')}</h3>
+                            <p><strong>${t('patient', 'Patient')}:</strong> ${pre.patientName || ''}</p>
+                            <p><strong>${t('consultation_date', 'Date de consultation')}:</strong> ${createdStr}</p>
+                        </div>
+
+                        <div class="bill-section">
+                            <h3>${t('bill_items', 'Éléments de facture')}</h3>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>${t('description', 'Description')}</th>
+                                        <th class="text-right">${t('price', 'Prix')}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${itemsHtml}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="bill-section">
+                            <h3>${t('bill_summary', 'Résumé de la facture')}</h3>
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td>${t('subtotal', 'Sous-total')}</td>
+                                        <td class="text-right">${(pre.subtotal || 0).toFixed(2)} TND</td>
+                                    </tr>
+                                    <tr>
+                                        <td>${t('tax_8_percent', 'Taxe (8%)')}</td>
+                                        <td class="text-right">${(pre.taxAmount || 0).toFixed(2)} TND</td>
+                                    </tr>
+                                    <tr class="totals-row">
+                                        <td>${t('total', 'Total')}</td>
+                                        <td class="text-right">${(pre.totalAmount || 0).toFixed(2)} TND</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="bill-section">
+                            <h3>${t('payment_status', 'Statut de paiement')}</h3>
+                            <p><strong>${t('amount_paid', 'Montant payé')}:</strong> ${(pre.paidAmount || 0).toFixed(2)} TND</p>
+                            <p><strong>${t('amount_remaining', 'Montant restant')}:</strong> ${(pre.remainingAmount || 0).toFixed(2)} TND</p>
+                        </div>
+
+                        <div class="mt-4" style="font-size: 0.85rem; color: #6b7280;">
+                            ${t('pre_invoice_footer_notice', 'Ce document est une pré-facture et ne constitue pas une facture finale.')}<br>
+                            ${cabinetPhone ? t('contact_phone', 'Téléphone du cabinet') + ': ' + cabinetPhone : ''}
+                        </div>
+                    </div>
+                    <script>
+                        window.onload = function() { window.print(); };
+                    </script>
+                </body>
+                </html>
+            `;
+
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) {
+            console.error('Unable to open print window for pre-invoice');
+            return;
+        }
+        printWindow.document.open();
+        printWindow.document.write(html);
+        printWindow.document.close();
+    } catch (e) {
+        console.error('Error printing pre-invoice:', e);
+    }
 }
 
 // Language Settings Functions
@@ -6009,86 +6958,70 @@ function applyCabinetSettingsToForm(settings) {
     }
 }
 
-// Load bill/service descriptions with database as source of truth
-// Uses localStorage as a fast cache, then refreshes from get_bill_descriptions.php
+// Load bill/service descriptions with database as source of truth.
+// Always fetch from get_bill_descriptions.php; use in-memory cache only (no localStorage dependency).
 function getBillDescriptions() {
-    // 1) If we already have an in-memory cache, return it immediately
-    if (Array.isArray(window.billDescriptionsCache)) {
-        return window.billDescriptionsCache;
+    if (!Array.isArray(window.billDescriptionsCache)) {
+        window.billDescriptionsCache = [];
     }
 
-    // 2) Start with localStorage as a fast cache
-    let local = [];
-    try {
-        const raw = localStorage.getItem('bill_descriptions');
-        if (raw) {
-            const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed)) {
-                local = parsed;
-            }
+    // Always refresh from API (database is source of truth), but avoid parallel fetches
+    if (!window.billDescriptionsFetchInProgress) {
+        window.billDescriptionsFetchInProgress = true;
+        try {
+            fetch('api/get_bill_descriptions.php')
+                .then(res => {
+                    if (!res.ok) throw new Error('Failed to fetch bill descriptions');
+                    return res.json();
+                })
+                .then(data => {
+                    if (data && data.status === 'ok' && Array.isArray(data.services)) {
+                        const descriptions = data.services.map(s => ({
+                            id: s.id,
+                            name: s.name,
+                            price: typeof s.defaultPrice === 'number' ? s.defaultPrice : Number(s.defaultPrice) || 0,
+                            notes: s.notes || '',
+                            createdAt: s.createdAt || '',
+                            updatedAt: s.updatedAt || ''
+                        }));
+
+                        window.billDescriptionsCache = descriptions;
+
+                        // Re-render settings UI if open
+                        if (typeof renderBillDescriptionsList === 'function') {
+                            renderBillDescriptionsList();
+                        }
+
+                        // Refresh consultation act dropdown if present
+                        if (typeof window.populateConsultationActSelect === 'function') {
+                            window.populateConsultationActSelect();
+                        }
+                    } else {
+                        console.warn('get_bill_descriptions.php returned no services');
+                        window.billDescriptionsCache = [];
+                    }
+                })
+                .catch(err => {
+                    console.error('Error fetching bill descriptions from API:', err);
+                })
+                .finally(() => {
+                    window.billDescriptionsFetchInProgress = false;
+                });
+        } catch (e) {
+            console.error('Exception while fetching bill descriptions from API:', e);
+            window.billDescriptionsFetchInProgress = false;
         }
-    } catch (e) {
-        console.error('Error reading bill_descriptions from localStorage:', e);
-        local = [];
     }
 
-    // 3) Asynchronously refresh from backend API and update cache/localStorage
-    try {
-        fetch('api/get_bill_descriptions.php')
-            .then(res => {
-                if (!res.ok) throw new Error('Failed to fetch bill descriptions');
-                return res.json();
-            })
-            .then(data => {
-                if (data && data.status === 'ok' && Array.isArray(data.services)) {
-                    const descriptions = data.services.map(s => ({
-                        id: s.id,
-                        name: s.name,
-                        price: typeof s.defaultPrice === 'number' ? s.defaultPrice : Number(s.defaultPrice) || 0,
-                        notes: s.notes || '',
-                        createdAt: s.createdAt || '',
-                        updatedAt: s.updatedAt || ''
-                    }));
-
-                    try {
-                        localStorage.setItem('bill_descriptions', JSON.stringify(descriptions));
-                    } catch (e) {
-                        console.error('Error caching bill_descriptions to localStorage:', e);
-                    }
-                    window.billDescriptionsCache = descriptions;
-
-                    // Re-render settings UI if open
-                    if (typeof renderBillDescriptionsList === 'function') {
-                        renderBillDescriptionsList();
-                    }
-
-                    // Refresh consultation act dropdown if present
-                    if (typeof window.populateConsultationActSelect === 'function') {
-                        window.populateConsultationActSelect();
-                    }
-                } else {
-                    console.warn('get_bill_descriptions.php returned no services');
-                    window.billDescriptionsCache = [];
-                }
-            })
-            .catch(err => {
-                console.error('Error fetching bill descriptions from API:', err);
-            });
-    } catch (e) {
-        console.error('Exception while fetching bill descriptions from API:', e);
-    }
-
-    // 4) Use local cache for this call; will be updated once API returns
-    window.billDescriptionsCache = local;
-    return local;
+    // Always return the in-memory cache; it will be updated when the API call completes.
+    return window.billDescriptionsCache;
 }
 
 function saveBillDescriptions(descriptions) {
     try {
-        localStorage.setItem('bill_descriptions', JSON.stringify(descriptions || []));
         window.billDescriptionsCache = Array.isArray(descriptions) ? descriptions : [];
     } catch (e) {
-        console.error('Error saving bill descriptions to localStorage:', e);
+        console.error('Error updating bill descriptions cache:', e);
     }
 }
 
@@ -6119,6 +7052,13 @@ function syncBillDescriptionToDatabase(desc) {
                     return;
                 }
                 console.log('Bill description sync success:', data);
+
+                // After a successful sync, reload bill descriptions from API
+                // so the UI (existing services list and consultation acts)
+                // reflects the latest database state.
+                if (typeof getBillDescriptions === 'function') {
+                    getBillDescriptions();
+                }
             })
             .catch(err => {
                 console.error('Bill description sync error:', err);
@@ -6213,10 +7153,6 @@ function deleteBillDescription(id) {
     const confirmMessage = translations[currentLanguage].confirm_delete_service || 'Are you sure you want to delete this service?';
     if (!confirm(confirmMessage)) return;
 
-    const descriptions = getBillDescriptions();
-    const filtered = descriptions.filter(d => String(d.id) !== String(id));
-    saveBillDescriptions(filtered);
-
     // Call backend to delete from database
     try {
         fetch('api/delete_bill_description.php', {
@@ -6229,9 +7165,31 @@ function deleteBillDescription(id) {
                 try { data = await res.json(); } catch (_) { data = null; }
                 if (!res.ok || !data || data.status !== 'ok') {
                     console.error('Failed to delete bill description from database:', res.status, data || await res.text());
-                } else {
-                    console.log('Bill description deleted from database:', data);
+                    return;
                 }
+
+                console.log('Bill description deleted from database:', data);
+
+                if (typeof getBillDescriptions === 'function') {
+                    getBillDescriptions();
+                } else {
+                    const current = Array.isArray(window.billDescriptionsCache) ? window.billDescriptionsCache : [];
+                    const filtered = current.filter(d => String(d.id) !== String(id));
+                    if (typeof saveBillDescriptions === 'function') {
+                        saveBillDescriptions(filtered);
+                    } else {
+                        window.billDescriptionsCache = filtered;
+                    }
+                    if (typeof renderBillDescriptionsList === 'function') {
+                        renderBillDescriptionsList();
+                    }
+                    if (typeof window.populateConsultationActSelect === 'function') {
+                        window.populateConsultationActSelect();
+                    }
+                }
+
+                const successMessage = translations[currentLanguage].service_deleted || 'Service deleted successfully!';
+                showTranslatedAlert('service_deleted', successMessage);
             })
             .catch(err => {
                 console.error('Error calling delete_bill_description API:', err);
@@ -6239,11 +7197,6 @@ function deleteBillDescription(id) {
     } catch (e) {
         console.error('Exception while deleting bill description from database:', e);
     }
-
-    renderBillDescriptionsList();
-
-    const successMessage = translations[currentLanguage].service_deleted || 'Service deleted successfully!';
-    showTranslatedAlert('service_deleted', successMessage);
 }
 
 // ========================================
@@ -6891,6 +7844,83 @@ async function renderUnpaidPatientsReport() {
         ? window.storedPatients
         : (typeof window.getPatients === 'function' ? window.getPatients() : []);
 
+    // Compute aggregate partial paid and outstanding amounts for this period
+    let totalPartialPaid = 0;
+    let totalExpectedAmount = 0;
+
+    // Use current bill descriptions to compute consultation tariff-based amounts
+    let billDescriptions = [];
+    try {
+        if (typeof window.getBillDescriptions === 'function') {
+            const desc = window.getBillDescriptions();
+            if (Array.isArray(desc)) billDescriptions = desc;
+        }
+    } catch (e) {
+        console.error('Error loading bill descriptions for in-progress payments report:', e);
+    }
+
+    filtered.forEach(function (c) {
+        // Compute consultation total with tax similarly to payment tab
+        let numericAmount = null;
+        try {
+            const rawActs = c.consultationAct || '';
+            const actNames = rawActs
+                ? rawActs.split('|').map(function (s) { return s.trim(); }).filter(function (v) { return v; })
+                : [];
+            const hasActs = actNames.length > 0;
+            let amount = null;
+
+            if (hasActs && Array.isArray(billDescriptions) && billDescriptions.length > 0) {
+                actNames.forEach(function (actName) {
+                    const match = billDescriptions.find(function (d) {
+                        return d && d.name === actName;
+                    });
+                    if (match) {
+                        const price = typeof match.price === 'number' ? match.price : Number(match.price || 0);
+                        if (!isNaN(price)) {
+                            if (amount === null) amount = 0;
+                            amount += price;
+                        }
+                    }
+                });
+            }
+
+            if (amount === null && typeof c.consultationAmount === 'number' && !isNaN(c.consultationAmount)) {
+                amount = c.consultationAmount;
+            }
+
+            if (!hasActs && amount === null) {
+                amount = 0;
+            }
+
+            if (amount !== null) {
+                const taxRate = 0.08;
+                const totalWithTax = amount + (amount * taxRate);
+                numericAmount = totalWithTax;
+            }
+        } catch (e) {
+            console.error('Error computing consultation amount for in-progress payments aggregate:', e);
+        }
+
+        let partialAmount = null;
+        if (typeof c.partialPaymentAmount === 'number' && !isNaN(c.partialPaymentAmount)) {
+            partialAmount = c.partialPaymentAmount;
+        } else if (c.partialPaymentAmount !== undefined && c.partialPaymentAmount !== null && c.partialPaymentAmount !== '') {
+            const parsedPartial = Number(c.partialPaymentAmount);
+            if (!isNaN(parsedPartial)) {
+                partialAmount = parsedPartial;
+            }
+        }
+
+        if (numericAmount !== null && numericAmount > 0 && partialAmount !== null && partialAmount > 0) {
+            const clampedPartial = Math.min(partialAmount, numericAmount);
+            totalPartialPaid += clampedPartial;
+            totalExpectedAmount += numericAmount;
+        }
+    });
+
+    const totalOutstandingAmount = Math.max(totalExpectedAmount - totalPartialPaid, 0);
+
     if (filtered.length === 0) {
         container.innerHTML = '<p class="text-gray-500 text-center py-6" data-translate="no_data_for_period">' + (window.t ? window.t('no_data_for_period', 'No data for this period') : 'No data for this period') + '</p>';
         if (typeof applyTranslations === 'function') {
@@ -6905,9 +7935,26 @@ async function renderUnpaidPatientsReport() {
         return dateB - dateA;
     });
 
-    container.innerHTML = sorted.map(function (c) {
-        return buildConsultationPaymentRowForReports(c, patients);
-    }).join('');
+    const partialPaidLabel = window.t ? window.t('total_partial_paid', 'Total partial payments') : 'Total partial payments';
+    const outstandingLabel = window.t ? window.t('total_outstanding_amount', 'Total outstanding amount') : 'Total outstanding amount';
+
+    container.innerHTML = `
+            <div class="card p-4 mb-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <div class="text-sm text-gray-600">${partialPaidLabel}</div>
+                        <div class="text-2xl font-bold text-green-600">${totalPartialPaid.toFixed(2)} TND</div>
+                    </div>
+                    <div>
+                        <div class="text-sm text-gray-600">${outstandingLabel}</div>
+                        <div class="text-2xl font-bold text-yellow-600">${totalOutstandingAmount.toFixed(2)} TND</div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4">
+                ${sorted.map(function (c) { return buildConsultationPaymentRowForReports(c, patients); }).join('')}
+            </div>
+        `;
 
     if (typeof applyTranslations === 'function') {
         applyTranslations(container);
@@ -7426,58 +8473,782 @@ function renderMonthlyReport() {
     }
 }
 
-function exportReport() {
-    if (!currentReportData || currentReportData.bills.length === 0) {
-        alert('No data to export.');
+function printReport() {
+    const t = function (key, fallback) {
+        return window.t ? window.t(key, fallback) : (fallback || key);
+    };
+
+    // Special print for unpaid and in-progress payment tabs (consultation-based views)
+    if (currentReportTab === 'unpaidPatients' || currentReportTab === 'inProgressPayments') {
+        if (typeof printConsultationPaymentsReport === 'function') {
+            printConsultationPaymentsReport(currentReportTab, t);
+        }
+        return;
+    }
+
+    if (!currentReportData || !Array.isArray(currentReportData.bills) || currentReportData.bills.length === 0) {
+        if (typeof window.showTranslatedAlert === 'function') {
+            window.showTranslatedAlert('no_data_for_period');
+        } else if (window.t) {
+            alert(window.t('no_data_for_period', 'No data for this period'));
+        } else {
+            alert('No data for this period');
+        }
+        return;
+    }
+
+    const session = JSON.parse(localStorage.getItem('medconnect_session') || '{}');
+    const doctorName = session.name || 'Doctor';
+    const lang = (typeof currentLanguage !== 'undefined' && currentLanguage) ? currentLanguage : 'fr';
+
+    const now = new Date();
+    let rangeStart, rangeEnd, rangeLabel, reportTitle;
+
+    if (currentReportTab === 'daily') {
+        const dateInput = document.getElementById('dailyReportDate');
+        const selectedDate = (dateInput && dateInput.value) ? new Date(dateInput.value) : now;
+        rangeStart = new Date(selectedDate);
+        rangeStart.setHours(0, 0, 0, 0);
+        rangeEnd = new Date(selectedDate);
+        rangeEnd.setHours(23, 59, 59, 999);
+        rangeLabel = selectedDate.toLocaleDateString();
+        reportTitle = t('daily_report', 'Daily Report');
+    } else if (currentReportTab === 'weekly') {
+        const dateInput = document.getElementById('weeklyReportDate');
+        const selectedDate = (dateInput && dateInput.value) ? new Date(dateInput.value) : now;
+        rangeStart = new Date(selectedDate);
+        rangeStart.setHours(0, 0, 0, 0);
+        rangeEnd = new Date(selectedDate);
+        rangeEnd.setDate(rangeEnd.getDate() + 6);
+        rangeEnd.setHours(23, 59, 59, 999);
+        rangeLabel = rangeStart.toLocaleDateString() + ' - ' + rangeEnd.toLocaleDateString();
+        reportTitle = t('weekly_report', 'Weekly Report');
+    } else {
+        const monthSelect = document.getElementById('monthlyReportMonth');
+        const yearSelect = document.getElementById('monthlyReportYear');
+        const month = monthSelect ? parseInt(monthSelect.value, 10) : now.getMonth();
+        const year = yearSelect ? parseInt(yearSelect.value, 10) : now.getFullYear();
+        rangeStart = new Date(year, month, 1, 0, 0, 0, 0);
+        rangeEnd = new Date(year, month + 1, 0, 23, 59, 59, 999);
+        const monthName = rangeStart.toLocaleString('default', { month: 'long' });
+        rangeLabel = monthName + ' ' + year;
+        reportTitle = t('monthly_report', 'Monthly Report');
+    }
+
+    const expensesForRange = getExpensesForPeriod(rangeStart, rangeEnd).total;
+    const totalRevenueForRange = currentReportData.bills.reduce(function (sum, b) { return sum + b.total; }, 0);
+    const netProfitForRange = totalRevenueForRange - expensesForRange;
+
+    const docTitle = t('profit_reports', 'Profit Reports');
+
+    const billsRowsHtml = currentReportData.bills.map(function (bill, index) {
+        const created = new Date(bill.createdAt || bill.date || 0);
+        const createdStr = isNaN(created) ? '' : created.toLocaleString();
+        return `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${bill.patientName || ''}</td>
+                    <td>${bill.id}</td>
+                    <td>${createdStr}</td>
+                    <td style="text-align:right;">${(bill.total || 0).toFixed(2)} TND</td>
+                    <td style="text-align:right;">${Array.isArray(bill.items) ? bill.items.length : 0}</td>
+                </tr>`;
+    }).join('');
+
+    const html = `<!DOCTYPE html>
+<html lang="${lang}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${docTitle}</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #111827; margin: 0; padding: 20px; background: #f3f4f6; }
+        .report-container { max-width: 900px; margin: 0 auto; background: #ffffff; padding: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.08); }
+        .report-header { border-bottom: 2px solid #2563eb; padding-bottom: 12px; margin-bottom: 20px; }
+        .report-title { font-size: 24px; font-weight: 700; color: #2563eb; margin: 0 0 4px 0; }
+        .report-subtitle { font-size: 16px; color: #4b5563; margin: 0; }
+        .meta { font-size: 13px; color: #6b7280; margin-top: 8px; }
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
+        .summary-card { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px 12px; }
+        .summary-label { font-size: 12px; color: #6b7280; }
+        .summary-value { font-size: 18px; font-weight: 700; color: #111827; }
+        table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; }
+        th, td { padding: 6px 8px; border-bottom: 1px solid #e5e7eb; }
+        th { text-align: left; background: #eff6ff; font-weight: 600; color: #374151; }
+        .mt-4 { margin-top: 16px; }
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        <div class="report-header">
+            <h1 class="report-title">${docTitle}</h1>
+            <p class="report-subtitle">${reportTitle}</p>
+            <div class="meta">
+                <div><strong>${t('doctor', 'Doctor')}:</strong> ${doctorName}</div>
+                <div><strong>${t('date', 'Date')}:</strong> ${new Date().toLocaleString()}</div>
+                <div><strong>${t('period', 'Period')}:</strong> ${rangeLabel}</div>
+            </div>
+        </div>
+
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="summary-label">${t('total_consultations', 'Total Consultations')}</div>
+                <div class="summary-value">${currentReportData.consultations.length}</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">${t('total_bills', 'Total Bills')}</div>
+                <div class="summary-value">${currentReportData.bills.length}</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">${t('total_revenue', 'Total Revenue')}</div>
+                <div class="summary-value">${totalRevenueForRange.toFixed(2)} TND</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">${t('total_expenses', 'Total Expenses')}</div>
+                <div class="summary-value">${expensesForRange.toFixed(2)} TND</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">${t('net_profit', 'Net Profit')}</div>
+                <div class="summary-value">${netProfitForRange.toFixed(2)} TND</div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <h2 style="font-size:16px; font-weight:600; margin:0 0 6px 0;">${t('bill_details', 'Bill Details')}</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>${t('patient_name', 'Patient Name')}</th>
+                        <th>${t('bill_id', 'Bill ID')}</th>
+                        <th>${t('bill_date', 'Bill Date')}</th>
+                        <th style="text-align:right;">${t('total', 'Total')}</th>
+                        <th style="text-align:right;">${t('items', 'items')}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${billsRowsHtml}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        window.onload = function () { window.print(); };
+    <\/script>
+</body>
+</html>`;
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+        console.error('Unable to open print window for report');
+        return;
+    }
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
+}
+
+function computeConsultationAmountsForReport(consultation, billDescriptions) {
+    let numericAmount = null;
+
+    try {
+        const rawActs = consultation.consultationAct || '';
+        const actNames = rawActs
+            ? rawActs.split('|').map(function (s) { return s.trim(); }).filter(function (v) { return v; })
+            : [];
+        const hasActs = actNames.length > 0;
+        let amount = null;
+
+        if (hasActs && Array.isArray(billDescriptions) && billDescriptions.length > 0) {
+            actNames.forEach(function (actName) {
+                const match = billDescriptions.find(function (d) {
+                    return d && d.name === actName;
+                });
+                if (match) {
+                    const price = typeof match.price === 'number' ? match.price : Number(match.price || 0);
+                    if (!isNaN(price)) {
+                        if (amount === null) amount = 0;
+                        amount += price;
+                    }
+                }
+            });
+        }
+
+        if (amount === null && typeof consultation.consultationAmount === 'number' && !isNaN(consultation.consultationAmount)) {
+            amount = consultation.consultationAmount;
+        }
+
+        if (!hasActs && amount === null) {
+            amount = 0;
+        }
+
+        if (amount !== null) {
+            const taxRate = 0.08;
+            const totalWithTax = amount + (amount * taxRate);
+            numericAmount = totalWithTax;
+        }
+    } catch (e) {
+        console.error('Error computing consultation financials for export:', e);
+    }
+
+    let partialAmount = null;
+    if (typeof consultation.partialPaymentAmount === 'number' && !isNaN(consultation.partialPaymentAmount)) {
+        partialAmount = consultation.partialPaymentAmount;
+    } else if (consultation.partialPaymentAmount !== undefined && consultation.partialPaymentAmount !== null && consultation.partialPaymentAmount !== '') {
+        const parsedPartial = Number(consultation.partialPaymentAmount);
+        if (!isNaN(parsedPartial)) {
+            partialAmount = parsedPartial;
+        }
+    }
+
+    if (numericAmount === null || isNaN(numericAmount) || numericAmount < 0) {
+        numericAmount = 0;
+    }
+
+    let paid = 0;
+    if (partialAmount !== null && !isNaN(partialAmount) && partialAmount > 0) {
+        paid = Math.min(partialAmount, numericAmount);
+    }
+    const remaining = Math.max(numericAmount - paid, 0);
+
+    return {
+        total: numericAmount,
+        paid: paid,
+        remaining: remaining
+    };
+}
+
+async function printConsultationPaymentsReport(mode, t) {
+    const session = JSON.parse(localStorage.getItem('medconnect_session') || '{}');
+    const doctorName = session.name || 'Doctor';
+    const lang = (typeof currentLanguage !== 'undefined' && currentLanguage) ? currentLanguage : 'fr';
+    const now = new Date();
+
+    const today = new Date();
+    let monthSelectId;
+    let yearSelectId;
+    let reportTitleKey;
+
+    if (mode === 'unpaidPatients') {
+        monthSelectId = 'unpaidPatientsMonth';
+        yearSelectId = 'unpaidPatientsYear';
+        reportTitleKey = 'unpaid_patients';
+    } else {
+        monthSelectId = 'inProgressPaymentsMonth';
+        yearSelectId = 'inProgressPaymentsYear';
+        reportTitleKey = 'in_progress_payments';
+    }
+
+    const monthSelect = document.getElementById(monthSelectId);
+    const yearSelect = document.getElementById(yearSelectId);
+
+    let month;
+    let year;
+    if (monthSelect && yearSelect && yearSelect.value) {
+        month = monthSelect.value !== '' ? parseInt(monthSelect.value, 10) : today.getMonth();
+        year = parseInt(yearSelect.value, 10) || today.getFullYear();
+    } else {
+        month = today.getMonth();
+        year = today.getFullYear();
+    }
+
+    const startDate = new Date(year, month, 1);
+    startDate.setHours(0, 0, 0, 0);
+
+    const endDate = new Date(year, month + 1, 0);
+    endDate.setHours(23, 59, 59, 999);
+
+    const monthName = startDate.toLocaleString('default', { month: 'long' });
+    const rangeLabel = monthName + ' ' + year;
+
+    let consultations = [];
+    try {
+        const response = await fetch('api/get_consultations.php?all=1');
+        if (!response.ok) {
+            throw new Error('Failed to fetch consultations for payments print: ' + response.status);
+        }
+
+        const data = await response.json();
+        if (data && data.status === 'ok' && Array.isArray(data.consultations)) {
+            consultations = data.consultations;
+        }
+    } catch (err) {
+        console.error('Error loading consultations for payments print:', err);
+        consultations = [];
+    }
+
+    const doctorSessionName = session.name || '';
+
+    const filtered = consultations.filter(function (c) {
+        const consultDate = new Date(c.createdAt || c.date || 0);
+        if (!(consultDate >= startDate && consultDate <= endDate)) return false;
+
+        const consultDoctor = c.doctor || c.doctorName || '';
+        const isByThisDoctor = !doctorSessionName
+            ? true
+            : (consultDoctor === doctorSessionName || consultDoctor.includes(doctorSessionName) || doctorSessionName.includes(consultDoctor));
+
+        if (!isByThisDoctor) return false;
+
+        const status = normalizeConsultationPaymentStatusForReports(c);
+        if (mode === 'unpaidPatients') {
+            return status === 'unpaid';
+        }
+        if (mode === 'inProgressPayments') {
+            return status === 'partial';
+        }
+        return false;
+    });
+
+    if (filtered.length === 0) {
+        if (typeof window.showTranslatedAlert === 'function') {
+            window.showTranslatedAlert('no_data_for_period');
+        } else if (window.t) {
+            alert(window.t('no_data_for_period', 'No data for this period'));
+        } else {
+            alert('No data for this period');
+        }
+        return;
+    }
+
+    const patients = Array.isArray(window.storedPatients)
+        ? window.storedPatients
+        : (typeof window.getPatients === 'function' ? window.getPatients() : []);
+
+    let billDescriptions = [];
+    try {
+        if (typeof window.getBillDescriptions === 'function') {
+            const desc = window.getBillDescriptions();
+            if (Array.isArray(desc)) billDescriptions = desc;
+        }
+    } catch (e) {
+        console.error('Error loading bill descriptions for payments print:', e);
+    }
+
+    const docTitle = t('profit_reports', 'Profit Reports');
+    const reportTitle = t(reportTitleKey, reportTitleKey === 'unpaid_patients' ? 'Unpaid Patients' : 'Patients with Payments in Progress');
+
+    let totalPaid = 0;
+    let totalRemaining = 0;
+    let totalTotal = 0;
+
+    const tableRowsHtml = filtered.map(function (c, index) {
+        let patientName = c.patientName || c.patientFullName || '';
+        const patient = patients.find(function (p) {
+            if (!p) return false;
+            return String(p.id) === String(c.patientId);
+        });
+        if (!patientName && patient) {
+            patientName = patient.fullName || patient.name || '';
+        }
+        if (!patientName && c.patient && typeof c.patient === 'object') {
+            patientName = c.patient.fullName || c.patient.name || '';
+        }
+        if (!patientName) {
+            patientName = 'Unknown Patient';
+        }
+
+        const created = new Date(c.createdAt || c.date || 0);
+        const dateStr = isNaN(created) ? '' : created.toLocaleString();
+
+        const normalizedStatus = normalizeConsultationPaymentStatusForReports(c);
+        let statusLabel;
+        if (normalizedStatus === 'paid') {
+            statusLabel = t('paid_status', 'Paid');
+        } else if (normalizedStatus === 'partial') {
+            statusLabel = t('partially_paid_status', 'Partially Paid');
+        } else {
+            statusLabel = t('unpaid_status', 'Unpaid');
+        }
+
+        const financials = computeConsultationAmountsForReport(c, billDescriptions);
+        totalPaid += financials.paid;
+        totalRemaining += financials.remaining;
+        totalTotal += financials.total;
+
+        return `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${patientName}</td>
+                    <td>${dateStr}</td>
+                    <td>${statusLabel}</td>
+                    <td style="text-align:right;">${financials.paid.toFixed(2)} TND</td>
+                    <td style="text-align:right;">${financials.remaining.toFixed(2)} TND</td>
+                    <td style="text-align:right;">${financials.total.toFixed(2)} TND</td>
+                </tr>`;
+    }).join('');
+
+    const html = `<!DOCTYPE html>
+<html lang="${lang}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${docTitle}</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #111827; margin: 0; padding: 20px; background: #f3f4f6; }
+        .report-container { max-width: 900px; margin: 0 auto; background: #ffffff; padding: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.08); }
+        .report-header { border-bottom: 2px solid #2563eb; padding-bottom: 12px; margin-bottom: 20px; }
+        .report-title { font-size: 24px; font-weight: 700; color: #2563eb; margin: 0 0 4px 0; }
+        .report-subtitle { font-size: 16px; color: #4b5563; margin: 0; }
+        .meta { font-size: 13px; color: #6b7280; margin-top: 8px; }
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
+        .summary-card { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px 12px; }
+        .summary-label { font-size: 12px; color: #6b7280; }
+        .summary-value { font-size: 18px; font-weight: 700; color: #111827; }
+        table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; }
+        th, td { padding: 6px 8px; border-bottom: 1px solid #e5e7eb; }
+        th { text-align: left; background: #eff6ff; font-weight: 600; color: #374151; }
+        .mt-4 { margin-top: 16px; }
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        <div class="report-header">
+            <h1 class="report-title">${docTitle}</h1>
+            <p class="report-subtitle">${reportTitle}</p>
+            <div class="meta">
+                <div><strong>${t('doctor', 'Doctor')}:</strong> ${doctorName}</div>
+                <div><strong>${t('date', 'Date')}:</strong> ${now.toLocaleString()}</div>
+                <div><strong>${t('period', 'Period')}:</strong> ${rangeLabel}</div>
+            </div>
+        </div>
+
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="summary-label">${t('total_consultations', 'Total Consultations')}</div>
+                <div class="summary-value">${filtered.length}</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">${t('paid_amount', 'Paid')}</div>
+                <div class="summary-value">${totalPaid.toFixed(2)} TND</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">${t('remaining_amount', 'Remaining')}</div>
+                <div class="summary-value">${totalRemaining.toFixed(2)} TND</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">${t('total_amount', 'Total Amount')}</div>
+                <div class="summary-value">${totalTotal.toFixed(2)} TND</div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <h2 style="font-size:16px; font-weight:600; margin:0 0 6px 0;">${reportTitle}</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>${t('patient_name', 'Patient Name')}</th>
+                        <th>${t('date', 'Date')}</th>
+                        <th>${t('payment_status', 'Payment Status')}</th>
+                        <th style="text-align:right;">${t('paid_amount', 'Paid')}</th>
+                        <th style="text-align:right;">${t('remaining_amount', 'Remaining')}</th>
+                        <th style="text-align:right;">${t('total_amount', 'Total Amount')}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${tableRowsHtml}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        window.onload = function () { window.print(); };
+    <\/script>
+</body>
+</html>`;
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+        console.error('Unable to open print window for payments report');
+        return;
+    }
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
+}
+
+async function exportConsultationPaymentsTextReport(mode, t) {
+    const session = JSON.parse(localStorage.getItem('medconnect_session') || '{}');
+    const doctorName = session.name || 'Doctor';
+    const now = new Date();
+
+    const today = new Date();
+    let monthSelectId;
+    let yearSelectId;
+    let reportTitleKey;
+
+    if (mode === 'unpaidPatients') {
+        monthSelectId = 'unpaidPatientsMonth';
+        yearSelectId = 'unpaidPatientsYear';
+        reportTitleKey = 'unpaid_patients';
+    } else {
+        monthSelectId = 'inProgressPaymentsMonth';
+        yearSelectId = 'inProgressPaymentsYear';
+        reportTitleKey = 'in_progress_payments';
+    }
+
+    const monthSelect = document.getElementById(monthSelectId);
+    const yearSelect = document.getElementById(yearSelectId);
+
+    let month;
+    let year;
+    if (monthSelect && yearSelect && yearSelect.value) {
+        month = monthSelect.value !== '' ? parseInt(monthSelect.value, 10) : today.getMonth();
+        year = parseInt(yearSelect.value, 10) || today.getFullYear();
+    } else {
+        month = today.getMonth();
+        year = today.getFullYear();
+    }
+
+    const startDate = new Date(year, month, 1);
+    startDate.setHours(0, 0, 0, 0);
+
+    const endDate = new Date(year, month + 1, 0);
+    endDate.setHours(23, 59, 59, 999);
+
+    const monthName = startDate.toLocaleString('default', { month: 'long' });
+    const rangeLabel = monthName + ' ' + year;
+
+    let consultations = [];
+    try {
+        const response = await fetch('api/get_consultations.php?all=1');
+        if (!response.ok) {
+            throw new Error('Failed to fetch consultations for payments export: ' + response.status);
+        }
+
+        const data = await response.json();
+        if (data && data.status === 'ok' && Array.isArray(data.consultations)) {
+            consultations = data.consultations;
+        }
+    } catch (err) {
+        console.error('Error loading consultations for payments export:', err);
+        consultations = [];
+    }
+
+    const doctorSessionName = session.name || '';
+
+    const filtered = consultations.filter(function (c) {
+        const consultDate = new Date(c.createdAt || c.date || 0);
+        if (!(consultDate >= startDate && consultDate <= endDate)) return false;
+
+        const consultDoctor = c.doctor || c.doctorName || '';
+        const isByThisDoctor = !doctorSessionName
+            ? true
+            : (consultDoctor === doctorSessionName || consultDoctor.includes(doctorSessionName) || doctorSessionName.includes(consultDoctor));
+
+        if (!isByThisDoctor) return false;
+
+        const status = normalizeConsultationPaymentStatusForReports(c);
+        if (mode === 'unpaidPatients') {
+            return status === 'unpaid';
+        }
+        if (mode === 'inProgressPayments') {
+            return status === 'partial';
+        }
+        return false;
+    });
+
+    if (filtered.length === 0) {
+        if (typeof window.showTranslatedAlert === 'function') {
+            window.showTranslatedAlert('no_data_for_period');
+        } else if (window.t) {
+            alert(window.t('no_data_for_period', 'No data for this period'));
+        } else {
+            alert('No data for this period');
+        }
+        return;
+    }
+
+    const patients = Array.isArray(window.storedPatients)
+        ? window.storedPatients
+        : (typeof window.getPatients === 'function' ? window.getPatients() : []);
+
+    let billDescriptions = [];
+    try {
+        if (typeof window.getBillDescriptions === 'function') {
+            const desc = window.getBillDescriptions();
+            if (Array.isArray(desc)) billDescriptions = desc;
+        }
+    } catch (e) {
+        console.error('Error loading bill descriptions for payments export:', e);
+    }
+
+    const docTitle = t('profit_reports', 'Profit Reports');
+    const reportTitle = t(reportTitleKey, reportTitleKey === 'unpaid_patients' ? 'Unpaid Patients' : 'Patients with Payments in Progress');
+
+    let totalPaid = 0;
+    let totalRemaining = 0;
+    let totalTotal = 0;
+
+    const lines = [];
+    lines.push(`${docTitle} - ${doctorName}`);
+    lines.push(`${t('generated_on', 'Generated on')}: ${now.toLocaleString()}`);
+    lines.push(`${t('report_type', 'Report type')}: ${reportTitle}`);
+    lines.push(`${t('period', 'Period')}: ${rangeLabel}`);
+    lines.push('');
+    lines.push('==========================================');
+    lines.push('');
+    lines.push(`${t('summary', 'Summary')}:`);
+    lines.push(`${t('total_consultations', 'Total Consultations')}: ${filtered.length}`);
+    lines.push('');
+
+    // Table header
+    lines.push(`# | ${t('patient_name', 'Patient Name')} | ${t('date', 'Date')} | ${t('payment_status', 'Payment Status')} | ${t('paid_amount', 'Paid')} | ${t('remaining_amount', 'Remaining')} | ${t('total_amount', 'Total Amount')}`);
+
+    filtered.forEach(function (c, index) {
+        let patientName = c.patientName || c.patientFullName || '';
+        const patient = patients.find(function (p) {
+            if (!p) return false;
+            return String(p.id) === String(c.patientId);
+        });
+        if (!patientName && patient) {
+            patientName = patient.fullName || patient.name || '';
+        }
+        if (!patientName && c.patient && typeof c.patient === 'object') {
+            patientName = c.patient.fullName || c.patient.name || '';
+        }
+        if (!patientName) {
+            patientName = 'Unknown Patient';
+        }
+
+        const created = new Date(c.createdAt || c.date || 0);
+        const dateStr = isNaN(created) ? '' : created.toLocaleString();
+
+        const normalizedStatus = normalizeConsultationPaymentStatusForReports(c);
+        let statusLabel;
+        if (normalizedStatus === 'paid') {
+            statusLabel = t('paid_status', 'Paid');
+        } else if (normalizedStatus === 'partial') {
+            statusLabel = t('partially_paid_status', 'Partially Paid');
+        } else {
+            statusLabel = t('unpaid_status', 'Unpaid');
+        }
+
+        const financials = computeConsultationAmountsForReport(c, billDescriptions);
+        totalPaid += financials.paid;
+        totalRemaining += financials.remaining;
+        totalTotal += financials.total;
+
+        lines.push(`${index + 1} | ${patientName} | ${dateStr} | ${statusLabel} | ${financials.paid.toFixed(2)} TND | ${financials.remaining.toFixed(2)} TND | ${financials.total.toFixed(2)} TND`);
+    });
+
+    lines.push('');
+    lines.push('------------------------------------------');
+    lines.push(`${t('total', 'Total')}: ${t('paid_amount', 'Paid')} = ${totalPaid.toFixed(2)} TND, ${t('remaining_amount', 'Remaining')}: ${totalRemaining.toFixed(2)} TND, ${t('total_amount', 'Total Amount')}: ${totalTotal.toFixed(2)} TND`);
+
+    const reportText = lines.join('\n');
+
+    const blob = new Blob([reportText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `payments_report_${mode}_${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    // Translated success alert
+    if (typeof window.showTranslatedAlert === 'function') {
+        window.showTranslatedAlert('report_exported_successfully');
+    } else if (window.t) {
+        alert(window.t('report_exported_successfully', 'Report exported successfully!'));
+    } else {
+        alert('Report exported successfully!');
+    }
+}
+
+async function exportReport() {
+    const t = function (key, fallback) {
+        return window.t ? window.t(key, fallback) : (fallback || key);
+    };
+
+    // Special export for unpaid and in-progress payment tabs (consultation-based views)
+    if (currentReportTab === 'unpaidPatients' || currentReportTab === 'inProgressPayments') {
+        await exportConsultationPaymentsTextReport(currentReportTab, t);
+        return;
+    }
+
+    if (!currentReportData || !Array.isArray(currentReportData.bills) || currentReportData.bills.length === 0) {
+        if (typeof window.showTranslatedAlert === 'function') {
+            window.showTranslatedAlert('no_data_for_period');
+        } else if (window.t) {
+            alert(window.t('no_data_for_period', 'No data for this period'));
+        } else {
+            alert('No data for this period');
+        }
         return;
     }
 
     const session = JSON.parse(localStorage.getItem('medconnect_session') || '{}');
     const doctorName = session.name || 'Doctor';
 
-    let reportText = `Profit Report - ${doctorName}\n`;
-    reportText += `Generated: ${new Date().toLocaleString()}\n`;
-    reportText += `Report Type: ${currentReportTab.charAt(0).toUpperCase() + currentReportTab.slice(1)}\n`;
-    reportText += `\n==========================================\n\n`;
-
-    reportText += `Summary:\n`;
-    reportText += `Total Consultations: ${currentReportData.consultations.length}\n`;
     const now = new Date();
-    let rangeStart, rangeEnd;
+    let rangeStart, rangeEnd, rangeLabel, reportTitle;
+
     if (currentReportTab === 'daily') {
-        rangeStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-        rangeEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-    } else if (currentReportTab === 'weekly') {
-        const day = now.getDay();
-        rangeStart = new Date(now);
-        rangeStart.setDate(now.getDate() - day);
+        const dateInput = document.getElementById('dailyReportDate');
+        const selectedDate = (dateInput && dateInput.value) ? new Date(dateInput.value) : now;
+        rangeStart = new Date(selectedDate);
         rangeStart.setHours(0, 0, 0, 0);
-        rangeEnd = new Date(rangeStart);
-        rangeEnd.setDate(rangeStart.getDate() + 6);
+        rangeEnd = new Date(selectedDate);
         rangeEnd.setHours(23, 59, 59, 999);
+        rangeLabel = selectedDate.toLocaleDateString();
+        reportTitle = t('daily_report', 'Daily Report');
+    } else if (currentReportTab === 'weekly') {
+        const dateInput = document.getElementById('weeklyReportDate');
+        const selectedDate = (dateInput && dateInput.value) ? new Date(dateInput.value) : now;
+        rangeStart = new Date(selectedDate);
+        rangeStart.setHours(0, 0, 0, 0);
+        rangeEnd = new Date(selectedDate);
+        rangeEnd.setDate(rangeEnd.getDate() + 6);
+        rangeEnd.setHours(23, 59, 59, 999);
+        rangeLabel = rangeStart.toLocaleDateString() + ' - ' + rangeEnd.toLocaleDateString();
+        reportTitle = t('weekly_report', 'Weekly Report');
     } else {
-        const m = document.getElementById('monthlyReportMonth') ? parseInt(document.getElementById('monthlyReportMonth').value) : now.getMonth();
-        const y = document.getElementById('monthlyReportYear') ? parseInt(document.getElementById('monthlyReportYear').value) : now.getFullYear();
-        rangeStart = new Date(y, m, 1, 0, 0, 0, 0);
-        rangeEnd = new Date(y, m + 1, 0, 23, 59, 59, 999);
+        const monthSelect = document.getElementById('monthlyReportMonth');
+        const yearSelect = document.getElementById('monthlyReportYear');
+        const month = monthSelect ? parseInt(monthSelect.value, 10) : now.getMonth();
+        const year = yearSelect ? parseInt(yearSelect.value, 10) : now.getFullYear();
+        rangeStart = new Date(year, month, 1, 0, 0, 0, 0);
+        rangeEnd = new Date(year, month + 1, 0, 23, 59, 59, 999);
+        const monthName = rangeStart.toLocaleString('default', { month: 'long' });
+        rangeLabel = monthName + ' ' + year;
+        reportTitle = t('monthly_report', 'Monthly Report');
     }
+
     const expensesForRange = getExpensesForPeriod(rangeStart, rangeEnd).total;
-    const totalRevenueForRange = currentReportData.bills.reduce((sum, b) => sum + b.total, 0);
+    const totalRevenueForRange = currentReportData.bills.reduce(function (sum, b) {
+        return sum + (b.total || 0);
+    }, 0);
     const netProfitForRange = totalRevenueForRange - expensesForRange;
 
-    reportText += `Total Bills: ${currentReportData.bills.length}\n`;
-    reportText += `Total Revenue: ${totalRevenueForRange.toFixed(2)} TND\n`;
-    reportText += `Total Expenses: ${expensesForRange.toFixed(2)} TND\n`;
-    reportText += `Net Profit: ${netProfitForRange.toFixed(2)} TND\n`;
+    const docTitle = t('profit_reports', 'Profit Reports');
+
+    let reportText = `${docTitle} - ${doctorName}\n`;
+    reportText += `${t('generated_on', 'Generated on')}: ${now.toLocaleString()}\n`;
+    reportText += `${t('report_type', 'Report type')}: ${reportTitle}\n`;
+    reportText += `${t('period', 'Period')}: ${rangeLabel}\n`;
     reportText += `\n==========================================\n\n`;
 
-    reportText += `Bill Details:\n`;
-    currentReportData.bills.forEach((bill, index) => {
-        reportText += `\n${index + 1}. ${bill.patientName}\n`;
-        reportText += `   Bill ID: ${bill.id}\n`;
-        reportText += `   Date: ${new Date(bill.createdAt).toLocaleString()}\n`;
-        reportText += `   Total: ${bill.total.toFixed(2)} TND\n`;
-        reportText += `   Items: ${bill.items.length}\n`;
+    reportText += `${t('summary', 'Summary')}:\n`;
+    reportText += `${t('total_consultations', 'Total Consultations')}: ${currentReportData.consultations.length}\n`;
+    reportText += `${t('total_bills', 'Total Bills')}: ${currentReportData.bills.length}\n`;
+    reportText += `${t('total_revenue', 'Total Revenue')}: ${totalRevenueForRange.toFixed(2)} TND\n`;
+    reportText += `${t('total_expenses', 'Total Expenses')}: ${expensesForRange.toFixed(2)} TND\n`;
+    reportText += `${t('net_profit', 'Net Profit')}: ${netProfitForRange.toFixed(2)} TND\n`;
+    reportText += `\n==========================================\n\n`;
+
+    reportText += `${t('bill_details', 'Bill Details')}:\n`;
+    currentReportData.bills.forEach(function (bill, index) {
+        const created = new Date(bill.createdAt || bill.date || 0);
+        const createdStr = isNaN(created) ? '' : created.toLocaleString();
+        reportText += `\n${index + 1}. ${t('patient_name', 'Patient Name')}: ${bill.patientName || ''}\n`;
+        reportText += `   ${t('bill_id', 'Bill ID')}: ${bill.id}\n`;
+        reportText += `   ${t('bill_date', 'Bill Date')}: ${createdStr}\n`;
+        reportText += `   ${t('total', 'Total')}: ${(bill.total || 0).toFixed(2)} TND\n`;
+        reportText += `   ${t('items', 'items')}: ${Array.isArray(bill.items) ? bill.items.length : 0}\n`;
     });
     // Create and download file
     const blob = new Blob([reportText], { type: 'text/plain' });
@@ -7490,7 +9261,14 @@ function exportReport() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    alert('Report exported successfully!');
+    // Translated success alert
+    if (typeof window.showTranslatedAlert === 'function') {
+        window.showTranslatedAlert('report_exported_successfully');
+    } else if (window.t) {
+        alert(window.t('report_exported_successfully', 'Report exported successfully!'));
+    } else {
+        alert('Report exported successfully!');
+    }
 }
 
 function changeLanguage(lang) {
@@ -7656,6 +9434,11 @@ function populateConsultationActSelect() {
         if (!select) return;
         select.innerHTML = getBillDescriptionOptionsHTML();
 
+        // Initialize advanced multi-select UI if wrapper exists
+        if (typeof setupConsultationActAdvancedMultiSelect === 'function') {
+            setupConsultationActAdvancedMultiSelect();
+        }
+
         if (select.multiple && !select.dataset.clickToggleBound) {
             select.addEventListener('mousedown', function (e) {
                 const option = e.target;
@@ -7669,6 +9452,144 @@ function populateConsultationActSelect() {
         }
     } catch (e) {
         console.error('Error populating consultationAct select:', e);
+    }
+}
+
+function setupConsultationActAdvancedMultiSelect() {
+    try {
+        const select = document.getElementById('consultationAct');
+        const wrapper = document.getElementById('consultationActMultiWrapper');
+        const display = document.getElementById('consultationActDisplay');
+        const panel = document.getElementById('consultationActMultiPanel');
+        const list = document.getElementById('consultationActMultiList');
+        const searchInput = document.getElementById('consultationActMultiSearch');
+
+        if (!select || !wrapper || !display || !panel || !list) {
+            return;
+        }
+
+        // Build checkbox list from current select options (skip placeholder)
+        list.innerHTML = '';
+        const options = Array.from(select.options || []).filter(function (opt) {
+            return !!opt.value;
+        });
+
+        options.forEach(function (opt, index) {
+            const optionId = 'consultationActMultiOption_' + index;
+            const label = document.createElement('label');
+            label.className = 'flex items-center gap-2 text-sm cursor-pointer py-1';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            // Use app's styled checkbox appearance
+            checkbox.className = 'form-checkbox';
+            checkbox.value = opt.value;
+            checkbox.checked = !!opt.selected;
+            checkbox.id = optionId;
+
+            checkbox.addEventListener('change', function () {
+                opt.selected = checkbox.checked;
+                refreshFromSelect();
+            });
+
+            const span = document.createElement('span');
+            span.textContent = opt.textContent || opt.value;
+
+            label.appendChild(checkbox);
+            label.appendChild(span);
+            list.appendChild(label);
+        });
+
+        function refreshFromSelect() {
+            const selectedOptions = Array.from(select.options || []).filter(function (o) {
+                return o.selected && o.value;
+            });
+
+            const checkboxes = list.querySelectorAll('input[type="checkbox"]');
+            Array.from(checkboxes || []).forEach(function (cb) {
+                const match = options.find(function (o) { return o.value === cb.value; });
+                cb.checked = !!(match && match.selected);
+            });
+
+            const placeholderText = window.t
+                ? window.t('select_service', 'Select service...')
+                : 'Select service...';
+
+            // Clear current chips / placeholder content
+            display.innerHTML = '';
+
+            if (selectedOptions.length === 0) {
+                display.textContent = placeholderText;
+                display.classList.add('text-gray-400');
+            } else {
+                display.classList.remove('text-gray-400');
+
+                selectedOptions.forEach(function (opt) {
+                    const name = opt.textContent || opt.value;
+
+                    const chip = document.createElement('span');
+                    chip.className = 'inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-50 text-blue-700 text-xs border border-blue-200';
+
+                    const labelSpan = document.createElement('span');
+                    labelSpan.textContent = name;
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.className = 'ml-1 text-blue-500 hover:text-blue-700 focus:outline-none';
+                    removeBtn.innerHTML = '&times;';
+                    removeBtn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        opt.selected = false;
+                        refreshFromSelect();
+                    });
+
+                    chip.appendChild(labelSpan);
+                    chip.appendChild(removeBtn);
+                    display.appendChild(chip);
+                });
+            }
+        }
+
+        if (!display.dataset.boundClick) {
+            display.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                panel.classList.toggle('hidden');
+            });
+            display.dataset.boundClick = '1';
+        }
+
+        if (searchInput && !searchInput.dataset.boundInput) {
+            searchInput.addEventListener('input', function () {
+                const term = searchInput.value ? searchInput.value.toLowerCase() : '';
+                const labels = list.querySelectorAll('label');
+                Array.from(labels || []).forEach(function (labelEl) {
+                    const text = (labelEl.textContent || '').toLowerCase();
+                    labelEl.style.display = !term || text.indexOf(term) !== -1 ? '' : 'none';
+                });
+            });
+            searchInput.dataset.boundInput = '1';
+        }
+
+        if (!window._consultationActOutsideClickBound) {
+            document.addEventListener('click', function (e) {
+                const wrapperEl = document.getElementById('consultationActMultiWrapper');
+                const panelEl = document.getElementById('consultationActMultiPanel');
+                if (!wrapperEl || !panelEl) return;
+                if (!wrapperEl.contains(e.target)) {
+                    panelEl.classList.add('hidden');
+                }
+            });
+            window._consultationActOutsideClickBound = true;
+        }
+
+        // Expose refresh so editConsultation can sync UI after setting selected options
+        window.refreshConsultationActMultiSelect = refreshFromSelect;
+
+        refreshFromSelect();
+    } catch (e) {
+        console.error('Error setting up advanced consultation act multi-select:', e);
     }
 }
 
@@ -8482,8 +10403,9 @@ document.getElementById('addDescriptionForm').addEventListener('submit', (e) => 
         return;
     }
 
-    const descriptions = getBillDescriptions();
-    const newId = descriptions.length > 0 ? Math.max(...descriptions.map(d => d.id)) + 1 : 1;
+    // Generate a unique string ID for the new service without relying
+    // on the current in-memory list or a pre-fetch.
+    const newId = 'svc-' + Date.now();
 
     const newDesc = {
         id: newId,
@@ -8491,12 +10413,10 @@ document.getElementById('addDescriptionForm').addEventListener('submit', (e) => 
         price: price
     };
 
-    descriptions.push(newDesc);
-
-    saveBillDescriptions(descriptions);
-    // Sync to backend database
+    // Sync to backend database; on success, the sync function will
+    // trigger a fresh reload from the API so the list reflects
+    // the actual database contents.
     syncBillDescriptionToDatabase(newDesc);
-    renderBillDescriptionsList();
 
     // Clear form
     document.getElementById('newDescriptionName').value = '';
@@ -8520,20 +10440,28 @@ document.getElementById('editDescriptionForm').addEventListener('submit', (e) =>
     }
 
     const descriptions = getBillDescriptions();
-    const index = descriptions.findIndex(d => String(d.id) === String(id));
+    const existing = descriptions.find(d => String(d.id) === String(id));
 
-    if (index !== -1) {
-        descriptions[index].name = name;
-        descriptions[index].price = price;
-        saveBillDescriptions(descriptions);
-        // Sync updated description to backend
-        syncBillDescriptionToDatabase(descriptions[index]);
-        renderBillDescriptionsList();
-        closeEditDescriptionModal();
-
-        const successMessage = translations[currentLanguage].service_updated || 'Service updated successfully!';
-        showTranslatedAlert('service_updated', successMessage);
+    if (!existing) {
+        console.warn('Bill description to edit not found in cache:', id);
+        return;
     }
+
+    // Build an updated description object, preserving fields like notes/createdAt
+    const updatedDesc = {
+        ...existing,
+        name,
+        price
+    };
+
+    // Sync updated description to backend; on success, syncBillDescriptionToDatabase
+    // will call getBillDescriptions() which in turn refreshes the existing services
+    // list and consultation act dropdown from the database.
+    syncBillDescriptionToDatabase(updatedDesc);
+    closeEditDescriptionModal();
+
+    const successMessage = translations[currentLanguage].service_updated || 'Service updated successfully!';
+    showTranslatedAlert('service_updated', successMessage);
 });
 // Add Medicine Form Submission
 const addMedicineForm = document.getElementById('addMedicineForm');

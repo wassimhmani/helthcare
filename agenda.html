@@ -297,6 +297,64 @@
         </div>
     </div>
 
+    <!-- Pre-Invoice Modal (higher z-index so it appears above other modals) -->
+    <div class="modal" id="preInvoiceModal" style="z-index: 2500;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2 class="modal-title" data-translate="pre_invoice_title">Pré-facture</h2>
+                <button class="modal-close" onclick="this.closest('.modal').classList.remove('active')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="space-y-4 text-sm">
+                    <div>
+                        <div><strong data-translate="patient">Patient</strong>: <span id="preInvoicePatientName">-</span></div>
+                        <div><strong data-translate="consultation_date">Date de consultation</strong>: <span id="preInvoiceConsultationDate">-</span></div>
+                    </div>
+
+                    <div class="card p-4">
+                        <h4 class="font-semibold mb-2" data-translate="bill_items">Eléments de la consultation</h4>
+                        <div id="preInvoiceItemsContainer" class="space-y-1">
+                            <!-- Act details will be injected here -->
+                        </div>
+                    </div>
+
+                    <div class="card p-4">
+                        <h4 class="font-semibold mb-2" data-translate="bill_summary">Résumé de la pré-facture</h4>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span data-translate="subtotal">Sous-total :</span>
+                                <span id="preInvoiceSubtotal">0.00 TND</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span data-translate="tax_8_percent">Taxe (8%) :</span>
+                                <span id="preInvoiceTax">0.00 TND</span>
+                            </div>
+                            <div class="flex justify-between font-semibold border-t pt-2">
+                                <span data-translate="total">Total :</span>
+                                <span id="preInvoiceTotalSummary">0.00 TND</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-2">
+                        <div class="flex justify-between mb-1">
+                            <span data-translate="amount_paid">Montant payé</span>
+                            <span id="preInvoicePaid">0.00 TND</span>
+                        </div>
+                        <div class="flex justify-between font-semibold">
+                            <span data-translate="amount_remaining">Montant restant</span>
+                            <span id="preInvoiceRemaining">0.00 TND</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').classList.remove('active')" data-translate="close">Close</button>
+                <button type="button" class="btn btn-primary" onclick="printPreInvoiceModal()" data-translate="create_pre_invoice">Créer pré-facture</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Consultation Modal (Doctor Only) -->
     <div class="modal" id="consultationModal">
         <div class="modal-content" style="max-width: 1000px;">
@@ -391,10 +449,31 @@
                 <!-- Consultation Act (from bill descriptions) -->
                 <div class="form-group">
                     <label class="form-label" for="consultationAct" data-translate="consultation_act">Consultation Act</label>
-                    <!-- Allow selecting multiple acts for a single consultation -->
-                    <select id="consultationAct" class="form-input" multiple size="6">
-                        <!-- Options will be populated from bill descriptions via JS -->
-                    </select>
+                    <div id="consultationActMultiWrapper" class="relative">
+                        <!-- Display selected acts in a user-friendly way -->
+                        <div id="consultationActDisplay"
+                             class="form-input cursor-pointer flex flex-wrap gap-1 text-gray-700"
+                             style="min-height: 2.5rem;">
+                        </div>
+                        <!-- Advanced dropdown: search + checkbox list (opens above to avoid covering buttons) -->
+                        <div id="consultationActMultiPanel"
+                             class="absolute bottom-full mb-1 w-full bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-auto z-30 hidden">
+                            <div class="p-2 border-b border-gray-200">
+                                <input type="text"
+                                       id="consultationActMultiSearch"
+                                       class="form-input text-sm"
+                                       placeholder="Search service..."
+                                       data-translate-placeholder="search_service">
+                            </div>
+                            <div id="consultationActMultiList" class="p-2 space-y-1">
+                                <!-- Options will be rendered here by JS -->
+                            </div>
+                        </div>
+                        <!-- Underlying select kept for compatibility with existing logic -->
+                        <select id="consultationAct" class="form-input mt-2 hidden" multiple size="6">
+                            <!-- Options will be populated from bill descriptions via JS -->
+                        </select>
+                    </div>
                 </div>
                 
                 <!-- Payment Status -->
@@ -620,17 +699,6 @@
                         
                         
                         <!-- Preview/Print Option -->
-                        <div class="card p-3 bg-yellow-50 border-yellow-200 mb-4">
-                            <div class="flex items-start gap-2">
-                                <svg class="w-5 h-5 text-yellow-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <div class="text-sm text-yellow-800">
-                                    <p class="font-semibold mb-1" data-translate="certificate_info">Certificate Information</p>
-                                    <p data-translate="certificate_info_text">After saving, you can view and print the certificate from the consultation details.</p>
-                                </div>
-                            </div>
-                        </div>
                         
                         <!-- Print Button -->
                         <div class="flex justify-end gap-3 mb-4">
@@ -2209,6 +2277,7 @@
 
             <div class="modal-actions">
                 <button type="button" class="btn btn-secondary" onclick="closeReportsModal()" data-translate="close">Close</button>
+                <button type="button" class="btn btn-primary" onclick="printReport()" data-translate="print_report">Print Report</button>
                 <button type="button" class="btn btn-primary" onclick="exportReport()" data-translate="export_report">Export Report</button>
             </div>
         </div>
@@ -2517,6 +2586,7 @@
     <script src="scripts/consultation.js"></script>
     <script src="scripts/app_script.js"></script>
     <script src="scripts/payement.js"></script>
+    <script src="scripts/partially_paid.js"></script>
     <script>
         // Verify and ensure showDoctorDashboard is available
         (function() {
@@ -2623,6 +2693,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Clear any conflicting language settings
             localStorage.removeItem('selectedLanguage');
+            localStorage.removeItem('bill_descriptions');
             
             if (window.I18n) {
                 // Force French as default to avoid browser language detection
