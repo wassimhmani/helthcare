@@ -2283,10 +2283,48 @@ async function viewPatientDetails(patientId) {
 
     modal.classList.add('active');
 }
-function loadPatientConsultations(patientId) {
-    const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
-    const patientConsultations = consultations.filter(c => c.patientId === patientId).sort((a, b) => new Date(b.date) - new Date(a.date));
+async function loadPatientConsultations(patientId) {
     const consultationsList = document.getElementById('patientConsultationsList');
+    if (!consultationsList) return;
+
+    // Lightweight loading state while fetching consultations
+    consultationsList.innerHTML = `
+                <div class="text-center py-6 text-gray-500">
+                    <span data-translate="loading_consultations">Loading consultations...</span>
+                </div>
+            `;
+
+    let consultations = [];
+    try {
+        const response = await fetch('api/get_consultations.php?all=1');
+        if (!response.ok) {
+            throw new Error('Failed to fetch consultations for patient details: ' + response.status);
+        }
+
+        const data = await response.json();
+        if (data && data.status === 'ok' && Array.isArray(data.consultations)) {
+            consultations = data.consultations;
+            // Cache latest consultations so other views (bills, reports) see up-to-date data
+            try {
+                localStorage.setItem('consultations', JSON.stringify(consultations));
+            } catch (e) {
+                console.error('Error caching consultations to localStorage from patient details:', e);
+            }
+        } else {
+            consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+        }
+    } catch (err) {
+        console.error('Error loading consultations for patient details, falling back to localStorage:', err);
+        consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+    }
+
+    const patientConsultations = consultations
+        .filter(c => String(c.patientId) === String(patientId))
+        .sort((a, b) => {
+            const dateB = new Date(b.createdAt || b.date || b.consultationDate || 0);
+            const dateA = new Date(a.createdAt || a.date || a.consultationDate || 0);
+            return dateB - dateA;
+        });
 
     if (patientConsultations.length === 0) {
         consultationsList.innerHTML = `
@@ -2301,8 +2339,15 @@ function loadPatientConsultations(patientId) {
     }
 
     consultationsList.innerHTML = patientConsultations.map(consultation => {
-        const consultationDate = new Date(consultation.date).toLocaleDateString();
-        const consultationTime = new Date(consultation.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const consultationDateObj = new Date(consultation.createdAt || consultation.date || consultation.consultationDate || 0);
+        const consultationDate = isNaN(consultationDateObj.getTime())
+            ? ''
+            : consultationDateObj.toLocaleDateString();
+        const consultationTime = isNaN(consultationDateObj.getTime())
+            ? ''
+            : consultationDateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        const doctorName = consultation.doctorName || consultation.doctor || 'N/A';
 
         return `
                     <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
@@ -2315,7 +2360,7 @@ function loadPatientConsultations(patientId) {
                                     <span class="font-semibold text-gray-900">${consultationDate} at ${consultationTime}</span>
                                 </div>
                                 <div class="text-sm text-gray-600 ml-7">
-                                    <strong data-translate="doctor">Doctor:</strong> ${consultation.doctorName || 'N/A'}
+                                    <strong data-translate="doctor">Doctor:</strong> ${doctorName}
                                 </div>
                             </div>
                             <span class="badge badge-secondary">ID: ${consultation.id}</span>
@@ -2404,10 +2449,45 @@ function loadPatientConsultations(patientId) {
     }).join('');
 }
 
-function loadPatientBills(patientId) {
-    const bills = JSON.parse(localStorage.getItem('healthcareBills') || '[]');
-    const patientBills = bills.filter(b => b.patientId === patientId).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+async function loadPatientBills(patientId) {
     const billsList = document.getElementById('patientBillsList');
+    if (!billsList) return;
+
+    // Lightweight loading state while fetching bills
+    billsList.innerHTML = `
+                <div class="text-center py-6 text-gray-500">
+                    <span data-translate="loading_bills">Loading bills...</span>
+                </div>
+            `;
+
+    let bills = [];
+    try {
+        const response = await fetch('api/get_bills.php');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        if (data && data.status === 'ok' && Array.isArray(data.bills)) {
+            bills = data.bills;
+            // Keep bills in localStorage so other features (view/print) keep working
+            try {
+                localStorage.setItem('healthcareBills', JSON.stringify(bills));
+            } catch (e) {
+                console.error('Error caching bills to localStorage from patient details:', e);
+            }
+        } else {
+            bills = JSON.parse(localStorage.getItem('healthcareBills') || '[]');
+        }
+    } catch (err) {
+        // On error, fall back to any locally stored bills
+        console.error('Error loading bills for patient details, falling back to localStorage:', err);
+        bills = JSON.parse(localStorage.getItem('healthcareBills') || '[]');
+    }
+
+    const patientBills = bills
+        .filter(b => String(b.patientId) === String(patientId))
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     if (patientBills.length === 0) {
         billsList.innerHTML = `
@@ -2421,12 +2501,45 @@ function loadPatientBills(patientId) {
         return;
     }
 
-    billsList.innerHTML = patientBills.map(bill => {
+    // Build a quick lookup for consultations by ID so we can compute paid/remaining amounts
+    let consultationsByIdForPatientBills = {};
+    try {
+        const localConsultationsRaw = localStorage.getItem('consultations') || '[]';
+        const localConsultations = JSON.parse(localConsultationsRaw);
+        if (Array.isArray(localConsultations)) {
+            localConsultations.forEach(function (c) {
+                if (c && c.id != null) {
+                    consultationsByIdForPatientBills[String(c.id)] = c;
+                }
+            });
+        }
+    } catch (e) {
+        console.error('Error loading consultations for patient bills:', e);
+    }
+
+    if (Array.isArray(window.readyConsultationsCache)) {
+        window.readyConsultationsCache.forEach(function (c) {
+            if (c && c.id != null) {
+                const key = String(c.id);
+                if (!Object.prototype.hasOwnProperty.call(consultationsByIdForPatientBills, key)) {
+                    consultationsByIdForPatientBills[key] = c;
+                }
+            }
+        });
+    }
+
+    const groupedBills = {
+        paid: [],
+        partial: [],
+        unpaid: []
+    };
+
+    patientBills.forEach(function (bill) {
         const billDate = new Date(bill.billDate).toLocaleDateString();
         const dueDate = new Date(bill.dueDate).toLocaleDateString();
         const createdDate = new Date(bill.createdAt).toLocaleDateString();
 
-        // Status badge styling
+        // Status badge styling (based on bill.status as before)
         let statusClass = 'bg-yellow-100 text-yellow-800';
         if (bill.status === 'Paid') {
             statusClass = 'bg-green-100 text-green-800';
@@ -2436,7 +2549,95 @@ function loadPatientBills(patientId) {
             statusClass = 'bg-gray-100 text-gray-800';
         }
 
-        return `
+        // Detect pre-invoice bills (used for partial payments)
+        const rawStatus = (bill.status || '').toString().toLowerCase();
+        const idStr = (bill.id || '').toString().toLowerCase();
+        const isPreInvoiceBill = rawStatus === 'preinvoice' || idStr.indexOf('pre-') === 0;
+        const consultation = bill.consultationId
+            ? consultationsByIdForPatientBills[String(bill.consultationId)]
+            : null;
+
+        // Compute paid and remaining amounts for pre-invoice bills when a linked consultation exists
+        let paidAmountDisplay = null;
+        let remainingAmountDisplay = null;
+        if (isPreInvoiceBill && consultation) {
+            try {
+                let totalAmount = (typeof bill.total === 'number' && !isNaN(bill.total))
+                    ? bill.total
+                    : (Number(bill.total || 0) || 0);
+
+                let paidAmount = 0;
+                const status = (consultation.paymentStatus || '').toLowerCase();
+                if (status === 'paid') {
+                    paidAmount = totalAmount;
+                } else if (status === 'partial' || status === 'partially_paid') {
+                    if (typeof consultation.partialPaymentAmount === 'number' && !isNaN(consultation.partialPaymentAmount)) {
+                        paidAmount = consultation.partialPaymentAmount;
+                    } else if (consultation.partialPaymentAmount !== undefined && consultation.partialPaymentAmount !== null && consultation.partialPaymentAmount !== '') {
+                        const parsedPartial = Number(consultation.partialPaymentAmount);
+                        if (!isNaN(parsedPartial)) {
+                            paidAmount = parsedPartial;
+                        }
+                    }
+                }
+
+                paidAmountDisplay = paidAmount;
+                remainingAmountDisplay = Math.max(0, totalAmount - paidAmount);
+            } catch (e) {
+                console.error('Error computing paid/remaining amounts for pre-invoice bill in patient details:', e);
+            }
+        }
+
+        const paymentSummaryHtml = (function () {
+            if (!isPreInvoiceBill || paidAmountDisplay === null || remainingAmountDisplay === null) return '';
+            const paidLabel = window.t ? window.t('paid_amount', 'Montant payé') : 'Montant payé';
+            const remainingLabel = window.t ? window.t('remaining_amount', 'Montant restant') : 'Montant restant';
+            return `
+                            <div class="mt-2 space-y-1 text-sm text-gray-600">
+                                <div class="flex justify-between">
+                                    <span><strong>${paidLabel}:</strong></span>
+                                    <span>${paidAmountDisplay.toFixed(2)} TND</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span><strong>${remainingLabel}:</strong></span>
+                                    <span>${remainingAmountDisplay.toFixed(2)} TND</span>
+                                </div>
+                            </div>
+                        `;
+        })();
+
+        // Choose appropriate label and translation key for view button
+        const viewButtonTranslateKey = isPreInvoiceBill ? 'view_full_pre_invoice' : 'view_full_bill';
+        const viewButtonLabel = (function () {
+            if (typeof window !== 'undefined' && window.t) {
+                if (isPreInvoiceBill) {
+                    return window.t('view_full_pre_invoice', 'Voir la pré-facture complète');
+                }
+                return window.t('view_full_bill', 'View Full Bill');
+            }
+            return isPreInvoiceBill ? 'Voir la pré-facture complète' : 'View Full Bill';
+        })();
+
+        // Determine normalized payment status for grouping (paid / partial / unpaid)
+        let normalizedStatus = null;
+        if (consultation && typeof normalizeConsultationPaymentStatusForReports === 'function') {
+            try {
+                normalizedStatus = normalizeConsultationPaymentStatusForReports(consultation);
+            } catch (e) {
+                console.error('Error normalizing consultation payment status for patient bill:', e);
+            }
+        }
+
+        if (!normalizedStatus) {
+            const lowerBillStatus = (bill.status || '').toString().toLowerCase();
+            if (lowerBillStatus === 'paid') {
+                normalizedStatus = 'paid';
+            } else {
+                normalizedStatus = 'unpaid';
+            }
+        }
+
+        const cardHtml = `
                     <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                         <div class="flex justify-between items-start mb-3">
                             <div>
@@ -2489,6 +2690,7 @@ function loadPatientBills(patientId) {
                                 <span data-translate="total">Total:</span>
                                 <span class="text-blue-600">${bill.total.toFixed(2)} TND</span>
                             </div>
+                            ${paymentSummaryHtml}
                         </div>
 
                         ${bill.notes ? `
@@ -2507,12 +2709,64 @@ function loadPatientBills(patientId) {
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                 </svg>
-                                <span data-translate="view_full_bill">View Full Bill</span>
+                                <span data-translate="${viewButtonTranslateKey}">${viewButtonLabel}</span>
                             </button>
                         </div>
                     </div>
                 `;
-    }).join('');
+
+        if (normalizedStatus === 'paid') {
+            groupedBills.paid.push(cardHtml);
+        } else if (normalizedStatus === 'partial') {
+            groupedBills.partial.push(cardHtml);
+        } else {
+            groupedBills.unpaid.push(cardHtml);
+        }
+    });
+
+    const sections = [];
+
+    function pushBillSection(key, defaultTitle, items) {
+        if (!items || items.length === 0) return;
+        const titleText = window.t ? window.t(key, defaultTitle) : defaultTitle;
+        sections.push(`
+                    <details class="mb-4 border border-gray-200 rounded-lg" data-bill-group="${key}">
+                        <summary class="flex items-center justify-between px-3 py-2 cursor-pointer select-none">
+                            <span class="text-sm font-semibold text-gray-700" data-translate="${key}">${titleText}</span>
+                            <span class="text-gray-400 text-xs">▾</span>
+                        </summary>
+                        <div class="space-y-3 px-3 pb-3 pt-1">
+                            ${items.join('')}
+                        </div>
+                    </details>
+                `);
+    }
+
+    // Build sections in the requested order
+    pushBillSection('paid_invoices', 'Paid invoices', groupedBills.paid);
+    pushBillSection('partially_paid_invoices', 'Partially paid invoices', groupedBills.partial);
+    pushBillSection('unpaid_invoices', 'Unpaid invoices', groupedBills.unpaid);
+
+    billsList.innerHTML = sections.join('');
+
+    // Ensure only one bill group accordion is open at a time
+    try {
+        const accordions = billsList.querySelectorAll('details[data-bill-group]');
+        accordions.forEach(function (detailsEl) {
+            if (detailsEl.__billGroupHandlerAttached) return;
+            detailsEl.__billGroupHandlerAttached = true;
+            detailsEl.addEventListener('toggle', function () {
+                if (!detailsEl.open) return;
+                accordions.forEach(function (other) {
+                    if (other !== detailsEl && other.open) {
+                        other.open = false;
+                    }
+                });
+            });
+        });
+    } catch (e) {
+        console.error('Error wiring bill group accordions:', e);
+    }
 
     // Update translations after rendering
     if (window.I18n && window.I18n.walkAndTranslate) {
@@ -3402,7 +3656,22 @@ function viewBillDetails(billId) {
         return;
     }
 
-    // Use existing bill display function if available, or show in alert
+    // Detect if this is a pre-invoice bill (used for partial payments)
+    const rawStatus = (bill.status || '').toString().toLowerCase();
+    const idStr = (bill.id || '').toString().toLowerCase();
+    const isPreInvoiceBill = rawStatus === 'preinvoice' || idStr.indexOf('pre-') === 0;
+
+    if (isPreInvoiceBill) {
+        // For pre-invoices, reuse the dedicated pre-invoice preview/print layout
+        if (typeof printPreInvoiceFromBill === 'function') {
+            printPreInvoiceFromBill(bill);
+        } else {
+            alert(`Bill ID: ${bill.id}\nTotal: ${bill.total.toFixed(2)} TND\nStatus: ${bill.status}`);
+        }
+        return;
+    }
+
+    // For normal bills, use the standard printable bill view when available
     if (typeof showPrintableBill === 'function') {
         showPrintableBill(bill);
     } else {
@@ -10360,7 +10629,7 @@ document.getElementById('billingForm').addEventListener('submit', (e) => {
         console.log('Bill created successfully:', newBill);
 
         // Show success message with print option
-        const printBill = showTranslatedConfirm('bill_created_success', newBill.id, newBill.patientName, newBill.total.toFixed(2));
+        const printBill = showTranslatedConfirm('bill_created_success', newBill.patientName, newBill.total.toFixed(2));
 
         if (printBill) {
             console.log('Attempting to show printable bill:', newBill);

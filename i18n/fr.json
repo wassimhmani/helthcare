@@ -84,6 +84,7 @@
   "print_bill": "Imprimer la facture",
   "created_on": "Créé le",
   "view_full_bill": "Voir la facture complète",
+  "view_full_pre_invoice": "Voir la pré-facture complète",
   "billing_management": "Gestion de facturation",
   "ready_bills": "Factures prêtes",
   "done_bills": "Factures/Pré-factures terminées",
@@ -559,6 +560,7 @@
   "paid": "Payé",
   "overdue": "En retard",
   "cancelled": "Annulé",
+  "preinvoice": "Pré-facture",
   "qty": "Qté",
   "search_bills_placeholder": "Rechercher des factures par nom de patient, ID de facture ou statut...",
   "bill_summary": "Résumé de la facture",
@@ -628,5 +630,8 @@
   "report_exported_successfully": "Rapport exporté avec succès !",
   "paid_amount": "Montant payé",
   "remaining_amount": "Montant restant",
-  "total_amount": "Montant total"
+  "total_amount": "Montant total",
+  "paid_invoices": "Factures payées",
+  "partially_paid_invoices": "Factures partiellement payées",
+  "unpaid_invoices": "Factures impayées"
 }

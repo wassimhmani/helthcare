@@ -84,6 +84,7 @@
   "print_bill": "Print Bill",
   "created_on": "Created on",
   "view_full_bill": "View Full Bill",
+  "view_full_pre_invoice": "View Full Pre-invoice",
   "billing_management": "Billing Management",
   "ready_bills": "Ready Bills",
   "done_bills": "Done Bills",
@@ -556,6 +557,7 @@
   "paid": "Paid",
   "overdue": "Overdue",
   "cancelled": "Cancelled",
+  "preinvoice": "Pre-invoice",
   "qty": "Qty",
   "search_bills_placeholder": "Search bills by patient name, bill ID, or status...",
   "bill_summary": "Bill Summary",
@@ -625,5 +627,8 @@
   "report_exported_successfully": "Report exported successfully!",
   "paid_amount": "Paid Amount",
   "remaining_amount": "Remaining Amount",
-  "total_amount": "Total Amount"
+  "total_amount": "Total Amount",
+  "paid_invoices": "Paid invoices",
+  "partially_paid_invoices": "Partially paid invoices",
+  "unpaid_invoices": "Unpaid invoices"
 }
