@@ -8204,22 +8204,7 @@ async function renderUnpaidPatientsReport() {
         return dateB - dateA;
     });
 
-    const partialPaidLabel = window.t ? window.t('total_partial_paid', 'Total partial payments') : 'Total partial payments';
-    const outstandingLabel = window.t ? window.t('total_outstanding_amount', 'Total outstanding amount') : 'Total outstanding amount';
-
     container.innerHTML = `
-            <div class="card p-4 mb-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <div class="text-sm text-gray-600">${partialPaidLabel}</div>
-                        <div class="text-2xl font-bold text-green-600">${totalPartialPaid.toFixed(2)} TND</div>
-                    </div>
-                    <div>
-                        <div class="text-sm text-gray-600">${outstandingLabel}</div>
-                        <div class="text-2xl font-bold text-yellow-600">${totalOutstandingAmount.toFixed(2)} TND</div>
-                    </div>
-                </div>
-            </div>
             <div class="mt-4">
                 ${sorted.map(function (c) { return buildConsultationPaymentRowForReports(c, patients); }).join('')}
             </div>
@@ -9363,7 +9348,18 @@ async function exportConsultationPaymentsTextReport(mode, t) {
     lines.push('');
 
     // Table header
-    lines.push(`# | ${t('patient_name', 'Patient Name')} | ${t('date', 'Date')} | ${t('payment_status', 'Payment Status')} | ${t('paid_amount', 'Paid')} | ${t('remaining_amount', 'Remaining')} | ${t('total_amount', 'Total Amount')}`);
+    const headerRow = [
+        '#',
+        t('patient_name', 'Patient Name'),
+        t('date', 'Date'),
+        t('payment_status', 'Payment Status'),
+        t('paid_amount', 'Paid'),
+        t('remaining_amount', 'Remaining'),
+        t('total_amount', 'Total Amount')
+    ];
+
+    const tableRows = [];
+    tableRows.push(headerRow);
 
     filtered.forEach(function (c, index) {
         let patientName = c.patientName || c.patientFullName || '';
@@ -9399,8 +9395,65 @@ async function exportConsultationPaymentsTextReport(mode, t) {
         totalRemaining += financials.remaining;
         totalTotal += financials.total;
 
-        lines.push(`${index + 1} | ${patientName} | ${dateStr} | ${statusLabel} | ${financials.paid.toFixed(2)} TND | ${financials.remaining.toFixed(2)} TND | ${financials.total.toFixed(2)} TND`);
+        const paidStr = financials.paid.toFixed(2) + ' TND';
+        const remainingStr = financials.remaining.toFixed(2) + ' TND';
+        const totalStr = financials.total.toFixed(2) + ' TND';
+
+        tableRows.push([
+            String(index + 1),
+            patientName,
+            dateStr,
+            statusLabel,
+            paidStr,
+            remainingStr,
+            totalStr
+        ]);
     });
+
+    // Compute column widths for the ASCII table
+    const colCount = headerRow.length;
+    const colWidths = new Array(colCount).fill(0);
+    tableRows.forEach(function (row) {
+        for (let i = 0; i < colCount; i++) {
+            const cell = row[i] != null ? String(row[i]) : '';
+            if (cell.length > colWidths[i]) {
+                colWidths[i] = cell.length;
+            }
+        }
+    });
+
+    function buildBorderLine() {
+        // Use '*' as vertical separators and '-' to draw horizontal segments
+        let line = '*';
+        for (let i = 0; i < colCount; i++) {
+            // +2 for the spaces added around each cell in buildTableRow
+            line += '-'.repeat(colWidths[i] + 2) + '*';
+        }
+        return line;
+    }
+
+    function buildTableRow(row) {
+        const cells = row.map(function (cell, idx) {
+            const raw = cell != null ? String(cell) : '';
+            const padding = colWidths[idx] - raw.length;
+            return ' ' + raw + (padding > 0 ? ' '.repeat(padding) : '') + ' ';
+        });
+        return '*' + cells.join('*') + '*';
+    }
+
+    const borderLine = buildBorderLine();
+    const headerLine = buildTableRow(tableRows[0]);
+
+    // Top border and header
+    lines.push(borderLine);
+    lines.push(headerLine);
+    lines.push(borderLine);
+
+    // Data rows, each followed by a border to clearly separate rows and cells
+    for (let i = 1; i < tableRows.length; i++) {
+        lines.push(buildTableRow(tableRows[i]));
+        lines.push(borderLine);
+    }
 
     lines.push('');
     lines.push('------------------------------------------');
@@ -9537,6 +9590,43 @@ async function exportReport() {
         alert(window.t('report_exported_successfully', 'Report exported successfully!'));
     } else {
         alert('Report exported successfully!');
+    }
+}
+
+function exportFullBackupForCurrentMonth() {
+    try {
+        const now = new Date();
+        let year = now.getFullYear();
+        let monthIndex = now.getMonth(); // 0-based
+
+        const monthSelect = document.getElementById('monthlyReportMonth');
+        const yearSelect = document.getElementById('monthlyReportYear');
+        if (monthSelect && yearSelect && yearSelect.value) {
+            const parsedYear = parseInt(yearSelect.value, 10);
+            const parsedMonth = parseInt(monthSelect.value, 10);
+            if (!isNaN(parsedYear)) year = parsedYear;
+            if (!isNaN(parsedMonth)) monthIndex = parsedMonth;
+        }
+
+        const monthNumber = monthIndex + 1; // convert to 1-based month
+        const monthStr = monthNumber < 10 ? '0' + monthNumber : String(monthNumber);
+
+        const url = 'api/export_backup.php?year='
+            + encodeURIComponent(year)
+            + '&month='
+            + encodeURIComponent(monthStr);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } catch (e) {
+        console.error('Error triggering full backup export:', e);
+        if (typeof window.showTranslatedAlert === 'function') {
+            window.showTranslatedAlert('error_exporting_backup');
+        }
     }
 }
 

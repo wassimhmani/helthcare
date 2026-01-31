@@ -1368,6 +1368,22 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                         </svg>
                     </button>
+
+                    <button class="w-full btn btn-outline text-left flex items-center justify-between p-4 hover:bg-gray-50"
+                        id="settings-export-backup" data-permission="export_reports" onclick="exportFullBackupForCurrentMonth()">
+                        <div class="flex items-center gap-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h16v4H4zM4 10h16v10H4zM9 14h2v4H9zM13 14h2v4h-2z"></path>
+                            </svg>
+                            <div>
+                                <div class="font-semibold" data-translate="export_full_backup">Export all data</div>
+                                <div class="text-sm text-gray-500" data-translate="export_full_backup_hint">Download a full SQL backup of all data</div>
+                            </div>
+                        </div>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </button>
                 </div>
             </div>
 
@@ -2279,6 +2295,7 @@
                 <button type="button" class="btn btn-secondary" onclick="closeReportsModal()" data-translate="close">Close</button>
                 <button type="button" class="btn btn-primary" onclick="printReport()" data-translate="print_report">Print Report</button>
                 <button type="button" class="btn btn-primary" onclick="exportReport()" data-translate="export_report">Export Report</button>
+                <button type="button" class="btn btn-outline" onclick="exportFullBackupForCurrentMonth()" data-translate="export_full_backup" data-permission="export_reports">Export all data</button>
             </div>
         </div>
     </div>

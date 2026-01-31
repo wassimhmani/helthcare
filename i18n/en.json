@@ -625,10 +625,14 @@
   "report_type": "Report Type",
   "period": "Period",
   "report_exported_successfully": "Report exported successfully!",
+  "total_partial_paid": "Total partial payments",
+  "total_outstanding_amount": "Total outstanding amount",
   "paid_amount": "Paid Amount",
   "remaining_amount": "Remaining Amount",
   "total_amount": "Total Amount",
   "paid_invoices": "Paid invoices",
   "partially_paid_invoices": "Partially paid invoices",
-  "unpaid_invoices": "Unpaid invoices"
+  "unpaid_invoices": "Unpaid invoices",
+  "export_full_backup": "Export all data",
+  "export_full_backup_hint": "Download a full SQL backup of all data"
 }
