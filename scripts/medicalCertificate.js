@@ -168,7 +168,9 @@
       Math.ceil((new Date(cert.endDate) - new Date(cert.startDate)) / (1000 * 60 * 60 * 24)) : 0);
 
     // Derive patient display name (support API-loaded certificates without patientName field)
-    const patientName = cert.patientName || (patient ? patient.fullName : '');
+    const rawPatientName = cert.patientName || (patient ? patient.fullName : '');
+    // Remove phone number if present (format: " - 22659332")
+    const patientName = rawPatientName.replace(/\s*-\s*\d+$/, '');
 
     // Cabinet location
     const cabinetLocation = cabinetSettings.address ?
@@ -232,7 +234,7 @@
     certificateHTML += '<div class="cert-body">';
 
     // Doctor declaration
-    certificateHTML += '<p>Je soussigné(e), Dr ' + (cert.doctorName || '') + ', Médecin généraliste, certifie que :</p>';
+    certificateHTML += '<p>Je soussigné(e), Dr ' + (cert.doctorName || '') + ', certifie que :</p>';
 
     // Patient and consultation info
     certificateHTML += '<p>' + patientTitle + ' ' + (patientName || '');
@@ -329,8 +331,8 @@ printWindow.document.close();
 
   const patientNameFromInput = document.getElementById('consultPatient')?.value?.trim() || '';
   const patientFullName = (patientFromCache && patientFromCache.fullName) || patientNameFromInput || '';
-  
-  // Get consultation information
+  // Remove phone number if present (format: " - 22659332")
+  const displayPatientName = patientFullName.replace(/\s*-\s*\d+$/, '') || 'Patient';
   const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
   const consultation = consultationId ? consultations.find(c => c.id === consultationId) : null;
   const consultationDate = consultation ? consultation.createdAt : new Date().toISOString();
@@ -405,8 +407,6 @@ printWindow.document.close();
     return;
   }
   
-  const displayPatientName = patientFullName || 'Patient';
-
   let certificateHTML = '<!DOCTYPE html><html><head>';
   certificateHTML += '<title>' + certTypeName + ' - ' + displayPatientName + '</title>';
   certificateHTML += '<meta charset="UTF-8">';
@@ -448,7 +448,7 @@ printWindow.document.close();
   certificateHTML += '<div class="cert-body">';
   
   // Doctor declaration
-  certificateHTML += '<p>Je soussigné(e), Dr ' + doctorName + ', Médecin généraliste, certifie que :</p>';
+  certificateHTML += '<p>Je soussigné(e), Dr ' + doctorName + ', certifie que :</p>';
   
   // Patient and consultation info
   certificateHTML += '<p>' + patientTitle + ' ' + displayPatientName;
@@ -644,7 +644,7 @@ const restPeriod = parseInt(consultRestPeriodInput.value);
 if (startDate && restPeriod > 0) {
 isUpdating = true;
 const start = new Date(startDate);
-start.setDate(start.getDate() + restPeriod);
+start.setDate(start.getDate() + restPeriod - 1);
 consultEndDateInput.value = start.toISOString().split('T')[0];
 isUpdating = false;
 }
@@ -680,7 +680,6 @@ isUpdating = false;
 consultRestPeriodInput.addEventListener('input', updateConsultEndDate);
 consultStartDateInput.addEventListener('change', function(){
 updateConsultEndDate();
-updateConsultRestPeriod();
 });
 consultEndDateInput.addEventListener('change', function(){
 updateConsultStartDate();
