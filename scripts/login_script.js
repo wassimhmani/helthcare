@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (forgotPasswordLink) {
         forgotPasswordLink.addEventListener('click', (e) => {
             e.preventDefault();
-            alert('🔐 Please contact your administrator to reset your password.');
+            showForgotPasswordModal();
         });
     }
 
@@ -236,4 +236,199 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('📞 For technical support, please contact your system administrator.');
         });
     }
+
+    // Forgot password modal handlers
+    setupForgotPasswordModal();
 });
+
+// Forgot Password Modal Functions
+let resetSelectedRole = '';
+let verifiedUser = null;
+
+function setupForgotPasswordModal() {
+    const modal = document.getElementById('forgotPasswordModal');
+    const closeModal = document.getElementById('closeModal');
+    const verifyUserBtn = document.getElementById('verifyUserBtn');
+    const resetPasswordBtn = document.getElementById('resetPasswordBtn');
+    const backToLoginBtn = document.getElementById('backToLoginBtn');
+    const resetRoleOptions = document.querySelectorAll('#forgotPasswordModal .role-option');
+
+    // Close modal
+    if (closeModal) {
+        closeModal.addEventListener('click', hideForgotPasswordModal);
+    }
+
+    // Close on backdrop click
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) hideForgotPasswordModal();
+        });
+    }
+
+    // Role selection in modal
+    resetRoleOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            resetRoleOptions.forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            resetSelectedRole = option.dataset.role;
+        });
+    });
+
+    // Verify user button
+    if (verifyUserBtn) {
+        verifyUserBtn.addEventListener('click', verifyUserForReset);
+    }
+
+    // Reset password button
+    if (resetPasswordBtn) {
+        resetPasswordBtn.addEventListener('click', performPasswordReset);
+    }
+
+    // Back to login button
+    if (backToLoginBtn) {
+        backToLoginBtn.addEventListener('click', hideForgotPasswordModal);
+    }
+}
+
+function showForgotPasswordModal() {
+    const modal = document.getElementById('forgotPasswordModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        // Reset form
+        document.getElementById('step1').style.display = 'block';
+        document.getElementById('step2').style.display = 'none';
+        document.getElementById('step3').style.display = 'none';
+        document.getElementById('resetUsername').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
+        resetSelectedRole = '';
+        verifiedUser = null;
+        
+        // Clear role selections
+        document.querySelectorAll('#forgotPasswordModal .role-option').forEach(opt => {
+            opt.classList.remove('selected');
+        });
+        
+        // Clear errors
+        document.getElementById('resetUsernameError').textContent = '';
+        document.getElementById('resetUsernameError').classList.remove('show');
+    }
+}
+
+function hideForgotPasswordModal() {
+    const modal = document.getElementById('forgotPasswordModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function verifyUserForReset() {
+    const username = document.getElementById('resetUsername').value.trim();
+    const errorEl = document.getElementById('resetUsernameError');
+
+    // Validate
+    if (!username) {
+        errorEl.textContent = 'Please enter your username or email';
+        errorEl.classList.add('show');
+        return;
+    }
+
+    if (!resetSelectedRole) {
+        errorEl.textContent = 'Please select your role (Doctor or Secretary)';
+        errorEl.classList.add('show');
+        return;
+    }
+
+    // Check if user exists
+    const systemUsers = getSystemUsers();
+    const user = systemUsers.find(u => 
+        (u.username === username || u.email === username) && 
+        u.role === resetSelectedRole
+    );
+
+    if (!user) {
+        errorEl.textContent = 'User not found. Please check your username/email and role.';
+        errorEl.classList.add('show');
+        return;
+    }
+
+    if (user.status === 'inactive') {
+        errorEl.textContent = 'Account is inactive. Please contact administrator.';
+        errorEl.classList.add('show');
+        return;
+    }
+
+    // User verified - proceed to step 2
+    verifiedUser = user;
+    document.getElementById('step1').style.display = 'none';
+    document.getElementById('step2').style.display = 'block';
+}
+
+async function performPasswordReset() {
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const newPasswordError = document.getElementById('newPasswordError');
+    const confirmPasswordError = document.getElementById('confirmPasswordError');
+
+    // Clear errors
+    newPasswordError.textContent = '';
+    newPasswordError.classList.remove('show');
+    confirmPasswordError.textContent = '';
+    confirmPasswordError.classList.remove('show');
+
+    // Validate password
+    if (!newPassword) {
+        newPasswordError.textContent = 'Please enter a new password';
+        newPasswordError.classList.add('show');
+        return;
+    }
+
+    if (newPassword.length < 6) {
+        newPasswordError.textContent = 'Password must be at least 6 characters';
+        newPasswordError.classList.add('show');
+        return;
+    }
+
+    if (newPassword !== confirmPassword) {
+        confirmPasswordError.textContent = 'Passwords do not match';
+        confirmPasswordError.classList.add('show');
+        return;
+    }
+
+    // Call API to reset password
+    try {
+        const response = await fetch(host + 'api/reset_password.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username: document.getElementById('resetUsername').value.trim(),
+                role: resetSelectedRole,
+                newPassword: newPassword
+            })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || result.status === 'error') {
+            confirmPasswordError.textContent = result.message || 'Failed to reset password';
+            confirmPasswordError.classList.add('show');
+            return;
+        }
+
+        // Also update localStorage for consistency
+        const systemUsers = getSystemUsers();
+        const userIndex = systemUsers.findIndex(u => u.id === verifiedUser.id);
+        if (userIndex !== -1) {
+            systemUsers[userIndex].password = newPassword;
+            localStorage.setItem('system_users', JSON.stringify(systemUsers));
+        }
+
+        // Show success
+        document.getElementById('step2').style.display = 'none';
+        document.getElementById('step3').style.display = 'block';
+    } catch (error) {
+        console.error('Error resetting password:', error);
+        confirmPasswordError.textContent = 'Network error. Please try again.';
+        confirmPasswordError.classList.add('show');
+    }
+}
